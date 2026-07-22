@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Gestoor 360{% endblock %} — {{ g.municipio.nome }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+                    },
+                    colors: {
+                        gov: {
+                            navy: '#0A192F',
+                            blue: '#1351B4',
+                            green: '#00A859',
+                            yellow: '#FFCD00',
+                            dark: '#1E293B',
+                            light: '#64748B',
+                            bg: '#F8FAFC'
+                        }
+                    },
+                    boxShadow: {
+                        glow: '0 0 20px rgba(19, 81, 180, 0.3)',
+                        card: '0 10px 30px -5px rgba(0, 0, 0, 0.1)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS de Acessibilidade com Escopo Adaptado para Não Quebrar o Layout */
+        .alto-contraste {
+            background-color: #000000 !important;
+            color: #ffff00 !important;
+        }
+        .alto-contraste * {
+            background-color: #000000 !important;
+            color: #ffff00 !important;
+            border-color: #ffff00 !important;
+        }
+        /* Ajustes para manter o estilo minimalista no Choices.js */
+        .choices__inner {
+            background-color: #F8FAFC !important; 
+            border-radius: 0.5rem !important; 
+            border: 1px solid #E2E8F0 !important; 
+            padding: 6px 12px !important;
+            min-height: 42px;
+            font-size: 12px;
+            color: #1E293B !important;
+            transition: all 0.2s ease;
+        }
+        .choices__inner:focus-within {
+            border-color: #1351B4 !important;
+            box-shadow: 0 0 0 2px rgba(19, 81, 180, 0.1) !important;
+        }
+        .choices__list--dropdown { border-radius: 0.5rem !important; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1) !important; border: 1px solid #E2E8F0 !important; }
+        .choices__item--selectable { font-weight: 500 !important; font-size: 12px !important; }
+        .choices__input { background-color: transparent !important; font-size: 12px !important; color: #1E293B !important; }
+        .choices[data-type*="select-one"]::after { border-color: #64748B transparent transparent transparent !important; }
+        
+        /* Suavização de renderização de fontes */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body class="bg-gov-bg text-gov-dark min-h-screen flex font-sans">
+
+    <aside class="w-64 bg-gov-navy text-slate-300 flex flex-col justify-between fixed inset-y-0 left-0 z-40 border-r border-white/5 hidden md:flex shadow-xl">
+        <div class="flex flex-col">
+            <div class="p-6 border-b border-white/10 flex items-center gap-3.5">
+                <div class="w-9 h-9 bg-gradient-to-br from-gov-blue to-blue-600 border border-white/20 text-white rounded-lg flex flex-col items-center justify-center shadow-glow">
+                    <span class="font-bold text-[10px] tracking-tighter">GOV</span>
+                    <span class="font-semibold text-[7px] -mt-1 text-gov-yellow">360</span>
+                </div>
+                <div class="tracking-tight">
+                    <span class="font-semibold text-white block text-sm tracking-wide">Gestoor 360</span>
+                    <span class="text-[9px] text-blue-300 font-medium tracking-widest uppercase block mt-0.5">Educação Inclusiva</span>
+                </div>
+            </div>
+
+            <nav class="p-5 space-y-1.5" id="nav-lateral">
+                <a href="/{{ g.municipio.slug }}/dashboard" 
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
+                   <span class="opacity-80">📊</span> Dashboard Municipal
+                </a>
+                
+                <a href="{{ url_for('pei.dashboard_secretaria', municipio_slug=g.municipio.slug) }}" 
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
+                   <span class="opacity-80">🏢</span> Painel da Secretaria
+                </a>
+                
+                <a href="{{ url_for('escolas.cadastrar_escola', municipio_slug=g.municipio.slug) }}" 
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
+                   <span class="opacity-80">🏫</span> Infraestrutura Escolar
+                </a>
+                
+                <a href="{{ url_for('alunos.listar', municipio_slug=g.municipio.slug) }}" 
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
+                   <span class="opacity-80">👤</span> Cadastro Central Aluno
+                </a>
+
+                <a href="{{ url_for('alunos.listar_desativados', municipio_slug=g.municipio.slug) }}" 
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
+                   <span class="opacity-80">📁</span> Arquivo Inativo
+                </a>
+
+                <a href="/{{ g.municipio.slug }}/pei" 
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
+                   <span class="opacity-80">🧠</span> PEI Inteligente
+                </a>
+
+                <a href="/{{ g.municipio.slug }}/aee" 
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
+                   <span class="opacity-80">🎒</span> Gestão do AEE
+                </a>
+
+                <a href="/{{ g.municipio.slug }}/transporte/" 
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
+                   <span class="opacity-80">🚌</span> Transporte Inclusivo
+                </a>
+            </nav>
+        </div>
+
+        <div class="p-5 border-t border-white/10 bg-white/5 backdrop-blur-md space-y-1.5">
+            <span class="text-[9px] font-semibold uppercase tracking-widest text-slate-500 block">Operador da Secretaria</span>
+            <span class="text-white block font-semibold truncate text-xs">{{ current_user.nome }}</span>
+            <span class="text-slate-400 block text-[10px] font-medium tracking-wide">Perfil: {{ current_user.perfil }}</span>
+            <a href="/auth/logout" class="text-red-400 hover:text-red-300 transition-colors block font-medium pt-3 text-[10px] uppercase tracking-widest">Encerrar Sessão ↗</a>
+        </div>
+    </aside>
+
+    <div class="flex-1 md:pl-64 flex flex-col min-h-screen">
+
+        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 py-4 px-6 md:px-8 sticky top-0 z-30 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 transition-all">
+            <div>
+                <h1 class="text-lg font-bold tracking-tight text-gov-dark">{% block header_title %}{% endblock %}</h1>
+            </div>
+            
+            <div class="flex items-center gap-5">
+                <div class="flex items-center border border-slate-200 rounded-lg bg-slate-50 p-1 text-[10px] font-semibold text-slate-500 shadow-sm">
+                    <button onclick="toggleContraste()" class="px-3 py-1.5 hover:bg-white rounded-md transition-all uppercase tracking-widest">🌓 Contraste</button>
+                    <div class="w-px h-4 bg-slate-200 mx-1"></div>
+                    <button onclick="alterarFonte(1)" class="px-2.5 py-1.5 hover:bg-white rounded-md transition-all">A+</button>
+                    <button onclick="alterarFonte(-1)" class="px-2.5 py-1.5 hover:bg-white rounded-md transition-all">A-</button>
+                </div>
+                <span class="bg-green-50 text-gov-green border border-green-100 px-3 py-1.5 rounded-md text-[9px] font-semibold uppercase tracking-widest hidden sm:flex items-center gap-1.5 shadow-sm">
+                    <span class="w-1.5 h-1.5 rounded-full bg-gov-green animate-pulse"></span>
+                    Homologado MEC
+                </span>
+            </div>
+        </header>
+
+        <main class="flex-grow p-6 md:p-8" id="conteudo-principal">
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="space-y-3 mb-8 font-sans text-xs font-medium no-print">
+                        {% for category, message in messages %}
+                            <div class="p-4 rounded-xl shadow-sm border flex items-center justify-between
+                                {% if category == 'success' %} bg-green-50 text-gov-green border-green-100
+                                {% elif category == 'danger' %} bg-red-50 text-red-600 border-red-100
+                                {% else %} bg-yellow-50 text-amber-700 border-yellow-100 {% endif %}">
+                                <span class="tracking-wide">{{ message }}</span>
+                                <button onclick="this.parentElement.remove()" class="opacity-50 hover:opacity-100 transition-opacity focus:outline-none ml-4">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </main>
+
+        <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
+        <footer class="border-t border-slate-200 py-6 text-center text-[9px] font-semibold text-slate-400 bg-white uppercase tracking-widest mt-auto">
+            Plataforma de Governança Inclusiva — {{ g.municipio.nome }} - {{ g.municipio.estado }} © 2026
+        </footer>
+
+    </div>
+
+    <script>
+        function toggleContraste() {
+            document.getElementById('html-root').classList.toggle('alto-contraste');
+        }
+        function alterarFonte(direcao) {
+            const el = document.getElementById('conteudo-principal');
+            let estiloAtual = window.getComputedStyle(el).getPropertyValue('font-size');
+            let tamanhoAtual = parseFloat(estiloAtual);
+            el.style.fontSize = (tamanhoAtual + direcao) + 'px';
+        }
+
+        // DESTAQUE DA ABA ATIVA CONFORME PARÂMETROS OPERACIONAIS DA URL
+        document.addEventListener("DOMContentLoaded", function() {
+            const currentUrl = window.location.pathname;
+            document.querySelectorAll("#nav-lateral a").forEach(link => {
+                const hrefPath = link.getAttribute("href");
+                
+                if (currentUrl === hrefPath || (hrefPath && hrefPath.length > 5 && currentUrl.includes(hrefPath))) {
+                    link.classList.remove("text-slate-400", "hover:bg-slate-800/50", "hover:text-white");
+                    link.classList.add("bg-gov-blue", "text-white", "font-black", "shadow-md", "shadow-blue-900/40");
+                }
+            });
+
+            // Inicialização do campo de busca rápida
+            const searchableSelects = document.querySelectorAll('.search-select');
+            searchableSelects.forEach(select => {
+                new Choices(select, {
+                    searchEnabled: true,
+                    itemSelectText: '',
+                    noResultsText: 'Nenhuma escola encontrada',
+                    noChoicesText: 'Sem opções disponíveis',
+                    placeholder: true,
+                    searchPlaceholderValue: 'Digite o nome da escola para buscar...',
+                    shouldSort: false
+                });
+            });
+        });
+    </script>
+</body>
+</html>

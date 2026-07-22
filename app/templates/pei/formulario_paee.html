@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Módulo 2 — Plano de Atendimento Educacional Especializado (PAEE){% endblock %}
+
+{% block content %}
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: { 
+                    sans: ['Inter', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'] 
+                },
+                colors: {
+                    gov: { 
+                        navy: '#0A192F', 
+                        blue: '#1351B4', 
+                        green: '#00A859', 
+                        yellow: '#FFCD00', 
+                        dark: '#1E293B', 
+                        light: '#64748B', 
+                        bg: '#F8FAFC' 
+                    }
+                },
+                boxShadow: {
+                    glow: '0 0 20px rgba(19, 81, 180, 0.3)',
+                    card: '0 10px 30px -5px rgba(0, 0, 0, 0.1)'
+                }
+            }
+        }
+    }
+</script>
+
+<div class="max-w-[1400px] mx-auto px-6 py-8 font-sans antialiased text-gov-dark space-y-8 bg-gov-bg min-h-screen">
+    
+    <div class="bg-gov-navy rounded-3xl p-8 md:p-10 shadow-card relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gov-blue opacity-20 blur-3xl rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+        
+        <div class="relative z-10 space-y-3 text-center md:text-left">
+            <span class="inline-block bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[9px] font-semibold uppercase tracking-widest px-3 py-1.5 rounded-md">
+                Documento Oficial SRM — Gestoor 360
+            </span>
+            <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight">Plano de Atendimento Educacional Especializado (PAEE)</h1>
+        </div>
+    </div>
+
+    <form method="POST" id="paeeForm" class="space-y-8">
+        
+        <section class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+            <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">1. Identificação do Estudante</h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Nome do estudante</label>
+                    <input type="text" value="{{ aluno.nome }}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-slate-600 focus:outline-none opacity-80 cursor-not-allowed" readonly>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Escola</label>
+                    <input type="text" value="{{ aluno.escola.nome if aluno.escola else 'N/A' }}" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-slate-600 focus:outline-none opacity-80 cursor-not-allowed" readonly>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Ano/Série</label>
+                    <input type="text" name="ano_serie" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Turma/Turno</label>
+                    <input type="text" name="turma_turno" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Prof. Regente</label>
+                    <input type="text" name="prof_regente" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Período de Vigência</label>
+                    <input type="text" name="periodo_vigencia" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+            <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">3. Necessidades Educacionais Específicas</h4>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for item in ['Adaptação pedagógica', 'Acessibilidade física', 'Apoio à comunicação', 'Tecnologia assistiva', 'Mediação pedagógica', 'Desenvolvimento de autonomia'] %}
+                <label class="flex items-center gap-3 cursor-pointer group bg-slate-50 border border-slate-200 p-3.5 rounded-xl hover:bg-white hover:border-gov-blue/50 hover:shadow-sm transition-all text-xs font-medium text-slate-600">
+                    <input type="checkbox" name="needs[]" value="{{ item }}" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue transition-all">
+                    <span class="group-hover:text-gov-dark transition-colors">{{ item }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="bg-white border-t-[3px] border-t-purple-500 p-8 rounded-b-2xl shadow-card space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-3">
+                <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400">4. Objetivos do AEE</h4>
+                <button type="button" onclick="iaPreencher('obj_geral', 'objetivos_aee')" class="bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white border border-purple-100 font-semibold px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest transition-all shadow-sm">
+                    🤖 Copiloto IA
+                </button>
+            </div>
+            
+            <div class="space-y-6">
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Objetivo Geral</label>
+                    <textarea id="obj_geral" name="obj_geral" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs text-slate-600 font-normal focus:bg-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 focus:outline-none transition-all resize-none">Promover condições de acessibilidade e participação do estudante no ambiente escolar, favorecendo seu desenvolvimento integral.</textarea>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Objetivos Específicos</label>
+                    <textarea id="objetivos_aee" name="obj_especificos" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs text-slate-600 font-normal focus:bg-white focus:border-purple-500 focus:ring-1 focus:ring-purple-500/50 focus:outline-none transition-all resize-none"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-3">
+                <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400">5. Organização do AEE</h4>
+                <button type="button" onclick="addLinha('tabela_org')" class="bg-gov-navy text-white font-semibold px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm">
+                    + Adicionar Linha
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto rounded-xl border border-slate-100">
+                <table class="w-full text-left" id="tabela_org">
+                    <thead class="bg-slate-50 border-b border-slate-100 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                        <tr>
+                            <th class="p-4">Área</th>
+                            <th class="p-4">Objetivos</th>
+                            <th class="p-4">Estratégias</th>
+                            <th class="p-4">Recursos</th>
+                            <th class="p-4">Avaliação</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs">
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-2"><input type="text" name="org_area[]" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal text-slate-600"></td>
+                            <td class="p-2"><input type="text" name="org_obj[]" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal text-slate-600"></td>
+                            <td class="p-2"><input type="text" name="org_est[]" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal text-slate-600"></td>
+                            <td class="p-2"><input type="text" name="org_rec[]" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal text-slate-600"></td>
+                            <td class="p-2"><input type="text" name="org_ava[]" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal text-slate-600"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+            <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">9. Acompanhamento e Evolução</h4>
+            
+            <div class="overflow-x-auto rounded-xl border border-slate-100">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-slate-50 border-b border-slate-100 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                        <tr>
+                            <th class="p-4 w-32">Período</th>
+                            <th class="p-4">Avanços</th>
+                            <th class="p-4">Dificuldades</th>
+                            <th class="p-4">Encaminhamentos</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs">
+                        {% for bim in ['1º Bimestre', '2º Bimestre', '3º Bimestre', '4º Bimestre'] %}
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="p-4 font-semibold text-slate-500 bg-slate-50/50">{{ bim }}</td>
+                            <td class="p-2"><input type="text" name="ev_avanco[]" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal text-slate-600"></td>
+                            <td class="p-2"><input type="text" name="ev_dif[]" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal text-slate-600"></td>
+                            <td class="p-2"><input type="text" name="ev_enc[]" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal text-slate-600"></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+            <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">11. Articulação Multiprofissional</h4>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for prof in ['Psicopedagogo(a)', 'Psicólogo(a)', 'Fonoaudiólogo(a)', 'Terapeuta Ocupacional', 'Fisioterapeuta', 'Assistente Social'] %}
+                <div class="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2 focus-within:bg-white focus-within:border-gov-blue/40 focus-within:shadow-sm transition-all">
+                    <label class="block text-[10px] font-bold text-gov-dark">{{ prof }}</label>
+                    <input type="text" name="art_{{ loop.index }}" placeholder="Informe a periodicidade" class="w-full bg-transparent border-b border-slate-300 focus:border-gov-blue outline-none text-xs font-normal text-slate-600 transition-all pb-1 placeholder:text-slate-400">
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div class="pt-4">
+            <button type="submit" class="w-full bg-gov-blue hover:bg-blue-600 text-white font-semibold py-4 rounded-xl text-xs uppercase tracking-widest transition-all shadow-md flex justify-center items-center gap-2">
+                <svg class="w-4 h-4 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                Homologar e Salvar PAEE
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    function addLinha(id) {
+        const tbody = document.getElementById(id).getElementsByTagName('tbody')[0];
+        const row = tbody.rows[0].cloneNode(true);
+        row.querySelectorAll('input').forEach(i => i.value = '');
+        tbody.appendChild(row);
+    }
+
+    // IA CO-PILOTO PARA PREENCHIMENTO
+    function iaPreencher(targetId, targetId2) {
+        const prompts = {
+            'obj_geral': "Gerar um objetivo geral pedagógico para um aluno com base em educação inclusiva no AEE.",
+            'objetivos_aee': "Gerar 3 objetivos específicos para um aluno no AEE focados em autonomia, cognição e interação social."
+        };
+        alert("🤖 Copiloto IA Gestoor 360: Analisando as necessidades do estudante e gerando diretrizes pedagógicas inteligentes...");
+        // Em um sistema real, aqui você faria um fetch() para o seu backend
+        if(targetId === 'obj_geral') document.getElementById(targetId).value = "Promover a inclusão plena do estudante no ambiente escolar, mitigando barreiras atitudinais e cognitivas.";
+        if(targetId2 === 'objetivos_aee') document.getElementById(targetId2).value = "1. Desenvolver habilidades motoras finas através de materiais táteis.\n2. Ampliar o vocabulário básico utilizando pranchas de comunicação.\n3. Fortalecer a autonomia na execução de atividades escolares diárias.";
+    }
+</script>
+{% endblock %}

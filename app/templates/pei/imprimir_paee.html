@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>PAEE Oficial — {{ aluno.nome }} — Gestoor 360</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        
+        .print-area { position: relative; background-color: #ffffff; z-index: 10; }
+        .watermark-wrapper { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+        .watermark-img { position: absolute; width: 500px; height: 500px; left: 50%; transform: translateX(-50%) rotate(-15deg); background-image: url("{{ url_for('static', filename='img/marca_fundo.png') }}"); background-repeat: no-repeat; background-position: center; background-size: contain; opacity: 0.15; }
+        .wm-p1 { top: 15%; } .wm-p2 { top: 45%; } .wm-p3 { top: 75%; }
+
+        @media print {
+            @page { size: a4 portrait; margin: 12mm 15mm 12mm 15mm; }
+            body { background-color: #ffffff !important; color: #000000 !important; font-size: 11px !important; }
+            .no-print { display: none !important; }
+            .print-area { max-width: 100% !important; width: 100% !important; border: none !important; }
+            .avoid-break { display: block !important; page-break-inside: avoid !important; margin-bottom: 15px !important; }
+            table { width: 100% !important; border-collapse: collapse !important; margin-top: 8px !important; }
+            th, td { border: 1px solid #000000 !important; padding: 6px !important; }
+            th { background-color: #f1f5f9 !important; font-weight: 800 !important; text-transform: uppercase !important; }
+        }
+    </style>
+</head>
+<body class="text-slate-900 antialiased p-8">
+
+    <div class="max-w-4xl mx-auto bg-white p-12 border border-slate-300 shadow-xl space-y-6 text-[11px] print-area">
+        <div class="watermark-wrapper">
+            <div class="watermark-img wm-p1"></div>
+            <div class="watermark-img wm-p2"></div>
+            <div class="watermark-img wm-p3"></div>
+        </div>
+
+        <div class="relative z-10 space-y-6">
+            <div class="border-b-4 border-slate-900 pb-3 text-center">
+                <h1 class="text-lg font-black uppercase">Plano de Atendimento Educacional Especializado — PAEE</h1>
+                <p class="text-xs font-bold text-slate-600">Documento Técnico da Sala de Recursos Multifuncionais (SRM)</p>
+            </div>
+
+            <div class="avoid-break space-y-2">
+                <h4 class="font-black border-b border-slate-300 uppercase text-[10px]">Identificação do Estudante</h4>
+                <p><b>Estudante:</b> {{ aluno.nome }} | <b>Matrícula:</b> {{ aluno.matricula }}</p>
+                <p><b>Escola:</b> {{ aluno.escola.nome if aluno.escola else 'Não Informada' }}</p>
+            </div>
+
+            <div class="avoid-break space-y-2">
+                <h4 class="font-black border-b border-slate-300 uppercase text-[10px]">Objetivos e Organização</h4>
+                <p><b>Objetivos AEE:</b> {{ paee.objetivos_aee }}</p>
+                <p><b>Organização Espaço-Tempo:</b> {{ paee.organizacao_espaco_tempo }}</p>
+            </div>
+
+            <div class="avoid-break space-y-2">
+                <h4 class="font-black border-b border-slate-300 uppercase text-[10px]">Recursos e Articulação</h4>
+                <p><b>Recursos Assistivos:</b> {{ paee.tecnologia_assistiva_especifica }}</p>
+                <p><b>Articulação Regentes:</b> {{ paee.articulacao_professores_regentes }}</p>
+                <p><b>Interface Saúde:</b> {{ paee.interfaces_institucionais_saude }}</p>
+            </div>
+            
+            <div class="avoid-break pt-8">
+                <div class="text-center font-bold text-[10px]">
+                    <div style="border-bottom: 1px solid #000; width: 60%; margin: 0 auto; height: 30px;"></div>
+                    <p class="mt-2">Assinatura do Especialista AEE — Gestoor 360</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

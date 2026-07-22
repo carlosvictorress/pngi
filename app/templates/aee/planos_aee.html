@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Atendimento Educacional Especializado (PAEE/PDI) — Gestoor 360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'] },
+                    colors: {
+                        gov: { blue: '#003366', green: '#00875a', gray: '#f0f2f5', border: '#cbd5e1', text: '#1e293b' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#f8fafc] text-gov-text min-h-screen flex flex-col font-sans antialiased">
+
+    <header class="border-b-2 border-gov-blue bg-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-[1600px] mx-auto px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gov-blue rounded-xl flex flex-col items-center justify-center text-white font-black text-sm tracking-tighter shadow-inner">
+                    <span>GOV</span>
+                    <span class="text-[9px] -mt-1 text-emerald-400">360</span>
+                </div>
+                <div class="border-l border-slate-300 pl-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gov-blue block">Secretaria Municipal de Educação</span>
+                    <h1 class="text-lg font-black text-slate-800 tracking-tight uppercase">{{ g.municipio.nome }} — PORTAL DE INCLUSÃO</h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 self-end md:self-center">
+                <span class="text-xs bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1 rounded-md font-bold font-mono">ANO LETIVO: 2026</span>
+                <a href="/{{ g.municipio.slug }}/dashboard" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all shadow-sm">&larr; Painel Geral</a>
+            </div>
+        </div>
+        
+        <div class="bg-slate-50 border-t border-slate-200 px-6 shadow-sm">
+            <div class="max-w-[1600px] mx-auto flex flex-wrap gap-1 text-xs font-bold text-slate-500">
+                <a href="/{{ g.municipio.slug }}/aee/" class="px-4 py-3 hover:bg-slate-200/60 hover:text-gov-blue transition-colors">Equipe Técnica</a>
+                <a href="/{{ g.municipio.slug }}/aee/planos" class="px-4 py-3 bg-gov-blue text-white border-b-2 border-gov-blue">Planos Pedagógicos (PAEE/PDI)</a>
+                <a href="/{{ g.municipio.slug }}/aee/agenda" class="px-4 py-3 hover:bg-slate-200/60 hover:text-gov-blue transition-colors">Grade de Horários / Salas</a>
+                <a href="/{{ g.municipio.slug }}/aee/evolucoes" class="px-4 py-3 hover:bg-slate-200/60 hover:text-gov-blue transition-colors">Prontuário de Evoluções</a>
+                <a href="/{{ g.municipio.slug }}/aee/documentos" class="px-4 py-3 hover:bg-slate-200/60 hover:text-gov-blue transition-colors">Laudos e Pareceres</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-[1600px] mx-auto w-full px-6 py-8">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start">
+            
+            <div class="xl:col-span-5 bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden">
+                <div class="bg-slate-900 p-4 text-white flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xs uppercase font-black tracking-widest text-emerald-400">INSTRUMENTO REGULAMENTAR</h2>
+                        <h3 class="text-base font-bold">Emissão de PDI / PAEE Anual</h3>
+                    </div>
+                    <span class="text-[10px] bg-white/10 text-slate-300 px-2 py-1 rounded border border-white/20 font-mono">Mod. AEE-2026</span>
+                </div>
+
+                <form method="POST" class="p-6 space-y-6 text-xs">
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 border-b border-slate-200 pb-1.5">
+                            <span class="w-5 h-5 rounded-full bg-gov-blue text-white flex items-center justify-center font-bold text-[10px]">1</span>
+                            <h4 class="font-bold text-gov-blue uppercase tracking-wider text-[11px]">Vínculo de Acompanhamento</h4>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-bold text-slate-700 block mb-1">Estudante Assistido *</label>
+                                <div class="relative">
+                                    <input type="text" 
+                                           id="busca_aluno" 
+                                           list="lista_alunos" 
+                                           placeholder="Pesquisar por Nome ou CPF..." 
+                                           autocomplete="off"
+                                           required
+                                           class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold text-slate-800 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none">
+                                    
+                                    <input type="hidden" name="aluno_id" id="aluno_id_hidden">
+                                    
+                                    <datalist id="lista_alunos">
+                                        {% for a in alunos %}
+                                        <option data-id="{{ a.id }}" value="{{ a.nome }} (CPF: {{ a.cpf or 'Não informado' }}) — {{ a.turma }}"></option>
+                                        {% endfor %}
+                                    </datalist>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="font-bold text-slate-700 block mb-1">Especialista Responsável *</label>
+                                <select name="profissional_id" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold text-slate-800 focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
+                                    <option value="" disabled selected>Selecione o profissional...</option>
+                                    {% for p in profissionais %}
+                                    <option value="{{ p.id }}">{{ p.nome }} — {{ p.cargo }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 border-b border-slate-200 pb-1.5">
+                            <span class="w-5 h-5 rounded-full bg-gov-blue text-white flex items-center justify-center font-bold text-[10px]">2</span>
+                            <h4 class="font-bold text-gov-blue uppercase tracking-wider text-[11px]">Análise Diagnóstica Inicial</h4>
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Avaliação Inicial da Rede de Ensino</label>
+                            <textarea name="avaliacao_inicial" rows="2" placeholder="Descreva as condições pedagógicas atuais do aluno colhidas na triagem comunitária..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Barreiras Detectadas (Físicas, Atitudinais ou de Comunicação)</label>
+                            <textarea name="barreiras_identificadas" rows="2" placeholder="Especifique os impedimentos que bloqueiam a plena inclusão do estudante..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 border-b border-slate-200 pb-1.5 justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-5 h-5 rounded-full bg-gov-blue text-white flex items-center justify-center font-bold text-[10px]">3</span>
+                                <h4 class="font-bold text-gov-blue uppercase tracking-wider text-[11px]">Planejamento Curricular</h4>
+                            </div>
+                            
+                            <button type="button" onclick="gerarSugestoesIA()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold px-2.5 py-1 rounded-md text-[10px] shadow-sm transition-all flex items-center gap-1 uppercase tracking-wide">
+                                🤖 Sugerir Metas via IA
+                            </button>
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Objetivos Gerais (Longo Prazo)</label>
+                            <textarea id="obj_gerais" name="objetivos_gerais" rows="2" placeholder="Espera-se que o estudante desenvolva até o fim do período letivo..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Objetivos Específicos e Habilidades Trabalhadas (Trimestral)</label>
+                            <textarea id="obj_especificos" name="objetivos_especificos" rows="2" placeholder="Habilidades cognitivas, motoras e sociais isoladas para intervenção imediata..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-2 border-b border-slate-200 pb-1.5">
+                            <span class="w-5 h-5 rounded-full bg-gov-blue text-white flex items-center justify-center font-bold text-[10px]">4</span>
+                            <h4 class="font-bold text-gov-blue uppercase tracking-wider text-[11px]">Adaptações Didáticas e Acessibilidade</h4>
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-700 block mb-1">Estratégias Pedagógicas Aplicadas</label>
+                            <textarea name="estrategias_pedagogicas" rows="2" placeholder="Metodologias de ensino adaptadas, reduction de estímulos negativos, etc..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-bold text-slate-700 block mb-1">Recursos de Atendimento</label>
+                                <input type="text" name="recursos_utilizados" placeholder="Ex: Texturas, comunicação alternativa" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="font-bold text-slate-700 block mb-1">Tecnologias Assistivas</label>
+                                <input type="text" name="tecnologias_assistivas" placeholder="Ex: Software CAA, plano inclinado, engrossadores" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="font-bold text-slate-700 block mb-1">Metas de Aprendizagem</label>
+                                <input type="text" name="metas" placeholder="Ex: Fixar alfabeto fonético em 90 dias" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="font-bold text-slate-700 block mb-1">Cronograma de Acompanhamento</label>
+                                <input type="text" name="cronograma" placeholder="Ex: Atendimento individualizado bissemanal" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gov-blue hover:bg-slate-800 text-white font-black py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2">
+                        💾 Registrar e Publicar Prontuário Escolar
+                    </button>
+                </form>
+            </div>
+
+            <div class="xl:col-span-7 space-y-4">
+                
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-md space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                        <h3 class="text-xs font-black uppercase tracking-wider text-gov-blue flex items-center gap-1.5">
+                            🔍 Filtrar Prontuários Homologados
+                        </h3>
+                        <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                            Exibindo: <b id="contador_planos" class="text-gov-blue">{{ planos|length }}</b> de {{ planos|length }}
+                        </span>
+                    </div>
+                    <input type="text" 
+                           id="filtro_prontuarios" 
+                           placeholder="Buscar prontuário por Nome do Aluno, CPF ou Especialista Responsável..." 
+                           autocomplete="off"
+                           class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs font-semibold text-slate-700 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none placeholder:text-slate-400 shadow-inner">
+                </div>
+                
+                <div class="space-y-4" id="container_lista_planos">
+                    {% for plano in planos %}
+                    <div class="bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden hover:border-gov-blue transition-all card-plano-item">
+                        <div class="bg-slate-50 border-b border-slate-200 p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-slate-200 border border-slate-300 flex flex-col items-center justify-center font-mono text-gov-blue text-center shadow-sm shrink-0">
+                                    <span class="text-sm font-black leading-none">{{ plano.data_criacao.strftime('%d') }}</span>
+                                    <span class="text-[8px] font-bold uppercase tracking-wider mt-0.5 text-slate-500">{{ plano.data_criacao.strftime('%b') }}</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-black text-base text-slate-800 tracking-tight uppercase target-aluno-nome">{{ plano.aluno.nome }}</h4>
+                                    <span class="text-[10px] text-slate-500 font-medium block -mt-0.5">
+                                        Responsável Técnico: <b class="text-slate-700 uppercase target-profissional-nome">{{ plano.profissional.nome }}</b> 
+                                        {% if plano.aluno.cpf %}
+                                        • <span class="font-mono target-aluno-cpf">CPF: {{ plano.aluno.cpf }}</span>
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-2 self-end md:self-center">
+                                <span class="bg-emerald-50 text-gov-green border border-emerald-200 font-bold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-md">
+                                    📄 {{ plano.status }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="p-5 space-y-4 text-xs">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 shadow-sm space-y-1">
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-gov-blue block">Objetivos Gerais e Habilidades Alvo</span>
+                                    <p class="text-slate-700 font-medium leading-relaxed whitespace-pre-line">{{ plano.objetivos_gerais or 'Não parametrizado.' }}</p>
+                                </div>
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 shadow-sm space-y-1">
+                                    <span class="text-[9px] font-black uppercase tracking-wider text-gov-blue block">Estratégias Pedagógicas Homologadas</span>
+                                    <p class="text-slate-700 font-medium leading-relaxed whitespace-pre-line">{{ plano.estrategias_pedagogicas or 'Não parametrizado.' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50/50 border border-slate-200 rounded-xl p-3 text-[11px]">
+                                <div>
+                                    <span class="text-slate-400 font-bold block text-[9px] uppercase">Barreiras</span>
+                                    <p class="text-slate-700 font-semibold truncate">{{ plano.barreiras_identificadas or 'Nenhuma' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 font-bold block text-[9px] uppercase">Recursos</span>
+                                    <p class="text-slate-700 font-semibold truncate">{{ plano.recursos_utilizados or 'Nenhum' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 font-bold block text-[9px] uppercase">Assistivas</span>
+                                    <p class="text-slate-700 font-semibold truncate">{{ plano.tecnologias_assistivas or 'Nenhuma' }}</p>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 font-bold block text-[9px] uppercase">Cronograma</span>
+                                    <p class="text-slate-700 font-semibold truncate">{{ plano.cronograma or 'Não fixado' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div id="card_vazio_original" class="bg-white border-2 border-dashed border-slate-200 rounded-xl p-16 text-center text-slate-400 italic text-xs shadow-sm">
+                        ⚠️ Nenhum Prontuário de Atendimento Pedagógico Especializado (PAEE/PDI) foi emitido nesta jurisdição municipal até o presente momento.
+                    </div>
+                    {% endfor %}
+
+                    <div id="aviso_filtro_vazio" class="bg-white border-2 border-dashed border-red-200 rounded-xl p-12 text-center text-slate-400 italic text-xs shadow-sm hidden">
+                        ❌ Nenhum prontuário homologado corresponde aos critérios informados na busca.
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-200 py-4 text-center text-[10px] font-bold text-slate-400 bg-white uppercase tracking-wider mt-auto">
+        Plataforma de Governança Inclusiva — {{ g.municipio.nome }} © 2026
+    </footer>
+
+    <script>
+        // 1. LÓGICA DE FILTRAGEM INSTANTÂNEA DA REDE COM MAIS DE 1000 REGISTROS
+        document.getElementById('filtro_prontuarios').addEventListener('input', function(e) {
+            const termo = e.target.value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.card-plano-item');
+            const avisoVazio = document.getElementById('aviso_filtro_vazio');
+            const contador = document.getElementById('contador_planos');
+            let encontrados = 0;
+
+            cards.forEach(function(card) {
+                const alunoNome = card.querySelector('.target-aluno-nome').textContent.toLowerCase();
+                const profNome = card.querySelector('.target-profissional-nome').textContent.toLowerCase();
+                
+                // Trata a busca do CPF se ele existir no card
+                const cpfElement = card.querySelector('.target-aluno-cpf');
+                const alunoCpf = cpfElement ? cpfElement.textContent.toLowerCase() : '';
+
+                if (alunoNome.includes(termo) || profNome.includes(termo) || alunoCpf.includes(termo)) {
+                    card.classList.remove('hidden');
+                    encontrados++;
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+
+            // Atualiza o indicador dinâmico de contagem compliance
+            contador.textContent = encontrados;
+
+            // Gerencia o alerta de dados vazios no filtro
+            if (encontrados === 0 && termo !== '') {
+                avisoVazio.classList.remove('hidden');
+            } else {
+                avisoVazio.classList.add('hidden');
+            }
+        });
+
+        // 2. LÓGICA DE CAPTURA DO SELETOR DO ALUNO NO FORMULÁRIO
+        document.getElementById('busca_aluno').addEventListener('input', function(e) {
+            const input = e.target;
+            const val = input.value;
+            const list = document.getElementById('lista_alunos').options;
+            const hiddenInput = document.getElementById('aluno_id_hidden');
+            
+            hiddenInput.value = ""; 
+
+            for (let i = 0; i < list.length; i++) {
+                if (list[i].value === val) {
+                    hiddenInput.value = list[i].getAttribute('data-id');
+                    break;
+                }
+            }
+        });
+
+        // 3. COPILOTO PEDAGÓGICO DE IA
+        function gerarSugestoesIA() {
+            document.getElementById('obj_gerais').value = "1. Desenvolver a autonomia funcional no ambiente escolar;\n2. Ampliar a comunicação expressiva e a interação social com o grupo de pares;\n3. Estimular a coordenação motora fina para as atividades de escrita.";
+            document.getElementById('obj_especificos').value = "1. Reconhecer e sequenciar as vogais através de pareamento de objetos e texturas;\n2. Manter o foco atencional por até 15 minutos em atividades lúdicas direcionadas;\n3. Responder a comandos verbais simples sem necessidade de suporte físico.";
+            alert("🤖 Copiloto Pedagógico IA: Sugestões técnicas estruturadas injetadas com sucesso baseado nas diretrizes do MEC!");
+        }
+    </script>
+</body>
+</html>

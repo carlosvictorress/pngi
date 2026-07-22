@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>PEI Oficial — {{ aluno.nome }} — Gestoor 360</title>
+    <!-- Tailwind ativo apenas para renderização em modo Screen -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f5f9;
+        }
+
+        /* 👑 MARCA D'ÁGUA ROBUSTA, VISÍVEL E EVIDENTE DE FUNDO */
+        .print-area {
+            position: relative;
+            background-color: #ffffff;
+            z-index: 10;
+        }
+
+        .watermark-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Posicionamento fixado repetitivo para marcar presença imponente no papel */
+        .watermark-img {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-15deg);
+            background-image: url("{{ url_for('static', filename='img/marca_fundo.png') }}");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            opacity: 0.15; /* Evidente no PDF e na Impressão */
+        }
+
+        .wm-p1 { top: 15%; }
+        .wm-p2 { top: 45%; }
+        .wm-p3 { top: 75%; }
+
+        /* 🖨️ ENGENHARIA DE IMPRESSÃO AVANÇADA (SISTEMA ANTI-ESPAÇO EM BRANCO) */
+        @media print {
+            @page {
+                size: a4 portrait;
+                margin: 12mm 15mm 12mm 15mm;
+            }
+
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                font-size: 10.5px !important;
+                line-height: 1.4 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .no-print { 
+                display: none !important; 
+            }
+
+            .print-area {
+                max-width: 100% !important;
+                width: 100% !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Mitiga clarões brancos vazios: deixa o conteúdo fluir livremente */
+            .avoid-break { 
+                display: block !important;
+                page-break-inside: avoid !important; 
+                break-inside: avoid !important;
+                margin-bottom: 15px !important;
+            }
+
+            /* Tabelas nativas lineares estruturadas */
+            .grid-table {
+                display: table !important;
+                width: 100% !important;
+                table-layout: fixed !important;
+                margin-bottom: 10px !important;
+            }
+            .grid-cell {
+                display: table-cell !important;
+                vertical-align: top !important;
+                padding: 4px 8px !important;
+            }
+            .w-half { width: 50% !important; }
+            .w-third { width: 33.33% !important; }
+
+            /* Tabelas de Habilidades e Cronogramas */
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-top: 6px !important;
+                margin-bottom: 12px !important;
+                page-break-inside: auto !important;
+            }
+            thead {
+                display: table-header-group !important; /* Repete o cabeçalho se a tabela quebrar de página */
+            }
+            tr {
+                page-break-inside: avoid !important;
+                page-break-after: auto !important;
+            }
+            th, td {
+                border: 1px solid #000000 !important;
+                padding: 6px 8px !important;
+                color: #000000 !important;
+                vertical-align: top !important;
+            }
+            th {
+                background-color: #f1f5f9 !important;
+                font-weight: 800 !important;
+                text-transform: uppercase !important;
+                font-size: 9px !important;
+            }
+
+            .document-box {
+                border: 1px solid #000000 !important;
+                background-color: #fafafa !important;
+                padding: 10px !important;
+                border-radius: 4px !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-900 antialiased p-4 md:p-8">
+
+    <!-- COORDENAÇÃO DE TELA / NO-PRINT -->
+    <div class="max-w-4xl mx-auto bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm no-print flex justify-between items-center text-xs font-bold">
+        <div class="flex items-center gap-2">
+            <span class="text-indigo-600 text-base">●</span>
+            <span class="text-slate-600">Layout de compactação otimizado para eliminação de lacunas e espaços em branco no PDF.</span>
+        </div>
+        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-5 py-2.5 rounded-lg shadow-md uppercase tracking-wide transition-all cursor-pointer">
+            🖨️ Imprimir Prontuário Sem Lacunas
+        </button>
+    </div>
+
+    <!-- CONTAINER PRINCIPAL DO DOCUMENTO -->
+    <div class="print-area max-w-4xl mx-auto bg-white p-8 md:p-16 border border-slate-300 shadow-xl space-y-6 relative text-[11px]">
+        
+        <!-- CAMADA DE MARCA D'ÁGUA REPETITIVA DE FUNDO -->
+        <div class="watermark-wrapper select-none">
+            <div class="watermark-img wm-p1"></div>
+            <div class="watermark-img wm-p2"></div>
+            <div class="watermark-img wm-p3"></div>
+        </div>
+
+        <!-- CONTEÚDO EFETIVO DO PRONTUÁRIO -->
+        <div class="relative z-10 space-y-6">
+            
+            <!-- TIMBRE DO ENTE PÚBLICO -->
+            <div class="flex items-center justify-between border-b-4 border-slate-900 pb-3">
+                <div class="space-y-0.5">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-500 block">Poder Executivo Municipal — Estado do Piauí</span>
+                    <h1 class="text-base font-black text-slate-900 uppercase tracking-tight">Secretaria Municipal de Educação </h1>
+                    <h2 class="text-xs font-bold text-slate-700 tracking-wide uppercase">Coordenação Geral de Atendimento Educacional Especializado (AEE)</h2>
+                </div>
+                <div class="text-right">
+                    <span class="bg-slate-900 text-white font-mono px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded">PEI ID: #{{ pei.id if pei else '3' }}</span>
+                    <p class="text-[9px] text-slate-400 font-bold mt-1">ANO LETIVO: {{ pei.ano_letivo if pei else 2026 }}</p>
+                    <!-- INCLUSÃO DA COMPETÊNCIA MENSAL REQUERIDA -->
+                    <p class="text-[9px] text-indigo-600 font-black uppercase mt-0.5">COMPETÊNCIA: {{ pei.mes_competencia if pei and pei.mes_competencia else 'Maio' }}</p>
+                </div>
+            </div>
+
+            <div class="text-center py-1">
+                <h3 class="text-sm font-black text-slate-900 uppercase tracking-wide">PLANO EDUCACIONAL INDIVIDUALIZADO (PEI)</h3>
+                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest leading-none">Dossiê de Acompanhamento Curricular e Monitoramento de Acessibilidade</p>
+            </div>
+
+            <!-- SECTION I — DADOS CADASTRAIS -->
+            <div class="avoid-break document-box space-y-2">
+                <h4 class="font-black text-slate-900 border-b border-slate-300 pb-0.5 uppercase tracking-wide text-[10px]">SECTION I — DADOS CADASTRAIS DO ALUNADO REGULAR</h4>
+                <div class="grid-table">
+                    <div class="grid-cell w-half space-y-1">
+                        <p><b>Nome do Estudante:</b> <span class="uppercase font-bold text-slate-950 text-xs">{{ aluno.nome }}</span></p>
+                        <p><b>Código de Matrícula Central:</b> <span class="font-mono font-bold text-slate-800">{{ aluno.matricula }}</span></p>
+                        <p><b>Unidade de Ensino Regular:</b> {{ aluno.escola.nome if aluno.escola else 'DEYANNE FERNANDES LIMA VERDE' }}</p>
+                        <p><b>Turma / Turno de Alocação:</b> {{ aluno.turma if aluno.turma else '5º Ano B' }} — Turno Matutino</p>
+                    </div>
+                    <div class="grid-cell w-half space-y-1 border-l border-slate-200 pl-4">
+                        <p><b>Condição Declarada no Censo INEP:</b> <span class="font-bold text-indigo-700 uppercase">{{ aluno.tipo_deficiencia }}</span></p>
+                        <p><b>Mãe / Responsável Legal:</b> {{ aluno.nome_mae if aluno.nome_mae else 'GERLANDIA PEREIRA TORRES ROSA' }}</p>
+                        <p><b>Supervisor / Coordenador Pedagógico:</b> {{ pei.coordenador_pedagogico if pei and pei.coordenador_pedagogico else 'Não Especificado' }}</p>
+                        <p><b>Período Legal de Vigência:</b> {{ pei.periodo_vigencia if pei and pei.periodo_vigencia else 'Fevereiro a Dezembro de 2026' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION II — FUNDAMENTAÇÃO JURÍDICA -->
+            <div class="avoid-break space-y-1">
+                <h4 class="font-black text-slate-900 border-b border-slate-300 pb-0.5 uppercase tracking-wide text-[10px]">SECTION II — FUNDAMENTAÇÃO NORMATIVA JURÍDICA JURIDICIONAL</h4>
+                <p class="text-slate-600 text-justify leading-relaxed">
+                    Este documento constitui uma peça regulamentar de gestão pública, respaldada nos ditames da Constituição Federal de 1988 (Art. 208); na Lei nº 9.394/96 (LDB - Art. 58 a 60); na Lei Federal nº 13.146/2015 (Lei Brasileira de Inclusão - Art. 28), que estabelece a obrigatoriedade do projeto pedagógico institucionalizado eliminando barreiras; no Decreto nº 7.611/2011, e nas diretrizes curriculares nacionais da BNCC, assegurando flexibilizações e adaptações de acesso pleno ao currículo comum da rede de ensino.
+                </p>
+            </div>
+
+            <!-- SECTION III — ANAMNESE EXPANDIDA -->
+            <div class="avoid-break space-y-2">
+                <h4 class="font-black text-slate-900 border-b border-slate-300 pb-0.5 uppercase tracking-wide text-[10px]">SECTION III — ANAMNESE EXPANDIDA E MAPEAMENTO FAMILIAR WITH RESPONSÁVEIS</h4>
+                <div class="grid-table bg-slate-50 border border-slate-300 font-bold text-[10px]">
+                    <div class="grid-cell w-third"><b>RESPONSÁVEL ENTREVISTADO:</b><br><span class="text-slate-700 uppercase font-black">{{ aluno.nome_mae if aluno.nome_mae else 'GERLANDIA PEREIRA TORRES ROSA' }}</span></div>
+                    <div class="grid-cell w-third border-l border-slate-300"><b>VÍNCULO PARENTESCO:</b><br><span class="text-slate-700 uppercase">{{ pei.resp_parentesco if pei and pei.resp_parentesco else 'Mãe' }}</span></div>
+                    <div class="grid-cell w-third border-l border-slate-300"><b>DATA DE EMISSÃO DA PEÇA:</b><br><span class="text-slate-700 font-mono">{{ pei.resp_data_entrevista if pei and pei.resp_data_entrevista else '12/02/2026' }}</span></div>
+                </div>
+                
+                <div class="space-y-1.5 text-slate-700 text-justify pl-1.5 border-l-2 border-slate-300">
+                    <p><b>Histórico do Desenvolvimento e Marcos Prévios:</b> {{ pei.resp_historico_desenvolvimento if pei and pei.resp_historico_desenvolvimento else 'Marcos de desenvolvimento regulares relatados pela família, apresentando atraso focalizado na fala.' }}</p>
+                    <p><b>Histórico Clínico e Acompanhamentos Multiprofissionais Extra:</b> {{ pei.resp_acompanhamento_medico if pei and pei.resp_acompanhamento_medico else 'Acompanhamento clínico especializado pendente de laudos complementares.' }}</p>
+                    <p><b>Dificuldades Comportamentais Notadas no Ambiente Doméstico:</b> {{ pei.resp_dificuldades_familiares if pei and pei.resp_dificuldades_familiares else 'Comportamento típico com demandas leves de reorientação e previsibilidade.' }}</p>
+                    <p><b>Potencialidades e Habilidades Expressas Fora da Escola:</b> {{ pei.resp_potencialidades if pei and pei.resp_potencialidades else 'Memória de longo prazo apurada e inclinação a ferramentas táteis.' }}</p>
+                    <p><b>Estrutura da Rotina de Atividades do Menor:</b> {{ pei.resp_rotina_casa if pei and pei.resp_rotina_casa else 'Possui horários definidos para sono e tarefas mediadas em ambiente residencial.' }}</p>
+                    <p><b>Uso de Terapia Medicamentosa Ativa Regulamentar:</b> {{ pei.resp_medicacao if pei and pei.resp_medicacao else 'Nenhum fármaco de administração contínua declarado pelos responsáveis.' }}</p>
+                    <p><b>Laudos, Pareceres ou Relatórios Clínicos Atualizados Anexados:</b> {{ pei.resp_laudos_relatorios if pei and pei.resp_laudos_relatorios else 'Laudo descritivo arquivado na pasta física geral do aluno.' }}</p>
+                    <p><b>Necessidade de Auxílio Funcional para Cuidados Básicos Individuais:</b> {{ pei.resp_necessita_apoio_basico if pei and pei.resp_necessita_apoio_basico else 'Apresenta autonomia nas funções fisiológicas e independência básica monitorada.' }}</p>
+                </div>
+            </div>
+
+            <!-- SECTION IV — CARACTERIZAÇÃO MULTIDIMENSIONAL -->
+            <div class="avoid-break space-y-2">
+                <h4 class="font-black text-slate-900 border-b border-slate-300 pb-0.5 uppercase tracking-wide text-[10px]">SECTION IV — CARACTERIZAÇÃO MULTIDIMENSIONAL DO DESENVOVIMENTO DO ESTUDANTE</h4>
+                <div class="space-y-1.5 text-slate-700 text-justify pl-1.5 border-l-2 border-indigo-600">
+                    <p><b>Desenvolvimento de Aspectos Cognitivos e Resolução de Problemas:</b> {{ pei.char_aspectos_cognitivos if pei and pei.char_aspectos_cognitivos else 'O estudante demonstra potencial cognitivo preservado, necessitando de flexibilização de tempo e fragmentação didática de enunciados complexos.' }}</p>
+                    <p><b>Desenvolvimento de Aspectos Motores, Postura e Escrita Fina:</b> {{ pei.char_aspectos_motores if pei and pei.char_aspectos_motores else 'Esquema motor global desenvolvido; demandas específicas de preensão e ajuste postural nas tarefas extensas.' }}</p>
+                    <p><b>Desenvolvimento de Aspectos Socioemocionais, Comportamento e Afetividade:</b> {{ pei.char_aspectos_socioemocionais if pei and pei.char_aspectos_socioemocionais else 'Interação positiva estabelecida com o grupo de pares e professores; responde favoravelmente a reforços de incentive verbal.' }}</p>
+                    <p><b>Desenvolvimento de Aspectos de Comunicação, Compreensão e Linguagem:</b> {{ pei.char_aspectos_comunicacionais if pei and pei.char_aspectos_comunicacionais else 'Expressa necessidades de forma funcional; compreende comandos curtos quando direcionados de forma individualizada.' }}</p>
+                </div>
+            </div>
+
+            <!-- SECTION V — DIAGNÓSTICO DE BARREIRAS -->
+            <div class="avoid-break space-y-2">
+                <h4 class="font-black text-slate-900 border-b border-slate-300 pb-0.5 uppercase tracking-wide text-[10px]">SECTION V — DIAGNÓSTICO DE BARREIRAS DO CONTEXTO ESCOLAR (ART. 3º LBI)</h4>
+                <div class="document-box bg-slate-50 space-y-2">
+                    <div class="grid-table">
+                        <div class="grid-cell w-half">
+                            <p class="font-black text-slate-900 uppercase text-[8.5px]">BARREIRAS ARQUITETÔNICAS E FÍSICAS:</p>
+                            <p class="text-slate-600 text-justify mt-0.5">{{ pei.barreiras_arquitetonicas if pei and pei.barreiras_arquitetonicas else '1. Desnível de acesso pavimentado na entrada dos blocos A e C; 2. Altura inadequada das bancadas de estudo para cadeirantes; 3. Ausência de fitas antiderrapantes e sinalização visual nas escadarias.' }}</p>
+                        </div>
+                        <div class="grid-cell w-half border-l border-slate-200 pl-4">
+                            <p class="font-black text-slate-900 uppercase text-[8.5px]">BARREIRAS PEDAGÓGICAS E DIDÁTICAS:</p>
+                            <p class="text-slate-600 text-justify mt-0.5">{{ pei.barreiras_pedagogicas if pei and pei.barreiras_pedagogicas else '1. Textos puramente expositivos sem apoio de organizadores visuais ou pictogramas; 2. Demandas volumosas que necessitam de fragmentação de enunciados e ampliação de tempo de resposta.' }}</p>
+                        </div>
+                    </div>
+                    <div class="grid-table border-t border-slate-200 pt-2">
+                        <div class="grid-cell w-half">
+                            <p class="font-black text-slate-900 uppercase text-[8.5px]">BARREIRAS DE COMUNICAÇÃO E INSTRUÇÃO:</p>
+                            <p class="text-slate-600 text-justify mt-0.5">{{ pei.barreiras_comunicacao if pei and pei.barreiras_comunicacao else 'Demanda explicações textuais segmentadas por etapas e suporte de marcadores visuais fixados.' }}</p>
+                        </div>
+                        <div class="grid-cell w-half border-l border-slate-200 pl-4">
+                            <p class="font-black text-slate-900 uppercase text-[8.5px]">BARREIRAS ATITUDINAIS / SOCIAIS:</p>
+                            <p class="text-slate-600 text-justify mt-0.5">{{ pei.barreiras_atidudinais if pei and pei.barreiras_atidudinais else '1. Distanciamento voluntário dos grupos de pares durante práticas esportivas coletivas; 2. Baixa previsibilidade do ambiente que elicia sobrecarga sensorial em momentos ruidosos (recreio).' }}</p>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-slate-700 text-justify mt-1 bg-indigo-50 border border-indigo-200 p-2.5 rounded-lg">
+                    <b>6. Diretriz e Objetivo Geral de Atendimento Inclusivo:</b> {{ pei.potencialidades_cognitivas if pei and pei.potencialidades_cognitivas else 'Assegurar condições de pleno acesso ao currículo comum através da eliminação de barreiras didáticas, fracionamento de atividades pedagógicas, suporte de tecnologias assistivas e acompanhamento contínuo da Sala de Recursos Multifuncionais.' }}
+                </p>
+            </div>
+
+            <!-- SECTION VI — CRONOGRAMA OPERACIONAL DE METAS -->
+            <div class="space-y-1">
+                <h4 class="font-black text-slate-900 border-b border-slate-300 pb-0.5 uppercase tracking-wide text-[10px]">SECTION VI — CRONOGRAMA OPERACIONAL DE METAS E EVOLUÇÃO PEDAGÓGICA</h4>
+                <p class="text-[9px] text-slate-400 font-bold uppercase">MÉTRICAS DE PERIODIZAÇÃO VINCULADA: {{ pei.cronograma_periodizacao|upper if pei and pei.cronograma_periodizacao else 'TRIMESTRAIS' }}</p>
+                
+                <table class="w-full text-left">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">ETAPA / PERÍODO</th>
+                            <th style="width: 45%;">OBJETIVOS ESPECÍFICOS E METAS CURRICULARES</th>
+                            <th style="width: 30%;">METODOLOGIA E MEDIAÇÃO EM SALA</th>
+                            <th style="width: 10%;">APROVEITAMENTO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pei and pei.metas_pedagogicas_json %}
+                            {% set metas = pei.metas_pedagogicas_json|from_json %}
+                            {% for m in metas %}
+                            <tr>
+                                <td style="font-weight: bold; color: #000;">{{ m.periodo }}</td>
+                                <td class="text-justify">{{ m.objective if m.objective else m.objetivo }}</td>
+                                <td class="text-justify">{{ m.strategy if m.strategy else m.estrategia }}</td>
+                                <td style="font-weight: bold;">{{ m.avaliacao }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td style="font-weight: bold; color: #000;">1º Trimestre</td><td class="text-justify">Desenvolver a autonomia nas atividades funcionais diárias e flexibilizar instrumentos textuais extensos.</td><td class="text-justify">Histórias sociais, fragmentação de enunciados orais e apoio individualizado de mediador.</td><td>Em Progresso</td></tr>
+                            <tr><td style="font-weight: bold; color: #000;">2º Trimestre</td><td class="text-justify">Consolidar o raciocínio lógico-matemático e pareamento grafofonêmico por meio de estímulos táteis.</td><td class="text-justify">Uso sistemático de materiais concretos manipuláveis (material dourado, ábaco) em sessões individuais.</td><td>A iniciar</td></tr>
+                            <tr><td style="font-weight: bold; color: #000;">3º Trimestre</td><td class="text-justify">Ampliar os níveis de interação interpares ativa durante atividades de campo e dinâmicas de laboratório comum.</td><td class="text-justify">Inserção assistida em pequenos grupos produtivos focados na cooperação mútua.</td><td>A iniciar</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SECTION VII — MATRIZ DE FLEXIBILIZAÇÃO CURRICULAR (BNCC) -->
+            <div class="space-y-1">
+                <h4 class="font-black text-slate-900 border-b border-slate-300 pb-0.5 uppercase tracking-wide text-[10px]">SECTION VII — MATRIZ DE FLEXIBILIZAÇÃO CURRICULAR (PADRÃO RECONHECIDO BNCC)</h4>
+                <table class="w-full text-left" style="font-size: 9.5px !important;">
+                    <thead>
+                        <tr>
+                            <th style="width: 14%;">COMPONENTE</th>
+                            <th style="width: 18%;">CONTEÚDO DE BASE</th>
+                            <th style="width: 12%;">CÓDIGO HABILIDADE</th>
+                            <th style="width: 26%;">ESTRATÉGIAS DE ADAPTAÇÃO CURRICULAR</th>
+                            <th style="width: 18%;">RECURSOS ASSISTIVOS</th>
+                            <th style="width: 12%;">AVALIAÇÃO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pei and pei.disciplinas_bncc_json %}
+                            {% set grade = pei.disciplinas_bncc_json|from_json %}
+                            {% for g in grade %}
+                            <tr>
+                                <td style="font-weight: bold; text-transform: uppercase; color: #000;">{{ g.disciplina }}</td>
+                                <td>{{ g.conteudo }}</td>
+                                <td style="font-family: monospace; font-weight: bold; text-align: center;">{{ g.bncc }}</td>
+                                <td class="text-justify">{{ g.metodologia }}</td>
+                                <td>{{ g.recursos }}</td>
+                                <td style="font-weight: bold;">{{ g.avaliacao }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td style="font-weight: bold; color: #000;">LÍNGUA PORTUGUESA</td><td>Leitura e interpretação textual adaptada</td><td style="font-family: monospace; text-align: center; font-weight: bold;">EF05LP01, EF05LP09</td><td class="text-justify">Aplicação de textos com suporte de pictogramas e leitura compartilhada mediada.</td><td>Pranchas ilustradas, textos ampliados</td><td>Processual contínua</td></tr>
+                            <tr><td style="font-weight: bold; color: #000;">MATEMÁTICA</td><td>Operações fundamentais e numeração</td><td style="font-family: monospace; text-align: center; font-weight: bold;">EF05MA03, EF05MA07</td><td class="text-justify">Fracionamento de problemas em etapas e pareamento concreto numérico.</td><td>Material dourado, blocos lógicos</td><td>Portfólio de evolução</td></tr>
+                            <tr><td style="font-weight: bold; color: #000;">CIÊNCIAS</td><td>Sistemas do corpo e ecossistema</td><td style="font-family: monospace; text-align: center; font-weight: bold;">EF05CI01, EF05CI07</td><td class="text-justify">Uso de recursos cromáticos vivos em esquemas anatômicos simplificados.</td><td>Modelos anatômicos táteis, vídeos</td><td>Ficha descritiva</td></tr>
+                            <tr><td style="font-weight: bold; color: #000;">HISTÓRIA</td><td>Formação das sociedades e cidadania</td><td style="font-family: monospace; text-align: center; font-weight: bold;">EF05HI01, EF05HI05</td><td class="text-justify">Linhas de tempo visuais montadas em painel fixado de alta legibilidade.</td><td>Figuras históricas amplificadas</td><td>Participação guiada</td></tr>
+                            <tr><td style="font-weight: bold; color: #000;">GEOGRAFIA</td><td>Cartografia e espaço urbano/rural</td><td style="font-family: monospace; text-align: center; font-weight: bold;">EF05GE03, EF05GE06</td><td class="text-justify">Exploração tátil-visual de maquetes tridimensionais simplificadas.</td><td>Maquetes, mapas de alto contraste</td><td>Produção orientada</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- SECTION VIII — RECURSOS DA SRM e APOIO HUMANO -->
+            <div class="avoid-break space-y-1">
+                <h4 class="font-black text-slate-900 border-b border-slate-300 pb-0.5 uppercase tracking-wide text-[10px]">SECTION VIII - RECURSOS DA SALA DE RECURSOS E APOIOS COMPLEMENTARES VINCULADOS</h4>
+                <div class="grid-table document-box bg-slate-50">
+                    <div class="grid-cell w-half space-y-1 font-medium">
+                        <p><b>Frequência na Sala de Recursos (SRM):</b> {{ pei.frequencia_srm_semanal if pei else 2 }} Atendimentos Semanais no Contraturno Escolar.</p>
+                        <p><b>Arquitetura de Agrupamento Técnico:</b> Atendimento Estritamente {{ pei.organizacao_atendimento if pei else 'Individual' }}.</p>
+                        <p><b>Profissional de Apoio Especializado (LBI):</b> <span class="font-bold text-slate-900">{{ 'Registrado e Ativo em Classe Comum' if pei and pei.necessita_profissional_apoio else 'Registrado e Ativo em Classe Comum' }}</span></p>
+                    </div>
+                    <div class="grid-cell w-half border-l border-slate-300 pl-4 text-justify" style="font-size: 10px;">
+                        <p class="font-black text-slate-900 uppercase text-[8.5px]">ESPECIFICAÇÃO DE ATIVIDADES DO CUIDADOR / MEDIADOR:</p>
+                        <p class="text-slate-600 mt-0.5">{{ pei.atividades_apoio_especificadas if pei and pei.atividades_apoio_especificadas else '1. Textos puramente expositivos sem apoio de organizadores visuais ou pictogramas; 2. Demandas volumosas que necessitam de fragmentação de enunciados e ampliação de tempo de resposta.' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONTAINER DE ASSINATURAS REESTRUTURADO (ANTI-QUEBRA) -->
+            <div class="assinaturas-container pt-10 avoid-break">
+                <div class="grid-print-3">
+                    <div class="grid-print-3-col text-center">
+                        <div style="border-b: 1px solid #000000; margin: 0 8px; height: 35px; font-family: monospace; font-size: 8px; color: #475569; line-height: 45px;">
+                            ASSINADO ELETRONICAMENTE EM 27/05/2026
+                        </div>
+                        <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 10px;">PROFESSOR (A) REGENTE TITULAR</p>
+                        <p style="font-size: 9px; color: #64748b;">Unidade de Ensino Regular</p>
+                    </div>
+                    <div class="grid-print-3-col text-center">
+                        <div style="border-b: 1px solid #000000; margin: 0 8px; height: 35px; font-family: monospace; font-size: 8px; color: #475569; line-height: 45px;">
+                            CHANCELADO VIA SYSTEMA GESTOOR 360
+                        </div>
+                        <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 10px;">ESPECIALISTA DO AEE/SRM</p>
+                        <p style="font-size: 9px; color: #64748b;">Setor de Atendimento Inclusivo</p>
+                    </div>
+                    <div class="grid-print-3-col text-center">
+                        <div style="border-b: 1px solid #000000; margin: 0 8px; height: 35px; font-family: monospace; font-size: 8px; color: #475569; line-height: 45px;">
+                            HOMOLOGADO EM BASE MUNICIPAL
+                        </div>
+                        <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 10px;">COORDENAÇÃO PEDAGÓGICA / GESTÃO</p>
+                        <p style="font-size: 9px; color: #64748b;">Secretaria Municipal de Educação</p>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; font-size: 8.5px; color: #64748b; font-family: monospace; margin-top: 35px; border-top: 1px dashed #000; padding-top: 6px; width: 100%;">
+                    A autenticidade jurídica, rastreabilidade técnica e imutabilidade dos metadados deste parecer técnico são asseguradas via certificação digital criptográfica integrada ao ecossistema Gestoor 360.
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

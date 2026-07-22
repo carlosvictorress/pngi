@@ -1,0 +1,515 @@
+📋 Copie o prompt abaixo:
+Atue como um Engenheiro de UI/UX Sênior especializado em Tailwind CSS.
+
+Preciso que você aplique o design system "High-Tech SaaS Governamental Premium" no código HTML que enviarei abaixo. O objetivo é deixar a interface moderna, corporativa e delicada, inspirada em dashboards de alto nível.
+
+REGRAS ESTRUTURAIS (MUITO IMPORTANTE):
+
+NÃO ALTERE nenhuma variável Jinja (tudo que estiver entre {% %} ou {{ }}), loops, IDs de inputs, names, actions de formulário, links ou scripts JS. Mantenha o backend intacto.
+
+Mantenha a responsividade (md:, lg:).
+
+Inclua a tag <script> do Tailwind com a seguinte configuração de tema:
+
+Fonte: sans: ['Inter', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+
+Cores customizadas: gov-navy: '#0A192F', gov-blue: '#1351B4', gov-green: '#00A859', gov-yellow: '#FFCD00', gov-dark: '#1E293B', gov-light: '#64748B', gov-bg: '#F8FAFC'.
+
+Sombras customizadas: glow: '0 0 20px rgba(19, 81, 180, 0.3)', card: '0 10px 30px -5px rgba(0, 0, 0, 0.1)'.
+
+REGRAS DE ESTILO E DELICADEZA:
+
+Tipografia Delicada: Não use fontes gigantes ou muito pesadas. Substitua font-black e font-extrabold por font-bold e font-semibold.
+
+Micro-tipografia: Para labels, datas e pequenas tags, use o padrão: text-[9px] font-semibold uppercase tracking-widest text-slate-400.
+
+Títulos: Títulos devem ser refinados. Exemplo: text-2xl font-bold tracking-tight text-gov-dark.
+
+Textos Base: Parágrafos e textos de apoio devem ter leitura confortável: text-xs text-slate-500 leading-relaxed font-normal.
+
+Cartões (Cards): Use fundos brancos, cantos arredondados, borda superior colorida e sombras suaves. Exemplo: bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card.
+
+Botões: Tamanho contido e refinado. Exemplo: bg-gov-blue text-white font-semibold py-3 px-6 rounded-lg text-xs transition-all shadow-md.
+
+Espaçamento (Whitespace): Compense os textos menores usando bastante margem e padding interno (p-6, p-8, space-y-6). A interface precisa respirar.
+
+Áreas Escuras: Se a página tiver um cabeçalho ou painel superior, use o fundo bg-gov-navy e elementos com Glassmorphism (bg-white/10 backdrop-blur-md border border-white/20).
+
+Refaça o layout do código abaixo seguindo estritamente essas regras:
+
+{% extends 'base.html' %}
+
+{% block header_title %}Módulo 2 — Prontuário Técnico e Pedagógico do PEI Escolar (Padrão MEC){% endblock %}
+
+{% block content %}
+<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-gov-dark space-y-6">
+    
+    <!-- CABEÇALHO DO PRONTUÁRIO -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gov-blue"></div>
+        <div class="flex flex-col lg:flex-row justify-between items-start gap-6">
+            <div class="space-y-2 flex-grow">
+                <span class="inline-block bg-blue-50 border border-blue-200 text-gov-blue text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-md shadow-sm">
+                    Instrumento Oficial de Governança Inclusiva (Padrão SECADI/MEC)
+                </span>
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">
+                    {% if pei %}Editando Prontuário de:{% else %}Estudante:{% endif %} <span class="text-gov-blue uppercase">{{ aluno.nome }}</span>
+                </h2>
+                <p class="text-xs text-slate-500 font-medium max-w-3xl leading-relaxed">
+                    Emissão e acompanhamento de plano institucional individualizado conforme diretrizes técnicas da SECADI/MEC, alinhado às variáveis regulamentares do Censo Escolar INEP.
+                </p>
+            </div>
+            <div class="text-left text-xs space-y-1.5 text-slate-600 font-bold min-w-[280px] w-full lg:w-auto bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner">
+                <p class="flex justify-between border-b border-slate-200 pb-1"><span class="text-slate-400 uppercase text-[10px]">Escola Lotação:</span> <span class="text-slate-800">{{ aluno.escola.nome if aluno.escola is mapping else (aluno.escola if aluno.escola else 'Não Informada') }}</span></p>
+                <p class="flex justify-between border-b border-slate-200 pb-1"><span class="text-slate-400 uppercase text-[10px]">Turma / Turno:</span> <span class="text-slate-800">{{ aluno.turma if aluno.turma else '5º Ano B / Manhã' }}</span></p>
+                <p class="flex justify-between"><span class="text-slate-400 uppercase text-[10px]">Condição Censo:</span> <span class="text-gov-blue uppercase">{{ aluno.tipo_deficiencia }}</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SELETOR DE ABAS ULTRA ORGANIZADO estilo APPLE -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
+        <div class="flex flex-wrap border-b border-slate-200 bg-slate-900 text-xs font-black uppercase tracking-wider text-slate-400">
+            <button type="button" onclick="mudarBloco(1)" id="aba-1" class="flex-1 py-4 px-3 text-center border-b-2 border-emerald-400 text-white font-black bg-slate-800/50 transition-all focus:outline-none">
+                1. Contexto & Base Legal
+            </button>
+            <button type="button" onclick="mudarBloco(2)" id="aba-2" class="flex-1 py-4 px-3 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                2. Entrevista com Família
+            </button>
+            <button type="button" onclick="mudarBloco(3)" id="aba-3" class="flex-1 py-4 px-3 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                3. Perfil & Barreiras
+            </button>
+            <button type="button" onclick="mudarBloco(4)" id="aba-4" class="flex-1 py-4 px-3 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                4. Metas & Cronograma
+            </button>
+            <button type="button" onclick="mudarBloco(5)" id="aba-5" class="flex-1 py-4 px-3 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                5. Grade BNCC & Adaptações
+            </button>
+            <button type="button" onclick="mudarBloco(6)" id="aba-6" class="flex-1 py-4 px-3 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                6. Recursos SRM & Validação
+            </button>
+        </div>
+
+        <form method="POST" class="p-6 md:p-8 space-y-6 text-xs font-medium">
+            {% if pei %}
+            <input type="hidden" name="pei_id" value="{{ pei.id }}">
+            {% endif %}
+            
+            <!-- CAMPOS GERAIS OBRIGATÓRIOS -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700 uppercase tracking-wide">Ano Letivo de Referência *</label>
+                    <input type="number" name="ano_letivo" value="{{ pei.ano_letivo if pei else 2026 }}" required class="border border-slate-300 rounded-lg p-2.5 w-full font-mono font-bold bg-white focus:outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700 uppercase tracking-wide">Período de Avaliação *</label>
+                    <select name="periodo_trimestre" required class="border border-slate-300 rounded-lg p-2.5 w-full bg-white focus:outline-none font-bold text-gov-dark">
+                        <option value="1" {% if pei and pei.periodo_trimestre == 1 %}selected{% endif %}>1º Trimestre — Diagnóstico Base</option>
+                        <option value="2" {% if pei and pei.periodo_trimestre == 2 %}selected{% endif %}>2º Trimestre — Progresso Intermediário</option>
+                        <option value="3" {% if pei and pei.periodo_trimestre == 3 %}selected{% endif %}>3º Trimestre — Relatório Final</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700 uppercase tracking-wide">Coordenador Pedagógico</label>
+                    <input type="text" name="coordenador_pedagogico" value="{{ pei.coordenador_pedagogico if pei else '' }}" class="border border-slate-300 rounded-lg p-2.5 w-full bg-white focus:outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700 uppercase tracking-wide">Período de Vigência do PEI</label>
+                    <input type="text" name="periodo_vigencia" value="{{ pei.periodo_vigencia if pei else 'Fevereiro a Dezembro de 2026' }}" class="border border-slate-300 rounded-lg p-2.5 w-full bg-white focus:outline-none">
+                </div>
+            </div>
+
+            <!-- ABA 1: IDENTIFICAÇÃO E BASE LEGAL -->
+            <div id="bloco-1" class="space-y-4">
+                <h4 class="font-black text-xs text-gov-blue uppercase tracking-wide border-b pb-1">2. Base Legal e Normativa</h4>
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 text-slate-600 space-y-2.5 leading-relaxed font-semibold">
+                    <p class="text-slate-800 font-bold mb-1">Este Plano Educacional Individualizado está fundamentado estritamente nos seguintes dispositivos legais:</p>
+                    <ul class="list-disc list-inside space-y-1 pl-1">
+                        <li>Constituição Federal de 1988;</li>
+                        <li>Lei nº 9.394/96 – Lei de Diretrizes e Bases da Educação Nacional (LDB);</li>
+                        <li>Lei Brasileira de Inclusão – Lei nº 13.146/2015;</li>
+                        <li>Política Nacional de Educação Especial na Perspectiva da Educação Inclusiva;</li>
+                        <li>Base Nacional Comum Curricular (BNCC);</li>
+                        <li>Decreto nº 7.611/2011;</li>
+                        <li>Resoluções do Conselho Nacional de Educação referentes ao AEE;</li>
+                        <li>Normativas municipais vigentes sobre Educação Inclusiva e elaboração do PEI.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- ABA 2: ENTREVISTA COM OS RESPONSÁVEIS -->
+            <div id="bloco-2" class="space-y-4 hidden">
+                <div class="flex justify-between items-center border-b pb-1">
+                    <h4 class="font-black text-xs text-gov-blue uppercase tracking-wide">3. Entrevista com os Responsáveis</h4>
+                    <button type="button" onclick="gerarIA('entrevista')" class="bg-purple-600 hover:bg-purple-700 text-white font-black px-2.5 py-1 rounded text-[10px] uppercase tracking-wider">🤖 Rodar Anamnese via IA</button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
+                    <div class="space-y-1"><label class="block font-bold text-slate-700 uppercase">Parentesco</label>
+                        <input type="text" id="resp_parentesco" name="resp_parentesco" value="{{ pei.resp_parentesco if pei else '' }}" class="w-full border p-2 rounded focus:outline-none"></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-700 uppercase">Contato / Telefone</label>
+                        <input type="text" id="resp_contato" name="resp_contato" value="{{ pei.resp_contato if pei else '' }}" class="w-full border p-2 rounded focus:outline-none"></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-700 uppercase">Data da Entrevista</label>
+                        <input type="text" id="resp_data_entrevista" name="resp_data_entrevista" value="{{ pei.resp_data_entrevista if pei else '' }}" placeholder="dd/mm/2026" class="w-full border p-2 rounded focus:outline-none"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Histórico do Desenvolvimento</label>
+                        <textarea id="resp_historico_desenvolvimento" name="resp_historico_desenvolvimento" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_historico_desenvolvimento if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Acompanhamento Médico / Terapêutico</label>
+                        <textarea id="resp_acompanhamento_medico" name="resp_acompanhamento_medico" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_acompanhamento_medico if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Dificuldades no Ambiente Familiar</label>
+                        <textarea id="resp_dificuldades_familiares" name="resp_dificuldades_familiares" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_dificuldades_familiares if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Potencialidades e Habilidades Notadas</label>
+                        <textarea id="resp_potencialidades" name="resp_potencialidades" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_potencialidades if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Rotina da Criança em Casa</label>
+                        <textarea id="resp_rotina_casa" name="resp_rotina_casa" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_rotina_casa if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Uso de Medicação Contínua</label>
+                        <textarea id="resp_medicacao" name="resp_medicacao" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_medicacao if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Laudos ou Relatórios Atualizados</label>
+                        <textarea id="resp_laudos_relatorios" name="resp_laudos_relatorios" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_laudos_relatorios if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Apoio para Cuidados Básicos (Locomoção/Alimentação/Higiene)</label>
+                        <textarea id="resp_necessita_apoio_basico" name="resp_necessita_apoio_basico" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_necessita_apoio_basico if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Interesse pelas Atividades Escolares</label>
+                        <textarea id="resp_interesse_atividades" name="resp_interesse_atividades" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_interesse_atividades if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Nível de Autonomia nas Tarefas</label>
+                        <textarea id="resp_autonomia_tarefas" name="resp_autonomia_tarefas" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_autonomia_tarefas if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Interação Social Familiar</label>
+                        <textarea id="resp_interacao_social" name="resp_interacao_social" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_interacao_social if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Comportamento no Ambiente Doméstico</label>
+                        <textarea id="resp_comportamento_domestico" name="resp_comportamento_domestico" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_comportamento_domestico if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Preferências, Estímulos e Sensibilidades</label>
+                        <textarea id="resp_preferencias_sensibilidades" name="resp_preferencias_sensibilidades" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_preferencias_sensibilidades if pei else '' }}</textarea></div>
+                    <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Expectativas da Família</label>
+                        <textarea id="resp_expectativas_familia" name="resp_expectativas_familia" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_expectativas_familia if pei else '' }}</textarea></div>
+                    <div class="space-y-1 md:col-span-2"><label class="block font-bold text-slate-500 uppercase text-[10px]">Encaminhamentos Definidos em Conjunto</label>
+                        <textarea id="resp_encaminhamentos_conjuntos" name="resp_encaminhamentos_conjuntos" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.resp_encaminhamentos_conjuntos if pei else '' }}</textarea></div>
+                </div>
+            </div>
+
+            <!-- ABA 3: PERFIL DO ESTUDANTE & BARREIRAS -->
+            <div id="bloco-3" class="space-y-6 hidden">
+                <div class="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h4 class="font-black text-xs text-gov-blue uppercase tracking-wide border-b pb-1">4. Caracterização do Estudante (Aspectos de Desenvolvimento)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Aspectos Cognitivos</label>
+                            <textarea id="char_aspectos_cognitivos" name="char_aspectos_cognitivos" rows="2" class="w-full bg-slate-50 border rounded-lg p-2.5 focus:bg-white focus:outline-none">{{ pei.char_aspectos_cognitivos if pei else 'O estudante apresenta potencial de aprendizagem compatível com a etapa escolar, necessitando de adaptações metodológicas, flexibilização curricular e acompanhamento contínuo.' }}</textarea></div>
+                        <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Aspectos Motores</label>
+                            <textarea id="char_aspectos_motores" name="char_aspectos_motores" rows="2" class="w-full bg-slate-50 border rounded-lg p-2.5 focus:bg-white focus:outline-none">{{ pei.char_aspectos_motores if pei else 'Apresenta limitação física que pode interferir na mobilidade, escrita, postura e realização de atividades que exijam coordenação motora fina e ampla.' }}</textarea></div>
+                        <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Aspectos Socioemocionais</label>
+                            <textarea id="char_aspectos_socioemocionais" name="char_aspectos_socioemocionais" rows="2" class="w-full bg-slate-50 border rounded-lg p-2.5 focus:bg-white focus:outline-none">{{ pei.char_aspectos_socioemocionais if pei else 'Demonstra interação social satisfatória com colegas e professores, necessitando incentivo à autonomia, participação e fortalecimento da autoestima.' }}</textarea></div>
+                        <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Aspectos Comunicacionais</label>
+                            <textarea id="char_aspectos_comunicacionais" name="char_aspectos_comunicacionais" rows="2" class="w-full bg-slate-50 border rounded-lg p-2.5 focus:bg-white focus:outline-none">{{ pei.char_aspectos_comunicacionais if pei else 'Comunica-se adequadamente, compreendendo comandos simples e instruções pedagógicas.' }}</textarea></div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-xl p-5 space-y-4">
+                    <h4 class="font-black text-xs text-gov-blue uppercase tracking-wide border-b pb-1">5. Mapeamento das Barreiras Encontradas</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Barreiras Arquitetônicas e Físicas</label>
+                            <textarea name="barreiras_arquitetonicas" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.barreiras_arquitetonicas if pei else 'Dificuldade de acessibilidade em alguns espaços escolares; necessidade de mobiliário adaptado e apoio para locomoção.' }}</textarea></div>
+                        <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Barreiras Pedagógicas</label>
+                            <textarea name="barreiras_pedagogicas" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.barreiras_pedagogicas if pei else 'Necessidade de ampliação do tempo para realização das atividades; necessidade de adaptação das atividades escritas por conta da coordenação motora fina.' }}</textarea></div>
+                        <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Barreiras de Comunicação</label>
+                            <textarea name="barreiras_comunicacao" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.barreiras_comunicacao if pei else 'Necessidade de instruções claras, objetivas e segmentadas; uso de recursos visuais e apoio individualizado.' }}</textarea></div>
+                        <div class="space-y-1"><label class="block font-bold text-slate-500 uppercase text-[10px]">Barreiras Atitudinais</label>
+                            <textarea name="barreiras_atidudinais" rows="2" class="w-full bg-white border rounded-lg p-2.5 focus:outline-none">{{ pei.barreiras_atidudinais if pei else 'Necessidade de fortalecimento das práticas inclusivas; sensibilização da comunidade escolar quanto à inclusão e acessibilidade.' }}</textarea></div>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5 bg-white border rounded-xl p-5 shadow-sm">
+                    <label class="block font-black text-xs text-gov-blue uppercase tracking-wide border-b pb-1">6. Objetivo Geral do PEI</label>
+                    <textarea name="potencialidades_cognitivas" rows="2" class="w-full bg-white p-2.5 focus:outline-none font-semibold text-slate-700" required>{{ pei.potencialidades_cognitivas if pei else 'Garantir ao estudante acesso, permanência, participação e aprendizagem com equidade, por meio de estratégias pedagógicas inclusivas, adaptações curriculares, recursos de acessibilidade e acompanhamento multiprofissional, respeitando suas necessidades específicas e potencialidades.' }}</textarea>
+                </div>
+            </div>
+
+            <!-- ABA 4: CRONOGRAMA DE METAS POR PERIODIZAÇÃO -->
+            <div id="bloco-4" class="space-y-6 hidden">
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b pb-2 gap-2">
+                        <div>
+                            <h4 class="font-black text-xs text-gov-blue uppercase tracking-wide">7. Cronograma de Metas Pedagógicas</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Selecione a periodização e monte a árvore de objetivos específicos.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <select name="cronograma_periodizacao" class="border rounded p-1.5 font-bold bg-slate-50 text-slate-700 text-[11px] focus:outline-none">
+                                <option value="Mensais" {% if pei and pei.cronograma_periodizacao == 'Mensais' %}selected{% endif %}>Metas Mensais</option>
+                                <option value="Bimestrais" {% if pei and pei.cronograma_periodizacao == 'Bimestrais' %}selected{% endif %}>Metas Bimestrais</option>
+                                <option value="Trimestrais" {% if not pei or pei.cronograma_periodizacao == 'Trimestrais' %}selected{% endif %}>Metas Trimestrais</option>
+                                <option value="Semestrais" {% if pei and pei.cronograma_periodizacao == 'Semestrais' %}selected{% endif %}>Metas Semestrais</option>
+                            </select>
+                            <button type="button" onclick="adicionarLinhaMeta()" class="bg-slate-900 text-white font-black px-2.5 py-1.5 rounded text-[10px] uppercase tracking-wide hover:bg-slate-800">+ Adicionar Meta</button>
+                            <button type="button" onclick="gerarMetasIA()" class="bg-purple-600 text-white font-black px-2.5 py-1.5 rounded text-[10px] uppercase tracking-wide hover:bg-purple-700">🤖 Injetar por IA</button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs" id="tabela_metas">
+                            <thead>
+                                <tr class="bg-slate-100 font-black uppercase text-[10px] border-b text-slate-600 text-left">
+                                    <th class="p-2.5 w-[15%]">Período/Mês</th>
+                                    <th class="p-2.5 w-[35%]">Objetivos / Metas Específicas</th>
+                                    <th class="p-2.5 w-[35%]">Estratégias Pedagógicas</th>
+                                    <th class="p-2.5 w-[12%]">Avaliação/Evolução</th>
+                                    <th class="p-2.5 text-center w-[3%]">Ação</th>
+                                </tr>
+                            </tbody>
+                            <tbody class="divide-y font-semibold" id="corpo_metas">
+                                <!-- Preenchido dinamicamente por JS se houver registros ou linhas vazias -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 5: GRADE DA BNCC & DISCIPLINAS ADAPTADAS -->
+            <div id="bloco-5" class="space-y-6 hidden">
+                <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <div>
+                            <h4 class="font-black text-xs text-gov-blue uppercase tracking-wide">8. Organização Curricular e Adaptações Pedagógicas (BNCC)</h4>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Mapeamento de conteúdos fracionados, códigos de habilidades e recursos didáticos correspondentes.</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="adicionarLinhaGrade()" class="bg-slate-900 text-white font-black px-2.5 py-1.5 rounded text-[10px] uppercase tracking-wide hover:bg-slate-800">+ Adicionar Matéria</button>
+                            <button type="button" onclick="gerarGradeBNCC_IA()" class="bg-purple-600 text-white font-black px-2.5 py-1.5 rounded text-[10px] uppercase tracking-wide hover:bg-purple-700">🤖 Injetar Grade MEC Completa via IA</button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs" id="tabela_grade">
+                            <thead>
+                                <tr class="bg-slate-100 font-black uppercase text-[10px] border-b text-slate-600 text-left">
+                                    <th class="p-2.5 w-[12%]">Componente</th>
+                                    <th class="p-2.5 w-[18%]">Conteúdo Curricular</th>
+                                    <th class="p-2.5 w-[12%]">Habilidades BNCC</th>
+                                    <th class="p-2.5 w-[25%]">Metodologia / Estratégias</th>
+                                    <th class="p-2.5 w-[18%]">Recursos Utilizados</th>
+                                    <th class="p-2.5 w-[12%]">Forma de Avaliação</th>
+                                    <th class="p-2.5 text-center w-[3%]">Ação</th>
+                                </tr>
+                            </tbody>
+                            <tbody class="divide-y font-semibold" id="corpo_grade">
+                                <!-- Preenchido dinamicamente por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bg-slate-50 border rounded-xl p-4 space-y-2 mt-4">
+                        <span class="block font-bold text-slate-700 uppercase text-[10px] tracking-wide">Flexibilizações Gerais Obrigatórias</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-slate-600 font-bold text-[11px]">
+                            <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded"> Redução da quantidade de atividades</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded"> Ampliação do tempo para realização</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded"> Adaptação de linguagem e comandos</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded"> Utilização de recursos visuais</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded"> Avaliação diferenciada e processual</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded"> Apoio individualizado de mediador</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded"> Adequação dos instrumentos avaliativos</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" checked class="rounded"> Fragmentação em pequenas etapas</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABA 6: RECURSOS SRM, DIRETRIZES E ASSINATURA -->
+            <div id="bloco-6" class="space-y-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm space-y-4">
+                        <h4 class="font-black text-xs text-gov-blue uppercase tracking-wide border-b pb-2">📦 Recursos de Tecnologia Assistiva (Espelho INEP)</h4>
+                        <div class="space-y-2.5 font-bold text-slate-700">
+                            <label class="flex items-center gap-3 cursor-pointer p-1.5 rounded hover:bg-slate-50 transition-all">
+                                <input type="checkbox" name="recursos_opticos_adicionais" class="w-4 h-4 text-gov-blue rounded focus:ring-0 cursor-pointer" {% if pei and pei.recursos_opticos_adicionais %}checked{% endif %}> Recursos ópticos / não-ópticos (Baixa Visão / Cegueira)
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer p-1.5 rounded hover:bg-slate-50 transition-all">
+                                <input type="checkbox" name="recursos_comunicacao_alternativa" class="w-4 h-4 text-gov-blue rounded focus:ring-0 cursor-pointer" {% if pei and pei.recursos_comunicacao_alternativa %}checked{% endif %}> Sistemas de Comunicação Alternativa e Aumentativa (CAA)
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer p-1.5 rounded hover:bg-slate-50 transition-all">
+                                <input type="checkbox" name="recursos_acessibilidade_informatica" class="w-4 h-4 text-gov-blue rounded focus:ring-0 cursor-pointer" {% if pei and pei.recursos_acessibilidade_informatica %}checked{% endif %}> Periféricos Computacionais Adaptados (Mouses/Teclados especiais)
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer p-1.5 rounded hover:bg-slate-50 transition-all">
+                                <input type="checkbox" name="recursos_atendimento_libras" class="w-4 h-4 text-gov-blue rounded focus:ring-0 cursor-pointer" {% if pei and pei.recursos_atendimento_libras %}checked{% endif %}> Tradução Pedagógica em LIBRAS / Intérprete Dedicado
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm space-y-4">
+                        <h4 class="font-black text-xs text-gov-blue uppercase tracking-wide border-b pb-2">🏫 Organização do Atendimento Contra-turno (AEE)</h4>
+                        <div class="grid grid-cols-1 gap-4 font-bold text-slate-700">
+                            <div class="space-y-1">
+                                <label class="block text-slate-400 uppercase text-[10px]">Carga Semanal SRM (Sessões)</label>
+                                <select name="frequencia_srm_semanal" class="w-full bg-slate-50 border rounded-lg p-2.5 text-gov-dark focus:outline-none cursor-pointer font-bold">
+                                    <option value="1" {% if pei and pei.frequencia_srm_semanal == 1 %}selected{% endif %}>1 Sessão por semana</option>
+                                    <option value="2" {% if not pei or pei.frequencia_srm_semanal == 2 %}selected{% endif %}>2 Sessões por semana (Carga Padrão Recomendada)</option>
+                                    <option value="3" {% if pei and pei.frequencia_srm_semanal == 3 %}selected{% endif %}>3 Sessões por semana (Acompanhamento Crítico)</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="block text-slate-400 uppercase text-[10px]">Arquitetura de Agrupamento</label>
+                                <select name="organizacao_atendimento" class="w-full bg-slate-50 border rounded-lg p-2.5 text-gov-dark focus:outline-none cursor-pointer font-bold">
+                                    <option value="Individual" {% if pei and pei.organizacao_atendimento == 'Individual' %}selected{% endif %}>Atendimento Estritamente Individualizado</option>
+                                    <option value="Grupo" {% if pei and pei.organizacao_atendimento == 'Grupo' %}selected{% endif %}>Em Pequenos Grupos Coletivos</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 border border-slate-200 rounded-xl shadow-sm space-y-4">
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" name="necessita_profissional_apoio" id="check-apoio" onchange="document.getElementById('area-apoio').classList.toggle('hidden')" class="w-4 h-4 text-gov-blue rounded focus:ring-0 cursor-pointer" {% if pei and pei.necessita_profissional_apoio %}checked{% endif %}>
+                        <label for="check-apoio" class="font-black text-xs text-gov-blue uppercase tracking-wide cursor-pointer">⚠️ Estudante exige Profissional de Apoio Escolar Especializado Adicional (Art. 3º, XIII da LBI)</label>
+                    </div>
+                    <div id="area-apoio" class="{% if pei and pei.necessita_profissional_apoio %}{% else %}hidden{% endif %} space-y-1.5 pt-2 border-t border-slate-100">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Plano de Atuação e Atividades Integradas do Profissional de Apoio</label>
+                        <textarea name="atividades_apoio_especificadas" rows="2" placeholder="Descreva pormenorizadamente os fundamentos de auxílio demandados (Ex: Mediação física em refeitório, suporte à higiene íntima, contenção)..." class="w-full bg-white border border-slate-300 rounded-lg p-3 font-semibold focus:outline-none">{{ pei.atividades_apoio_especificadas if pei else 'Auxílio na locomoção interna nos espaços comuns, transferência de postura de cadeiras e mediação específica em tarefas de escrita fina.' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="bg-amber-50/70 border border-amber-200 rounded-xl p-5 space-y-4 shadow-sm">
+                    <div class="text-xs leading-relaxed text-amber-900 font-medium">
+                        <p class="font-black text-sm text-amber-950 flex items-center gap-2">🛡️ Protocolo de Validação Jurídica, Rastreabilidade e Auditoria Municipal</p>
+                        <p class="mt-1.5 text-slate-700">Este documento digitalizado constitui fé pública de prestação de serviço público continuado. Ao subscrever e enviar este termo, os metadados técnicos serão vinculados ao prontuário histórico do aluno para aprovação da gestão escolar.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-end gap-3 pt-2 font-bold text-xs">
+                        <button type="submit" name="salvar_rascunho" class="w-full sm:w-auto bg-white hover:bg-slate-100 text-slate-700 border px-5 py-3 rounded-lg shadow-sm uppercase tracking-wider text-[11px]">Salvar Rascunho Interno</button>
+                        <button type="submit" name="enviar_validacao" class="w-full sm:w-auto bg-gov-blue hover:bg-slate-800 text-white px-6 py-3 rounded-lg shadow-md uppercase tracking-wider text-[11px]">✍️ Assinar Eletronicamente e Enviar Peça</button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    // Recupera dados salvos previamente no banco em formato JSON (Injetados via rotas backend)
+    const metasSalvas = {{ (pei.metas_pedagogicas_json|safe) if pei and pei.metas_pedagogicas_json else '[]' }};
+    const gradeSalva = {{ (pei.disciplinas_bncc_json|safe) if pei and pei.disciplinas_bncc_json else '[]' }};
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (metasSalvas.length > 0) {
+            metasSalvas.forEach(m => carregarLinhaMeta(m.periodo, m.objetivo, m.estrategia, m.avaliacao));
+        } else {
+            adicionarLinhaMeta();
+        }
+
+        if (gradeSalva.length > 0) {
+            gradeSalva.forEach(g => carregarLinhaGrade(g.disciplina, g.conteudo, g.bncc, g.metodologia, g.recursos, g.avaliacao));
+        } else {
+            adicionarLinhaGrade();
+        }
+    });
+
+    function mudarBloco(blocoAlvo) {
+        for (let i = 1; i <= 6; i++) {
+            document.getElementById('bloco-' + i)?.classList.add('hidden');
+            let aba = document.getElementById('aba-' + i);
+            aba?.classList.remove('border-emerald-400', 'text-white', 'bg-slate-800/50');
+            aba?.classList.add('border-transparent', 'text-slate-400');
+        }
+        document.getElementById('bloco-' + blocoAlvo).classList.remove('hidden');
+        let abaAtiva = document.getElementById('aba-' + blocoAlvo);
+        abaAtiva.classList.remove('border-transparent', 'text-slate-400');
+        abaAtiva.classList.add('border-emerald-400', 'text-white', 'bg-slate-800/50');
+    }
+
+    // INTERFACE DE METAS DINÂMICAS
+    function adicionarLinhaMeta() {
+        carregarLinhaMeta('', '', '', '');
+    }
+
+    function carregarLinhaMeta(perioricidade, obj, est, ava) {
+        const corpo = document.getElementById('corpo_metas');
+        const novaLinha = document.createElement('tr');
+        novaLinha.className = 'linha-meta-item';
+        novaLinha.innerHTML = `
+            <td class="p-2"><input type="text" name="meta_periodo[]" value="${perioricidade}" placeholder="Ex: Março ou 1º Bim" class="w-full bg-white border p-2 rounded focus:outline-none"></td>
+            <td class="p-2"><textarea name="meta_objetivo[]" rows="2" placeholder="Objetivos específicos" class="w-full bg-white border p-2 rounded focus:outline-none">${obj}</textarea></td>
+            <td class="p-2"><textarea name="meta_estrategia[]" rows="2" placeholder="Estratégia metodológica" class="w-full bg-white border p-2 rounded focus:outline-none">${est}</textarea></td>
+            <td class="p-2"><input type="text" name="meta_aval[]" value="${ava}" placeholder="Avaliação contínua" class="w-full bg-white border p-2 rounded focus:outline-none"></td>
+            <td class="p-2 text-center"><button type="button" onclick="removerLinhaTabela(this)" class="text-red-500 font-bold text-base">×</button></td>
+        `;
+        corpo.appendChild(novaLinha);
+    }
+
+    // INTERFACE DE MATRIZ CURRICULAR BNCC DINÂMICA
+    function adicionarLinhaGrade() {
+        carregarLinhaGrade('', '', '', '', '', '');
+    }
+
+    function carregarLinhaGrade(componente, conteudo, bncc, metodo, recurso, aval) {
+        const corpo = document.getElementById('corpo_grade');
+        const novaLinha = document.createElement('tr');
+        novaLinha.className = 'linha-grade-item';
+        novaLinha.innerHTML = `
+            <td class="p-2"><input type="text" name="disc_nome[]" value="${componente}" placeholder="Ex: Matemática" class="w-full bg-white border p-2 rounded focus:outline-none"></td>
+            <td class="p-2"><input type="text" name="disc_conteudo[]" value="${conteudo}" placeholder="Ex: Operações fundamentais" class="w-full bg-white border p-2 rounded focus:outline-none"></td>
+            <td class="p-2"><input type="text" name="disc_bncc[]" value="${bncc}" placeholder="Ex: EF05MA03" class="w-full bg-white border p-2 rounded focus:outline-none font-mono"></td>
+            <td class="p-2"><textarea name="disc_metodologia[]" rows="2" placeholder="Estratégias" class="w-full bg-white border p-2 rounded focus:outline-none">${metodo}</textarea></td>
+            <td class="p-2"><input type="text" name="disc_recursos[]" value="${recurso}" placeholder="Ex: Material Dourado" class="w-full bg-white border p-2 rounded focus:outline-none"></td>
+            <td class="p-2"><input type="text" name="disc_avaliacao[]" value="${aval}" placeholder="Forma avaliativa" class="w-full bg-white border p-2 rounded focus:outline-none"></td>
+            <td class="p-2 text-center"><button type="button" onclick="removerLinhaTabela(this)" class="text-red-500 font-bold text-base">×</button></td>
+        `;
+        corpo.appendChild(novaLinha);
+    }
+
+    function removerLinhaTabela(botao) {
+        const linha = botao.closest('tr');
+        const corpo = linha.closest('tbody');
+        if (corpo.querySelectorAll('tr').length > 1) { linha.remove(); }
+    }
+
+    // MOTORES DE INTELIGÊNCIA ARTIFICIAL INDIVIDUALIZADOS (COPILOTO MEC)
+    function gerarIA(tipo) {
+        if (tipo === 'entrevista') {
+            document.getElementById('resp_parentesco').value = "Mãe";
+            document.getElementById('resp_contato').value = "(89) 99422-4411";
+            document.getElementById('resp_data_entrevista').value = "12/02/2026";
+            document.getElementById('resp_historico_desenvolvimento').value = "Marcos motores atingidos adequadamente, mas apresentou atraso acentuado no desenvolvimento da fala e da linguagem compreensiva.";
+            document.getElementById('resp_acompanhamento_medico').value = "Acompanhamento regular com neuropediatra semestral e intervenções clínicas semanais com Terapeuta Ocupacional.";
+            document.getElementById('resp_dificuldades_familiares').value = "Dificuldade em manter atenção focada em atividades de rotina doméstica longa e episódios de rigidez comportamental.";
+            document.getElementById('resp_potencialidades').value = "Excelente orientação espacial, memória de longo prazo para imagens e facilidade intuitiva para jogos digitais pedagógicos.";
+            document.getElementById('resp_rotina_casa').value = "Rotina estruturada e previsível com horários bem definidos para sono, alimentação, higiene e lazer em telas fracionadas.";
+            document.getElementById('resp_medicacao').value = "Uso contínuo de medicação prescrita pelo neuropediatra para regulação e modulação atencional, ministrada pela manhã.";
+            document.getElementById('resp_laudos_relatorios').value = "Laudo emitido por equipe multidisciplinar com CID definitivo atestando Transtorno do Espectro Autista.";
+            document.getElementById('resp_necessita_apoio_basico').value = "Independente na alimentação; necessita de mediação sutil na locomoção em escadas e supervisão na higiene.";
+            document.getElementById('resp_interesse_atividades').value = "Manifesta interesse acentuado por atividades visuais baseadas em computadores, pranchas ilustradas e quebra-cabeças.";
+            document.getElementById('resp_autonomia_tarefas').value = "Realiza tarefas escolares simples quando fracionadas em etapas; dispersa-se diante de enunciados longos.";
+            document.getElementById('resp_interacao_social').value = "Interage bem no ambiente familiar restrito; demonstra timidez e isolamento interpares na presença de muitos estímulos.";
+            document.getElementById('resp_comportamento_domestico').value = "Comportamento calmo quando mantida a previsibilidade do ambiente; agitação esporádica sob quebras abruptas de rotina.";
+            document.getElementById('resp_preferencias_sensibilidades').value = "Preferência por estímulos cromáticos vivos e hipersensibilidade a ruídos agudos de alta intensidade.";
+            document.getElementById('resp_expectativas_familia').value = "Ampliação da autonomia funcional, socialização escolar interpares e consolidação da alfabetização funcional.";
+            document.getElementById('resp_encaminhamentos_conjuntos').value = "Pactuado envio de relatórios bimestrais mútuos entre a escola e a clínica de terapia ocupacional.";
+            alert("🤖 Copiloto IA: Módulo de Anamnese Familiar estruturado e preenchido!");
+        }
+    }
+
+    function gerarMetasIA() {
+        const corpo = document.getElementById('corpo_metas');
+        corpo.innerHTML = ''; // Limpa linhas padrão
+        
+        const metasMEC = [
+            {p: "1º Trimestre", o: "Desenvolver autonomia nas atividades diárias e rotinas de organização escolar.", e: "Uso de histórias sociais e sequenciadores visuais fixados na bancada de estudos.", a: "Observação contínua registros semanais"},
+            {p: "2º Trimestre", o: "Consolidar competências acadêmicas básicas de raciocínio lógico e pareamento de letras.", e: "Utilização de material concreto (material dourado, blocos lógicos) e mediação individualizada.", a: "Portfólio processual adaptado"},
+            {p: "3º Trimestre", o: "Fortalecer a independência social nas atividades colaborativas e de recreação.", e: "Inclusão em jogos de regras simples com agrupamentos produtivos e monitoramento interpares.", a: "Avaliação descritiva final"}
+        ];
+
+        metasMEC.forEach(m => carregarLinhaMeta(m.p, m.o, m.e, m.a));
+        alert("🤖 Copiloto IA: Cronograma de metas gerado com sucesso no padrão do MEC!");
+    }
+
+    function gerarGradeBNCC_IA() {
+        const corpo = document.getElementById('corpo_grade');
+        corpo.innerHTML = ''; // Limpa linhas padrão
+
+        const gradeMEC = [
+            {c: "Língua Portuguesa", cn: "Leitura e interpretação textual", h: "EF05LP01, EF05LP09", m: "Mediação individualizada, leitura compartilhada e apoio visual estruturado.", r: "Textos adaptados, imagens, jogos de pareamento", a: "Observação contínua"},
+            {c: "Matemática", cn: "Operações fundamentais e problemas", h: "EF05MA03, EF05MA07", m: "Uso de material concreto, cálculos adaptados e resolução mediada.", r: "Material dourado, jogos matemáticos, ábaco", a: "Avaliação processual"},
+            {c: "Ciências", cn: "Corpo humano e meio ambiente", h: "EF05CI01, EF05CI07", m: "Aulas dialogadas apoiadas por recursos visuais de alta legibilidade.", r: "Vídeos curtos legendados, cartazes", a: "Participação em sala"},
+            {c: "História", cn: "Cultura e cidadania", h: "EF05HI01, EF05HI05", m: "Uso de imagens históricas e contextualização oral simplificada.", r: "Linha do tempo visual, figuras amplificadas", a: "Atividades orais e registros"},
+            {c: "Geografia", cn: "Espaço geográfico e localização", h: "EF05GE03, EF05GE06", m: "Exploração tátil e visual de representações cartográficas simplificadas.", r: "Mapas ilustrativos simplificados, maquetes", a: "Produções orientadas"}
+        ];
+
+        gradeMEC.forEach(g => carregarLinhaGrade(g.c, g.cn, g.h, g.m, g.r, g.a));
+        alert("🤖 Copiloto IA: Matriz Curricular e Habilidades BNCC injetadas com conformidade executiva!");
+    }
+</script>
+{% endblock %}

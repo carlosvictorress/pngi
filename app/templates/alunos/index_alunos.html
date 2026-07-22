@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro Centralizado de Alunos Inclusos — Gestoor 360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'] },
+                    colors: {
+                        gov: { blue: '#003366', green: '#00875a', dark: '#1e293b', border: '#cbd5e1' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-[#f8fafc] text-gov-dark min-h-screen flex flex-col font-sans antialiased">
+
+    <header class="border-b-2 border-gov-blue bg-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-[1600px] mx-auto px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gov-blue rounded-xl flex flex-col items-center justify-center text-white font-black text-sm tracking-tighter shadow-inner">
+                    <span>GOV</span>
+                    <span class="text-[9px] -mt-1 text-emerald-400">360</span>
+                </div>
+                <div class="border-l border-slate-300 pl-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gov-blue block">Secretaria Municipal de Educação</span>
+                    <h1 class="text-lg font-black text-slate-800 tracking-tight uppercase">{{ g.municipio.nome }} — PORTAL DE INCLUSÃO</h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-4 self-end md:self-center text-xs font-bold">
+                <span class="text-[11px] bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1 rounded-md font-mono">ANO LETIVO: 2026</span>
+                <a href="/" class="text-slate-500 hover:text-gov-blue transition-colors">Portal Nacional</a>
+                <span class="text-slate-300">|</span>
+                <a href="/auth/logout" class="text-red-600 hover:underline">Sair do Sistema</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-[1600px] mx-auto w-full px-6 py-8 space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <div class="space-y-1">
+                <span class="text-[10px] uppercase font-black tracking-widest text-gov-blue block">Base de Controle Unificada</span>
+                <h2 class="text-xl font-black text-slate-800 tracking-tight uppercase">Cadastro Centralizado de Alunos Inclusos</h2>
+                <p class="text-xs text-slate-500 font-medium">Repositório oficial de estudantes laudados PCD, TEA e com Altas Habilidades / Superdotação.</p>
+            </div>
+            
+            <div class="shrink-0">
+                <a href="{{ url_for('alunos.novo', municipio_slug=g.municipio.slug) }}" 
+                   class="inline-flex items-center text-xs font-black text-white bg-gov-blue hover:bg-slate-800 px-5 py-3.5 rounded-lg gap-2 transition-all shadow-md uppercase tracking-wider">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"/></svg>
+                    Matricular Aluno Inclusivo
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center gap-3">
+            <div class="text-slate-400 pl-2 text-base">🔍</div>
+            <input type="text" 
+                   id="campo_pesquisa" 
+                   placeholder="Filtrar base de dados instantaneamente por Nome, CPF, Matrícula ou CID..." 
+                   autocomplete="off"
+                   class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-semibold text-slate-700 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none placeholder:text-slate-400">
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-md">
+            <table class="w-full text-left border-collapse text-xs" id="tabela_alunos">
+                <thead>
+                    <tr class="bg-slate-900 text-white border-b border-slate-200 text-[10px] font-black uppercase tracking-wider">
+                        <th class="py-4 px-6 pl-6">Nome Completo do Estudante</th>
+                        <th class="py-4 px-4">Identificação / Matrícula</th>
+                        <th class="py-4 px-4">Lotação Escolar / Turma</th>
+                        <th class="py-4 px-4">Condição Cadastrada (Censo MEC)</th>
+                        <th class="py-4 px-6 text-center">Classificação CID</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-gov-dark font-medium" id="corpo_tabela">
+                    {% for aluno in alunos %}
+                    <tr class="hover:bg-slate-50 transition-colors item-aluno-linha">
+                        <td class="py-4 px-6 pl-6 font-black text-slate-900 text-sm tracking-tight nome-target">{{ aluno.nome }}</td>
+                        
+                        <td class="py-4 px-4">
+                            <span class="block font-mono font-bold text-slate-700 text-[11px] matricula-target">{{ aluno.matricula }}</span>
+                            <span class="block text-[10px] text-slate-400 font-mono mt-0.5 cpf-target">CPF: {{ aluno.cpf if aluno.cpf else 'Não informado' }}</span>
+                        </td>
+                        
+                        <td class="py-4 px-4 text-slate-700 font-semibold">
+                            <span class="block text-sm">🏫 {{ aluno.escola }}</span>
+                            <span class="block text-[10px] text-slate-400 mt-0.5">Classe: {{ aluno.turma }}</span>
+                        </td>
+                        
+                        <td class="py-4 px-4">
+                            <div class="flex flex-wrap gap-1.5">
+                                {% if aluno.possui_tea %}
+                                <span class="bg-purple-50 text-purple-700 border border-purple-200 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wide">TEA</span>
+                                {% endif %}
+                                {% if aluno.possui_superdotacao %}
+                                <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wide">Altas Habilidades</span>
+                                {% endif %}
+                                <span class="bg-blue-50 text-gov-blue border border-blue-200 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wide">{{ aluno.tipo_deficiencia }}</span>
+                            </div>
+                        </td>
+                        
+                        <td class="py-4 px-6 text-center font-mono text-slate-600 font-bold text-sm cid-target">
+                            {% if aluno.cid %}
+                            <span class="bg-slate-100 border border-slate-300 px-2 py-0.5 rounded text-xs">{{ aluno.cid }}</span>
+                            {% else %}
+                            <span class="text-slate-300">—</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr id="linha_vazia_original">
+                        <td colspan="5" class="py-16 text-center text-slate-400 italic font-semibold bg-slate-50/50">
+                            ⚠️ Nenhum aluno da educação inclusiva matriculado nesta jurisdição municipal até o momento.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <tr id="linha_sem_resultados" class="hidden">
+                        <td colspan="5" class="py-16 text-center text-slate-400 italic font-semibold bg-slate-50/50">
+                            ❌ Nenhum registro de estudante corresponde aos termos pesquisados na base atual.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-200 py-4 text-center text-[10px] font-bold text-slate-400 bg-white uppercase tracking-wider">
+        Plataforma de Governança Inclusiva — {{ g.municipio.nome }} © 2026
+    </footer>
+
+    <script>
+        document.getElementById('campo_pesquisa').addEventListener('input', function(e) {
+            const termo = e.target.value.toLowerCase().trim();
+            const linhas = document.querySelectorAll('.item-aluno-linha');
+            const linhaSemResultado = document.getElementById('linha_sem_resultados');
+            let encontrouAlgum = false;
+
+            linhas.forEach(function(linha) {
+                // Captura os textos de busca das colunas alvos
+                const nome = linha.querySelector('.nome-target').textContent.toLowerCase();
+                const matricula = linha.querySelector('.matricula-target').textContent.toLowerCase();
+                const cpf = linha.querySelector('.cpf-target').textContent.toLowerCase();
+                const cid = linha.querySelector('.cid-target').textContent.toLowerCase();
+
+                // Verifica correspondência parcial
+                if (nome.includes(termo) || matricula.includes(termo) || cpf.includes(termo) || cid.includes(termo)) {
+                    linha.classList.remove('hidden');
+                    encontrouAlgum = true;
+                } else {
+                    linha.classList.add('hidden');
+                }
+            });
+
+            // Gerencia exibição do alerta de falta de resultados
+            if (!encontrouAlgum && termo !== "") {
+                linhaSemResultado.classList.remove('hidden');
+            } else {
+                linhaSemResultado.classList.add('hidden');
+            }
+        });
+    </script>
+
+</body>
+</html>

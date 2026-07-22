@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Módulo 1 — Atualização de Prontuário Unificado{% endblock %}
+
+{% block content %}
+<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-slate-800">
+    
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <div>
+            <span class="text-[10px] uppercase font-black tracking-widest text-gov-blue block">Retificação de Matrícula</span>
+            <p class="text-slate-500 text-xs mt-0.5">Editando o prontuário de: <b class="text-gov-blue uppercase">{{ aluno.nome }}</b></p>
+        </div>
+        <a href="/{{ g.municipio.slug }}/alunos/" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">
+            &larr; Cancelar e Voltar
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden mb-6">
+        
+        <div class="flex flex-wrap border-b border-slate-200 bg-slate-900 text-xs font-black uppercase tracking-wider text-slate-400">
+            <button onclick="mudarEtapa(1)" id="btn-etapa-1" class="flex-1 py-4 px-4 text-center border-b-2 border-emerald-400 text-white font-black whitespace-nowrap bg-slate-800/50 transition-all focus:outline-none">
+                1. Dados Pessoais e Civis
+            </button>
+            <button onclick="mudarEtapa(2)" id="btn-etapa-2" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 whitespace-nowrap transition-all focus:outline-none">
+                2. Vínculo Escolar & Censo
+            </button>
+            <button onclick="mudarEtapa(3)" id="btn-etapa-3" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 whitespace-nowrap transition-all focus:outline-none">
+                3. Condição Diagnóstica & AEE
+            </button>
+            <button onclick="mudarEtapa(4)" id="btn-etapa-4" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 whitespace-nowrap transition-all focus:outline-none">
+                4. Saúde & Logística Coletiva
+            </button>
+        </div>
+
+        <form method="POST" class="p-6 md:p-8 space-y-8 text-xs font-medium">
+
+            <div id="etapa-1" class="space-y-6">
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">01</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Informações Cadastrais Básicas</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Nome Completo do Estudante *</label>
+                        <input type="text" name="nome" value="{{ aluno.nome }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">CPF do Aluno</label>
+                        <input type="text" name="cpf" value="{{ aluno.cpf if aluno.cpf else '' }}" placeholder="000.000.000-00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Data de Nascimento *</label>
+                        <input type="date" name="data_nascimento" value="{{ aluno.data_nascimento }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Sexo Biológico (Padrão MEC)</label>
+                        <select name="sexo" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
+                            <option value="Masculino" {% if aluno.sexo == 'Masculino' %}selected{% endif %}>Masculino</option>
+                            <option value="Feminino" {% if aluno.sexo == 'Feminino' %}selected{% endif %}>Feminino</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Cor / Raça (Padrão IBGE/INEP)</label>
+                        <select name="raca_cor" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
+                            <option value="Branca" {% if aluno.raca_cor == 'Branca' %}selected{% endif %}>Branca</option>
+                            <option value="Preta" {% if aluno.raca_cor == 'Preta' %}selected{% endif %}>Preta</option>
+                            <option value="Parda" {% if aluno.raca_cor == 'Parda' %}selected{% endif %}>Parda</option>
+                            <option value="Amarela" {% if aluno.raca_cor == 'Amarela' %}selected{% endif %}>Amarela</option>
+                            <option value="Indígena" {% if aluno.raca_cor == 'Indígena' %}selected{% endif %}>Indígena</option>
+                            <option value="Não Declarada" {% if aluno.raca_cor == 'Não Declarada' %}selected{% endif %}>Não Declarada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Nacionalidade / Naturalidade</label>
+                        <input type="text" name="naturalidade" value="{{ aluno.naturalidade if aluno.naturalidade else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">02</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Filiação e Núcleo Familiar</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Nome Completo da Mãe *</label>
+                        <input type="text" name="nome_mae" value="{{ aluno.nome_mae }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Nome Completo do Pai</label>
+                        <input type="text" name="nome_pai" value="{{ aluno.nome_pai if aluno.nome_pai else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Telefone Principal de Contato *</label>
+                        <input type="text" name="contato_urgencia" value="{{ aluno.contato_urgencia }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none" required>
+                    </div>
+                    <div class="flex items-center pt-4 md:pt-6">
+                        <label class="flex items-center gap-3 cursor-pointer text-sm font-black text-slate-700 bg-slate-100 border border-slate-200 rounded-xl p-3 w-full hover:bg-slate-200/50 transition-colors">
+                            <input type="checkbox" name="recebe_bpc" class="w-4 h-4 rounded border-slate-300 text-gov-blue cursor-pointer" {% if aluno.recebe_bpc %}checked{% endif %}>
+                            <span>Família recebe Benefício de Prestação Continuada (BPC)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="etapa-2" class="space-y-6 hidden">
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">03</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Vínculo Operacional na Rede Municipal</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Código do Aluno no Censo / INEP</label>
+                        <input type="text" name="codigo_inep" value="{{ aluno.codigo_inep if aluno.codigo_inep else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Número de Matrícula Interna *</label>
+                        <input type="text" name="matricula" value="{{ aluno.matricula }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Unidade Escolar de Lotação *</label>
+                        <select name="escola_id" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
+                            <option value="" disabled>Selecione a Unidade de Ensino...</option>
+                            {% for e in escolas %}
+                            <option value="{{ e.id }}" {% if aluno.escola_id == e.id %}selected{% endif %}>🏢 {{ e.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Turma e Turno *</label>
+                        <input type="text" name="turma" value="{{ aluno.turma }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Modalidade de Ensino</label>
+                        <select name="modalidade" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
+                            <option value="Regular" {% if aluno.modalidade == 'Regular' %}selected{% endif %}>Ensino Regular</option>
+                            <option value="EJA" {% if aluno.modalidade == 'EJA' %}selected{% endif %}>EJA</option>
+                            <option value="Profissional" {% if aluno.modalidade == 'Profissional' %}selected{% endif %}>Educação Profissional</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Etapa de Ensino (INEP)</label>
+                        <select name="etapa_ensino" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
+                            <option value="Creche" {% if aluno.etapa_ensino == 'Creche' %}selected{% endif %}>Educação Infantil (Creche)</option>
+                            <option value="Pre-Escola" {% if aluno.etapa_ensino == 'Pre-Escola' %}selected{% endif %}>Educação Infantil (Pré-Escola)</option>
+                            <option value="Fundamental-Iniciais" {% if aluno.etapa_ensino == 'Fundamental-Iniciais' %}selected{% endif %}>Ensino Fundamental (Anos Iniciais)</option>
+                            <option value="Fundamental-Finais" {% if aluno.etapa_ensino == 'Fundamental-Finais' %}selected{% endif %}>Ensino Fundamental (Anos Finais)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">04</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Recursos Necessários para Avaliações Oficiais</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 border border-slate-200 rounded-xl p-4 font-bold text-slate-700">
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_ledor" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer" {% if aluno.recurso_ledor %}checked{% endif %}> Necessita de Ledor de Prova</label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_transcritor" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer" {% if aluno.recurso_transcritor %}checked{% endif %}> Necessita de Transcritor</label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_libras" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer" {% if aluno.recurso_libras %}checked{% endif %}> Necessita de Guia-Intérprete de Libras</label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_ampliado" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer" {% if aluno.recurso_ampliado %}checked{% endif %}> Necessita de Prova Impressa com Fonte Ampliada</label>
+                </div>
+            </div>
+
+            <div id="etapa-3" class="space-y-6 hidden">
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">05</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Mapeamento da Educação Especial</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Deficiência / Categoria Principal *</label>
+                        <select name="tipo_deficiencia" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer" required>
+                            <option value="Física" {% if aluno.tipo_deficiencia == 'Física' %}selected{% endif %}>Deficiência Física</option>
+                            <option value="Intelectual" {% if aluno.tipo_deficiencia == 'Intelectual' %}selected{% endif %}>Deficiência Intelectual</option>
+                            <option value="Auditiva" {% if aluno.tipo_deficiencia == 'Auditiva' %}selected{% endif %}>Deficiência Auditiva</option>
+                            <option value="Visual" {% if aluno.tipo_deficiencia == 'Visual' %}selected{% endif %}>Deficiência Visual</option>
+                            <option value="Surdocegueira" {% if aluno.tipo_deficiencia == 'Surdocegueira' %}selected{% endif %}>Surdocegueira</option>
+                            <option value="Múltipla" {% if aluno.tipo_deficiencia == 'Múltipla' %}selected{% endif %}>Deficiência Múltipla</option>
+                            <option value="Nenhuma" {% if aluno.tipo_deficiencia == 'Nenhuma' %}selected{% endif %}>Nenhuma</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Código CID Principal</label>
+                        <input type="text" name="cid" value="{{ aluno.cid if aluno.cid else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-2 pt-2 md:pt-4">
+                        <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-purple-950 bg-purple-50 border border-purple-200 rounded-xl p-2.5 hover:bg-purple-100/60 transition-colors">
+                            <input type="checkbox" name="possui_tea" class="w-4 h-4 rounded border-purple-300 text-purple-600 cursor-pointer" {% if aluno.possui_tea %}checked{% endif %}>
+                            <span>Estudante com Transtorno do Espectro Autista (TEA)</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-teal-950 bg-teal-50 border border-teal-200 rounded-xl p-2.5 hover:bg-teal-100/60 transition-colors">
+                            <input type="checkbox" name="possui_superdotacao" class="w-4 h-4 rounded border-teal-300 text-teal-600 cursor-pointer" {% if aluno.possui_superdotacao %}checked{% endif %}>
+                            <span>Altas Habilidades / Superdotação</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">06</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Atendimento Educacional Especializado (AEE) Contra-turno</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Local de Atendimento Compartilhado</label>
+                        <select name="local_aee" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
+                            <option value="Sala de Recursos Multifuncionais da Própria Escola" {% if aluno.local_aee == 'Sala de Recursos Multifuncionais da Própria Escola' %}selected{% endif %}>Sala de Recursos Multifuncionais da Própria Escola</option>
+                            <option value="Sala de Recursos de OUTRA Escola Municipal" {% if aluno.local_aee == 'Sala de Recursos de OUTRA Escola Municipal' %}selected{% endif %}>Sala de Recursos de OUTRA Escola Municipal</option>
+                            <option value="Centro de Atendimento Especializado conveniado" {% if aluno.local_aee == 'Centro de Atendimento Especializado conveniado' %}selected{% endif %}>Centro de Atendimento Especializado de Rede Conveniada (Ex: APAE)</option>
+                            <option value="Não Recebe AEE" {% if aluno.local_aee == 'Não Recebe AEE' %}selected{% endif %}>Não Recebe Atendimento Especializado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Necessidade de Moderação Técnico-Apoio</label>
+                        <select name="necessita_apoio" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
+                            <option value="Monitor de Cuidados Pessoais / Vida Diária" {% if aluno.necessita_apoio == 'Monitor de Cuidados Pessoais / Vida Diária' %}selected{% endif %}>Monitor de Cuidados Pessoais / Vida Diária</option>
+                            <option value="Estagiário Auxiliar Pedagógico" {% if aluno.necessita_apoio == 'Estagiário Auxiliar Pedagógico' %}selected{% endif %}>Estagiário Auxiliar Pedagógico de Ensino</option>
+                            <option value="Intérprete de Libras em sala" {% if aluno.necessita_apoio == 'Intérprete de Libras em sala' %}selected{% endif %}>Intérprete Regular de Libras em Classe</option>
+                            <option value="Nenhum" {% if aluno.necessita_apoio == 'Nenhum' %}selected{% endif %}>Não Necessita de Profissional Exclusivo</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="etapa-4" class="space-y-6 hidden">
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">07</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Prontuário Médico e Cuidados Institucionais</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Medicações de Uso Contínuo e Dosagens</label>
+                        <textarea name="medicacoes" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">{{ aluno.medicacoes if aluno.medicacoes else '' }}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Restrições Alimentares / Intolerâncias</label>
+                        <textarea name="restricoes_alimentares" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">{{ aluno.restricoes_alimentares if aluno.restricoes_alimentares else '' }}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Acessibilidade Necessária na Estrutura</label>
+                        <textarea name="acessibilidade_necessaria" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">{{ aluno.acessibilidade_necessaria if aluno.acessibilidade_necessaria else '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">08</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">🚐 Pré-Mapeamento Logístico (Módulo de Transporte)</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50/50 border-2 border-dashed border-blue-200 rounded-xl p-5 font-black text-slate-700">
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
+                        <input type="checkbox" name="necessita_transporte_adaptado" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer" {% if aluno.necessita_transporte_adaptado %}checked{% endif %}>
+                        <span>Estudante necessita de Ônibus/Van Escolar Adaptada</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
+                        <input type="checkbox" name="cadeirante" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer" {% if aluno.cadeirante %}checked{% endif %}>
+                        <span>Aluno Cadeirante (Exige elevador/plataforma hidráulica)</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
+                        <input type="checkbox" name="necessita_acompanhante" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer" {% if aluno.necessita_acompanhante %}checked{% endif %}>
+                        <span>Exige Responsável/Acompanhante a bordo</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
+                        <input type="checkbox" name="possui_monitor_rota" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer" {% if aluno.possui_monitor_rota %}checked{% endif %}>
+                        <span>Necessita de monitor de rota especializado em crises</span>
+                    </label>
+                </div>
+
+                <div class="border-t border-slate-200 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p class="text-xs text-slate-400 font-bold tracking-tight">Ao salvar, as alterações serão consolidadas na base ativa.</p>
+                    <button type="submit" class="w-full sm:w-auto bg-gov-blue hover:bg-slate-800 text-white font-black text-xs uppercase tracking-wider px-8 py-3.5 rounded-lg transition-all shadow-md flex items-center justify-center gap-2">
+                        💾 Atualizar Prontuário do Aluno
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function mudarEtapa(etapaAlvo) {
+        document.getElementById('etapa-1').classList.add('hidden');
+        document.getElementById('etapa-2').classList.add('hidden');
+        document.getElementById('etapa-3').classList.add('hidden');
+        document.getElementById('etapa-4').classList.add('hidden');
+
+        for (let i = 1; i <= 4; i++) {
+            let btn = document.getElementById('btn-etapa-' + i);
+            btn.classList.remove('border-emerald-400', 'text-white', 'bg-slate-800/50');
+            btn.classList.add('border-transparent', 'text-slate-400');
+        }
+
+        document.getElementById('etapa-' + etapaAlvo).classList.remove('hidden');
+
+        let btnAtivo = document.getElementById('btn-etapa-' + etapaAlvo);
+        btnAtivo.classList.remove('border-transparent', 'text-slate-400');
+        btnAtivo.classList.add('border-emerald-400', 'text-white', 'bg-slate-800/50');
+    }
+</script>
+{% endblock %}

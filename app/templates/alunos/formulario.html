@@ -1,0 +1,374 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Módulo 1 - Prontuário Unificado e Ficha do Censo Escolar MEC{% endblock %}
+
+{% block content %}
+<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-slate-800">
+    
+    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+        <div>
+            <span class="text-[10px] uppercase font-black tracking-widest text-gov-blue block">Ficha Regulamentar de Matrícula</span>
+            <p class="text-slate-500 text-xs mt-0.5">Instrumento unificado em estrita conformidade com o padrão INEP/MEC e diretrizes da PNEEI.</p>
+        </div>
+        <a href="/{{ g.municipio.slug }}/alunos/" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">
+            &larr; Voltar para Listagem
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden mb-6">
+        
+        <div class="flex flex-wrap border-b border-slate-200 bg-slate-900 text-xs font-black uppercase tracking-wider text-slate-400">
+            <button onclick="mudarEtapa(1)" id="btn-etapa-1" class="flex-1 py-4 px-4 text-center border-b-2 border-emerald-400 text-white font-black whitespace-nowrap bg-slate-800/50 transition-all focus:outline-none">
+                1. Dados Pessoais e Civis
+            </button>
+            <button onclick="mudarEtapa(2)" id="btn-etapa-2" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 whitespace-nowrap transition-all focus:outline-none">
+                2. Vínculo Escolar & Censo
+            </button>
+            <button onclick="mudarEtapa(3)" id="btn-etapa-3" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 whitespace-nowrap transition-all focus:outline-none">
+                3. Condição Diagnóstica & AEE
+            </button>
+            <button onclick="mudarEtapa(4)" id="btn-etapa-4" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 whitespace-nowrap transition-all focus:outline-none">
+                4. Saúde & Logística Coletiva
+            </button>
+        </div>
+
+        <form method="POST" class="p-6 md:p-8 space-y-8 text-xs font-medium">
+
+            <div id="etapa-1" class="space-y-6">
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">01</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Informações Cadastrais Básicas do Aluno</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Nome Completo do Estudante *</label>
+                        <input type="text" name="nome" placeholder="Nome idêntico ao registro civil" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">CPF do Aluno</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="campo_cpf" name="cpf" placeholder="000.000.000-00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none">
+                            <button type="button" onclick="buscarAlunoRedeNacional()" class="bg-gov-blue hover:bg-slate-800 text-white font-bold px-4 rounded-lg flex items-center justify-center transition-colors tooltip" title="Buscar em outros municípios">
+                                🔍 Buscar
+                            </button>
+                        </div>
+                        <span id="feedback_busca" class="text-[10px] font-bold mt-1 block"></span>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Data de Nascimento *</label>
+                        <input type="date" name="data_nascimento" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Sexo Biológico (Padrão MEC)</label>
+                        <select name="sexo" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
+                            <option value="Masculino">Masculino</option>
+                            <option value="Feminino">Feminino</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Cor / Raça (Padrão IBGE/INEP)</label>
+                        <select name="raca_cor" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
+                            <option value="Branca">Branca</option>
+                            <option value="Preta">Preta</option>
+                            <option value="Parda">Parda</option>
+                            <option value="Amarela">Amarela</option>
+                            <option value="Indígena">Indígena</option>
+                            <option value="Não Declarada">Não Declarada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Nacionalidade / Naturalidade</label>
+                        <input type="text" name="naturalidade" placeholder="Ex: Valença do Piauí - PI" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">02</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Filiação e Núcleo Familiar</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Nome Completo da Mãe (Responsável Legal Principal) *</label>
+                        <input type="text" name="nome_mae" placeholder="Nome completo da genitora" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Nome Completo do Pai / Segundo Responsável</label>
+                        <input type="text" name="nome_pai" placeholder="Nome completo do genitor" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Telefone Principal de Contato e WhatsApp *</label>
+                        <input type="text" name="contato_urgencia" placeholder="(86) 99999-9999" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
+                    </div>
+                    <div class="flex items-center pt-4 md:pt-6">
+                        <label class="flex items-center gap-3 cursor-pointer text-sm font-black text-slate-700 bg-slate-100 border border-slate-200 rounded-xl p-3 w-full hover:bg-slate-200/50 transition-colors">
+                            <input type="checkbox" name="recebe_bpc" class="w-4 h-4 rounded border-slate-300 text-gov-blue focus:ring-gov-blue cursor-pointer">
+                            <span>Família recebe Benefício de Prestação Continuada (BPC)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="etapa-2" class="space-y-6 hidden">
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">03</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Vínculo Operacional na Rede Municipal</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Código do Aluno no Censo / INEP</label>
+                        <input type="text" name="codigo_inep" placeholder="Identificação única nacional INEP" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Número de Matrícula Interna *</label>
+                        <input type="text" name="matricula" placeholder="Código de controle municipal" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Unidade Escolar de Lotação *</label>
+                        <select name="escola_id" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
+                            <option value="" disabled selected>Selecione a Unidade de Ensino...</option>
+                            {% for e in escolas %}
+                            <option value="{{ e.id }}">🏢 {{ e.nome }} (INEP: {{ e.codigo_inep }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Turma e Turno *</label>
+                        <input type="text" name="turma" placeholder="Ex: 5º Ano B — Tarde" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Modalidade de Ensino</label>
+                        <select name="modalidade" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
+                            <option value="Regular">Ensino Regular</option>
+                            <option value="EJA">EJA (Educação de Jovens e Adultos)</option>
+                            <option value="Profissional">Educação Profissional</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Etapa de Ensino (INEP)</label>
+                        <select name="etapa_ensino" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
+                            <option value="Creche">Educação Infantil (Creche)</option>
+                            <option value="Pre-Escola">Educação Infantil (Pré-Escola)</option>
+                            <option value="Fundamental-Iniciais">Ensino Fundamental (Anos Iniciais)</option>
+                            <option value="Fundamental-Finais">Ensino Fundamental (Anos Finais)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">04</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Recursos Necessários para Avaliações Oficiais (SAEB/Provas Censo)</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 border border-slate-200 rounded-xl p-4 font-bold text-slate-700">
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_ledor" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer"> Necessita de Ledor de Prova</label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_transcritor" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer"> Necessita de Transcritor (Auxílio para escrita)</label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_libras" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer"> Necessita de Guia-Intérprete de Libras</label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_ampliado" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer"> Necessita de Prova Impressa com Fonte Ampliada</label>
+                </div>
+            </div>
+
+            <div id="etapa-3" class="space-y-6 hidden">
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">05</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Mapeamento da Educação Especial</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Deficiência / Categoria Principal *</label>
+                        <select name="tipo_deficiencia" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer" required>
+                            <option value="Física">Deficiência Física</option>
+                            <option value="Intelectual">Deficiência Intelectual</option>
+                            <option value="Auditiva">Deficiência Auditiva</option>
+                            <option value="Visual">Deficiência Visual</option>
+                            <option value="Surdocegueira">Surdocegueira</option>
+                            <option value="Múltipla">Deficiência Múltipla</option>
+                            <option value="Nenhuma">Nenhuma Deficiência Declarada</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Código CID Principal</label>
+                        <input type="text" name="cid" placeholder="Ex: F84.0, G80" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none">
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-2 pt-2 md:pt-4">
+                        <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-purple-950 bg-purple-50 border border-purple-200 rounded-xl p-2.5 hover:bg-purple-100/60 transition-colors">
+                            <input type="checkbox" name="possui_tea" class="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-600 cursor-pointer">
+                            <span>Estudante com Transtorno do Espectro Autista (TEA)</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-teal-950 bg-teal-50 border border-teal-200 rounded-xl p-2.5 hover:bg-teal-100/60 transition-colors">
+                            <input type="checkbox" name="possui_superdotacao" class="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-600 cursor-pointer">
+                            <span>Altas Habilidades / Superdotação</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">06</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Atendimento Educacional Especializado (AEE) Contra-turno</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Local de Atendimento Compartilhado</label>
+                        <select name="local_aee" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
+                            <option value="Sala de Recursos Multifuncionais da Própria Escola">Sala de Recursos Multifuncionais da Própria Escola</option>
+                            <option value="Sala de Recursos de OUTRA Escola Municipal">Sala de Recursos de OUTRA Escola Municipal</option>
+                            <option value="Centro de Atendimento Especializado conveniado">Centro de Atendimento Especializado de Rede Conveniada (Ex: APAE)</option>
+                            <option value="Não Recebe AEE">Não Recebe Atendimento Especializado</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Necessidade de Moderação Técnico-Apoio</label>
+                        <select name="necessita_apoio" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
+                            <option value="Monitor de Cuidados Pessoais / Vida Diária">Monitor de Cuidados Pessoais / Vida Diária</option>
+                            <option value="Estagiário Auxiliar Pedagógico">Estagiário Auxiliar Pedagógico de Ensino</option>
+                            <option value="Intérprete de Libras em sala">Intérprete Regular de Libras em Classe</option>
+                            <option value="Nenhum">Não Necessita de Profissional Exclusivo</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="etapa-4" class="space-y-6 hidden">
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">07</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Prontuário Médico e Cuidados Institucionais</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Medicações de Uso Contínuo e Dosagens</label>
+                        <textarea name="medicacoes" placeholder="Especifique os fármacos controlados e cronograma de administração em horário escolar..." rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Restrições Alimentares / Intolerâncias</label>
+                        <textarea name="restricoes_alimentares" placeholder="Laudo de patologias digestivas, restrições ou alergias severas com a merenda..." rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Acessibilidade Necessária na Estrutura</label>
+                        <textarea name="acessibilidade_necessaria" placeholder="Ex: Mobiliário adaptado, rampa de acesso, instalações sanitárias adaptadas, etc..." rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
+                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">08</span>
+                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">🚐 Pré-Mapeamento Logístico (Módulo de Transporte Inclusivo)</h3>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50/50 border-2 border-dashed border-blue-200 rounded-xl p-5 font-black text-slate-700">
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
+                        <input type="checkbox" name="necessita_transporte_adaptado" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer">
+                        <span>Estudante necessita de Ônibus/Van Escolar Adaptada</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
+                        <input type="checkbox" name="cadeirante" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer">
+                        <span>Aluno Cadeirante (Exige elevador/plataforma hidráulica)</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
+                        <input type="checkbox" name="necessita_acompanhante" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer">
+                        <span>Exige Responsável/Acompanhante a bordo na poltrona auxiliar</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
+                        <input type="checkbox" name="possui_monitor_rota" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer">
+                        <span>Necessita de monitor de rota especializado em crises comportamentais</span>
+                    </label>
+                </div>
+
+                <div class="border-t border-slate-200 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p class="text-xs text-slate-400 font-bold tracking-tight">Ao validar e chancelar, a ficha será auditada e consolidada na base do censo municipal.</p>
+                    <button type="submit" class="w-full sm:w-auto bg-gov-blue hover:bg-slate-800 text-white font-black text-xs uppercase tracking-wider px-8 py-3.5 rounded-lg transition-all shadow-md flex items-center justify-center gap-2">
+                        💾 Homologar e Salvar Matrícula Unificada
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function mudarEtapa(etapaAlvo) {
+        document.getElementById('etapa-1').classList.add('hidden');
+        document.getElementById('etapa-2').classList.add('hidden');
+        document.getElementById('etapa-3').classList.add('hidden');
+        document.getElementById('etapa-4').classList.add('hidden');
+
+        for (let i = 1; i <= 4; i++) {
+            let btn = document.getElementById('btn-etapa-' + i);
+            btn.classList.remove('border-emerald-400', 'text-white', 'bg-slate-800/50');
+            btn.classList.add('border-transparent', 'text-slate-400');
+        }
+
+        document.getElementById('etapa-' + etapaAlvo).classList.remove('hidden');
+
+        let btnAtivo = document.getElementById('btn-etapa-' + etapaAlvo);
+        btnAtivo.classList.remove('border-transparent', 'text-slate-400');
+        btnAtivo.classList.add('border-emerald-400', 'text-white', 'bg-slate-800/50');
+    }
+
+    async function buscarAlunoRedeNacional() {
+        const cpf = document.getElementById('campo_cpf').value.replace(/\D/g, '');
+        const feedback = document.getElementById('feedback_busca');
+        
+        if (cpf.length !== 11) {
+            feedback.textContent = "Digite um CPF válido (11 dígitos).";
+            feedback.className = "text-[10px] font-bold mt-1 block text-red-500";
+            return;
+        }
+
+        feedback.textContent = "Buscando na rede nacional Gestoor 360...";
+        feedback.className = "text-[10px] font-bold mt-1 block text-blue-500";
+
+        try {
+            const municipioSlug = "{{ g.municipio.slug }}";
+            const response = await fetch(`/${municipioSlug}/alunos/api/buscar_cpf?cpf=${cpf}`);
+            const result = await response.json();
+
+            if (result.encontrado) {
+                const d = result.dados;
+                
+                // Preenche os inputs de texto e selects
+                if(d.nome) document.querySelector('[name="nome"]').value = d.nome;
+                if(d.data_nascimento) document.querySelector('[name="data_nascimento"]').value = d.data_nascimento;
+                if(d.sexo) document.querySelector('[name="sexo"]').value = d.sexo;
+                if(d.raca_cor) document.querySelector('[name="raca_cor"]').value = d.raca_cor;
+                if(d.naturalidade) document.querySelector('[name="naturalidade"]').value = d.naturalidade;
+                if(d.nome_mae) document.querySelector('[name="nome_mae"]').value = d.nome_mae;
+                if(d.nome_pai) document.querySelector('[name="nome_pai"]').value = d.nome_pai;
+                if(d.contato_urgencia) document.querySelector('[name="contato_urgencia"]').value = d.contato_urgencia;
+                if(d.codigo_inep) document.querySelector('[name="codigo_inep"]').value = d.codigo_inep;
+                if(d.tipo_deficiencia) document.querySelector('[name="tipo_deficiencia"]').value = d.tipo_deficiencia;
+                if(d.cid) document.querySelector('[name="cid"]').value = d.cid;
+                
+                // Preenche as Textareas 
+                if(d.medicacoes) document.querySelector('[name="medicacoes"]').value = d.medicacoes;
+                if(d.restricoes_alimentares) document.querySelector('[name="restricoes_alimentares"]').value = d.restricoes_alimentares;
+                if(d.acessibilidade_necessaria) document.querySelector('[name="acessibilidade_necessaria"]').value = d.acessibilidade_necessaria;
+                
+                // Preenche os Checkboxes
+                if(d.recebe_bpc !== undefined) document.querySelector('[name="recebe_bpc"]').checked = d.recebe_bpc;
+                if(d.possui_tea !== undefined) document.querySelector('[name="possui_tea"]').checked = d.possui_tea;
+                if(d.possui_superdotacao !== undefined) document.querySelector('[name="possui_superdotacao"]').checked = d.possui_superdotacao;
+                if(d.necessita_transporte_adaptado !== undefined) document.querySelector('[name="necessita_transporte_adaptado"]').checked = d.necessita_transporte_adaptado;
+                if(d.cadeirante !== undefined) document.querySelector('[name="cadeirante"]').checked = d.cadeirante;
+                if(d.necessita_acompanhante !== undefined) document.querySelector('[name="necessita_acompanhante"]').checked = d.necessita_acompanhante;
+                if(d.possui_monitor_rota !== undefined) document.querySelector('[name="possui_monitor_rota"]').checked = d.possui_monitor_rota;
+
+                feedback.innerHTML = `✅ <b>Aluno localizado!</b> Dados importados com sucesso. Ao salvar esta matrícula, o vínculo na prefeitura anterior será inativado automaticamente.`;
+                feedback.className = "text-xs font-black mt-2 block text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-200";
+            } else {
+                feedback.textContent = "Estudante não encontrado na base de outros municípios. Pode prosseguir com o cadastro manual.";
+                feedback.className = "text-[10px] font-bold mt-1 block text-slate-500";
+            }
+        } catch (error) {
+            console.error(error);
+            feedback.textContent = "Erro ao buscar na base nacional.";
+            feedback.className = "text-[10px] font-bold mt-1 block text-red-500";
+        }
+    }
+</script>
+{% endblock %}

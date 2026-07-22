@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Módulo 7 — Monitoramento Operacional e Indicadores Gerais{% endblock %}
+
+{% block content %}
+<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-gov-dark space-y-8">
+
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between bg-white border border-slate-200 rounded-xl p-6 shadow-md gap-4 relative overflow-hidden">
+        <div class="absolute top-0 left-0 bottom-0 w-1.5 bg-gov-blue"></div>
+        <div class="space-y-1 pl-2">
+            <span class="text-[10px] font-black tracking-widest text-gov-blue uppercase block">Sala de Situação & Monitoramento Operacional</span>
+            <h2 class="text-xl font-black text-slate-800 tracking-tight uppercase">Governança Inclusiva: <span class="text-gov-blue">{{ g.municipio.nome }} — {{ g.municipio.estado }}</span></h2>
+            <p class="text-xs text-slate-500 font-medium">Análise em tempo real de indicadores consolidados e metas regulamentares da rede de educação especial.</p>
+        </div>
+        <div class="text-xs text-slate-600 bg-slate-50 px-4 py-3 rounded-lg border border-slate-200 font-bold shadow-inner self-end lg:self-center">
+            <span class="text-slate-400 uppercase text-[10px] block font-black mb-0.5">Operador Credenciado</span>
+            <span class="text-slate-800">{{ current_user.nome }}</span> &bull; <span class="bg-gov-blue text-white text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-wider ml-1 shadow-sm">{{ current_user.perfil }}</span>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        <div class="flex items-center gap-2 border-b border-slate-300 pb-2">
+            <span class="text-base">📊</span>
+            <h3 class="uppercase tracking-wider text-[11px] font-black text-slate-500">Painel de Indicadores Gerais (Censo Municipal Letivo)</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md relative overflow-hidden flex items-center justify-between group hover:border-gov-blue transition-all">
+                <div class="absolute top-0 bottom-0 left-0 w-1.5 bg-gov-blue"></div>
+                <div class="space-y-1.5 pl-2">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Alunos Inclusos Matriculados (INEP)</span>
+                    <div class="text-5xl font-black text-slate-800 tracking-tight">
+                        {{ total_alunos }}
+                    </div>
+                    <span class="text-[10px] text-gov-green font-bold block bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded w-fit">✓ Sincronizado</span>
+                </div>
+                <span class="text-4xl bg-slate-100 p-4 rounded-xl border border-slate-200 shadow-inner group-hover:scale-105 transition-transform">👥</span>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md relative overflow-hidden flex items-center justify-between group hover:border-purple-600 transition-all">
+                <div class="absolute top-0 bottom-0 left-0 w-1.5 bg-purple-600"></div>
+                <div class="space-y-1.5 pl-2">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Casos Homologados com TEA</span>
+                    <div class="text-5xl font-black text-purple-600 tracking-tight">
+                        {{ total_tea }}
+                    </div>
+                    <span class="text-[10px] text-purple-700 font-bold block bg-purple-50 border border-purple-100 px-2 py-0.5 rounded w-fit">🛡️ Suporte Prioritário</span>
+                </div>
+                <span class="text-4xl bg-purple-50 text-purple-600 p-4 rounded-xl border border-purple-100 shadow-inner group-hover:scale-105 transition-transform">🧠</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-4">
+        <div class="text-xs font-black uppercase tracking-wider text-slate-500 border-b border-slate-300 pb-2">Ações Estratégicas de Controle Disponíveis</div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <a href="{{ url_for('alunos.listar', municipio_slug=g.municipio.slug) }}" 
+               class="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-gov-blue hover:shadow-md transition-all group">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-lg shadow-inner group-hover:bg-gov-blue/5 transition-colors">👤</div>
+                    <div>
+                        <h4 class="font-black text-sm uppercase text-slate-800 tracking-tight">Cadastro Central do Aluno</h4>
+                        <p class="text-[11px] text-slate-500 font-medium">Ficha nacional, dados civis, filiação e mapeamento Censo MEC.</p>
+                    </div>
+                </div>
+                <span class="text-gov-blue font-black text-sm group-hover:translate-x-1 transition-transform">&rarr;</span>
+            </a>
+
+            <a href="/{{ g.municipio.slug }}/pei" 
+               class="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-gov-blue hover:shadow-md transition-all group">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-lg shadow-inner group-hover:bg-gov-blue/5 transition-colors">🧠</div>
+                    <div>
+                        <h4 class="font-black text-sm uppercase text-slate-800 tracking-tight">Sala de Gestão do PEI</h4>
+                        <p class="text-[11px] text-slate-500 font-medium">Elaborar Plano de Desenvolvimento Individualizado com IA.</p>
+                    </div>
+                </div>
+                <span class="text-gov-blue font-black text-sm group-hover:translate-x-1 transition-transform">&rarr;</span>
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

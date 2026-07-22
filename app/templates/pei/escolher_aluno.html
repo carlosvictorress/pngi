@@ -1,0 +1,309 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Módulo 2 — Sala de Gestão do PEI Inteligente{% endblock %}
+
+{% block content %}
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: { 
+                    sans: ['Inter', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'] 
+                },
+                colors: {
+                    gov: { 
+                        navy: '#0A192F', 
+                        blue: '#1351B4', 
+                        green: '#00A859', 
+                        yellow: '#FFCD00', 
+                        dark: '#1E293B', 
+                        light: '#64748B', 
+                        bg: '#F8FAFC' 
+                    }
+                },
+                boxShadow: {
+                    glow: '0 0 20px rgba(19, 81, 180, 0.3)',
+                    card: '0 10px 30px -5px rgba(0, 0, 0, 0.1)'
+                }
+            }
+        }
+    }
+</script>
+
+<div class="max-w-[1400px] mx-auto px-6 py-8 font-sans antialiased text-gov-dark space-y-10">
+    
+    <div class="bg-gov-navy rounded-3xl p-8 md:p-10 shadow-card relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gov-blue opacity-20 blur-3xl rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+        
+        <div class="relative z-10 space-y-3">
+            <span class="text-[9px] font-semibold uppercase tracking-widest text-blue-300 block">Ambiente de Governança Pedagógica</span>
+            <h2 class="text-2xl md:text-3xl font-bold text-white tracking-tight">Plano de Desenvolvimento Individualizado (PEI)</h2>
+            <p class="text-slate-300 text-xs leading-relaxed max-w-3xl font-normal pt-2">
+                Selecione um estudante ativo na rede pública municipal para iniciar a elaboração do Plano de Desenvolvimento Individualizado (PEI) ou gerenciar revisões técnicas com total controle e rastreabilidade de dados.
+            </p>
+        </div>
+    </div>
+
+    <div class="space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+            <h3 class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-gov-blue"></span>
+                Selecionar Aluno para Novo Prontuário
+            </h3>
+        </div>
+
+        <div class="bg-white border border-slate-100 rounded-2xl p-3 shadow-sm flex items-center gap-3 transition-all focus-within:shadow-md focus-within:border-gov-blue/30">
+            <div class="text-slate-400 pl-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <input type="text" 
+                   id="campo_pesquisa" 
+                   placeholder="Filtrar base de dados por Nome, Matrícula ou Diagnóstico..." 
+                   autocomplete="off"
+                   class="w-full bg-transparent border-none p-2 text-xs font-normal text-gov-dark focus:ring-0 focus:outline-none placeholder:text-slate-400 placeholder:font-normal">
+        </div>
+
+        <div class="bg-white border-t-[3px] border-t-gov-blue rounded-b-2xl shadow-card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-100 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                            <th class="py-5 px-6 pl-8">Prontuário do Estudante</th>
+                            <th class="py-5 px-4">Lotação Escolar / Unidade</th>
+                            <th class="py-5 px-4">Diagnóstico (Censo MEC)</th>
+                            <th class="py-5 px-6 text-center">Ações de Governança</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 text-xs font-normal text-slate-600">
+                        {% for aluno in alunos %}
+                        <tr class="hover:bg-slate-50/50 transition-colors item-aluno-linha">
+                            <td class="py-5 px-6 pl-8">
+                                <div class="font-bold text-gov-dark text-[13px] tracking-tight nome-target">{{ aluno.nome }}</div>
+                                <div class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 mt-1.5 matricula-target">Matrícula: {{ aluno.matricula }}</div>
+                            </td>
+                            <td class="py-5 px-4 font-medium text-slate-600">
+                                {{ aluno.escola.nome if aluno.escola else 'Não Alocado' }}
+                            </td>
+                            <td class="py-5 px-4 condition-target">
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="bg-blue-50 text-gov-blue border border-blue-100 px-2.5 py-1 rounded text-[9px] font-semibold uppercase tracking-widest label-deficiencia">
+                                        {{ aluno.tipo_deficiencia }}
+                                    </span>
+                                    {% if aluno.possui_tea %}
+                                    <span class="bg-purple-50 text-purple-600 border border-purple-100 px-2.5 py-1 rounded text-[9px] font-semibold uppercase tracking-widest text-target-tea">
+                                        TEA
+                                    </span>
+                                    {% endif %}
+                                    {% if aluno.possui_superdotacao %}
+                                    <span class="bg-amber-50 text-amber-600 border border-amber-100 px-2.5 py-1 rounded text-[9px] font-semibold uppercase tracking-widest text-target-superdotacao">
+                                        Altas Habilidades
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="py-5 px-6 text-center whitespace-nowrap space-x-2">
+                                <a href="/{{ g.municipio.slug }}/pei/aluno/{{ aluno.id }}/estudo-caso" 
+                                   class="inline-flex items-center text-[9px] font-semibold text-white bg-gov-navy hover:bg-slate-800 px-4 py-2.5 rounded-lg transition-all shadow-md uppercase tracking-widest">
+                                    Estudo de Caso
+                                </a>
+
+                                {% set caso_existente = aluno.estudos_caso[0] if aluno.estudos_caso else None %}
+                                
+                                {% if caso_existente and caso_existente.status == 'Homologado' %}
+                                    {% if caso_existente.necessita_pei %}
+                                    <a href="/{{ g.municipio.slug }}/pei/aluno/{{ aluno.id }}/novo" 
+                                       class="inline-flex items-center text-[9px] font-semibold text-white bg-gov-blue hover:bg-blue-700 px-4 py-2.5 rounded-lg transition-all shadow-md uppercase tracking-widest">
+                                        Criar PEI
+                                    </a>
+                                    {% endif %}
+
+                                    {% if caso_existente.necessita_paee %}
+                                    <a href="/{{ g.municipio.slug }}/pei/aluno/{{ aluno.id }}/novo-paee" 
+                                       class="inline-flex items-center text-[9px] font-semibold text-white bg-purple-600 hover:bg-purple-700 px-4 py-2.5 rounded-lg transition-all shadow-md uppercase tracking-widest">
+                                        Criar PAEE
+                                    </a>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="inline-flex items-center text-[9px] font-semibold text-slate-400 bg-slate-50 px-4 py-2.5 rounded-lg uppercase tracking-widest border border-slate-200 cursor-not-allowed select-none" title="A homologação do Estudo de Caso é mandatória para liberação dos planos">
+                                        Aguardando Homologação
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr id="linha_vazia_original">
+                            <td colspan="4" class="text-center py-16 text-slate-400 text-xs font-normal bg-slate-50/50">
+                                Nenhum aluno localizado no cadastro central desta jurisdição municipal até o momento.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr id="linha_sem_resultados" class="hidden">
+                            <td colspan="4" class="py-16 text-center text-slate-400 text-xs font-normal bg-slate-50/50">
+                                Nenhum registro de estudante corresponde aos termos pesquisados.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="space-y-6 pt-6">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-3">
+            <h3 class="text-[10px] font-semibold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
+                Planos de Desenvolvimento (PEI) Emitidos
+            </h3>
+            <span class="text-[9px] font-semibold text-slate-500 uppercase tracking-widest bg-slate-100 px-3 py-1.5 rounded-md">
+                Total Homologado: <b id="contador_peis" class="text-gov-dark">{{ peis_emitidos|length if peis_emitidos else 0 }}</b>
+            </span>
+        </div>
+
+        <div class="bg-white border border-slate-100 rounded-2xl p-3 shadow-sm flex items-center gap-3 transition-all focus-within:shadow-md focus-within:border-purple-500/30">
+            <div class="text-slate-400 pl-3">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <input type="text" 
+                   id="busca_peis_emitidos" 
+                   placeholder="Pesquisar prontuário do PEI por Nome, Matrícula ou Especialista..." 
+                   autocomplete="off"
+                   class="w-full bg-transparent border-none p-2 text-xs font-normal text-gov-dark focus:ring-0 focus:outline-none placeholder:text-slate-400 placeholder:font-normal">
+        </div>
+
+        <div class="bg-white border-t-[3px] border-t-purple-500 rounded-b-2xl shadow-card overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-100 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                            <th class="p-5 pl-8">Estudante Assistido</th>
+                            <th class="p-5">Unidade de Lotação</th>
+                            <th class="p-5">Diagnóstico</th>
+                            <th class="p-5 text-center">Ações de Controle</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50 text-xs font-normal text-slate-600">
+                        {% for p in peis_emitidos %}
+                        <tr class="hover:bg-slate-50/80 transition-colors item-pei-linha">
+                            <td class="p-5 pl-8">
+                                <span class="font-bold text-[13px] text-gov-dark block tracking-tight target-pei-aluno">{{ p.aluno.nome }}</span>
+                                <div class="flex items-center gap-3 mt-1.5">
+                                    <span class="text-[9px] font-semibold text-indigo-500 uppercase tracking-widest">Comp: {{ p.mes_competencia if p.mes_competencia else 'Maio' }}</span>
+                                    <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Mat: <span class="target-pei-matricula">{{ p.aluno.matricula }}</span></span>
+                                </div>
+                            </td>
+                            <td class="p-5 font-medium text-slate-600">
+                                {{ p.aluno.escola.nome if p.aluno.escola else 'Não Informada' }}
+                            </td>
+                            <td class="p-5">
+                                <span class="bg-blue-50 text-gov-blue border border-blue-100 font-semibold text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-md">
+                                    {{ p.aluno.tipo_deficiencia }}
+                                </span>
+                            </td>
+                            <td class="p-5 text-center space-x-2 whitespace-nowrap flex justify-center items-center">
+                                <a href="/{{ g.municipio.slug }}/pei/documento/{{ p.id }}/imprimir" target="_blank"
+                                   class="inline-flex items-center bg-blue-50 hover:bg-gov-blue text-gov-blue hover:text-white px-3 py-2 rounded-lg font-semibold text-[9px] uppercase tracking-widest transition-all shadow-sm border border-blue-100 hover:border-gov-blue">
+                                    🖨️ PEI
+                                </a>
+
+                                {% if p.aluno.paees_emitidos %}
+                                <a href="/{{ g.municipio.slug }}/pei/aluno/{{ p.aluno_id }}/imprimir-paee" target="_blank"
+                                   class="inline-flex items-center bg-purple-50 hover:bg-purple-600 text-purple-600 hover:text-white px-3 py-2 rounded-lg font-semibold text-[9px] uppercase tracking-widest transition-all shadow-sm border border-purple-100 hover:border-purple-600">
+                                    🧩 PAEE
+                                </a>
+                                {% else %}
+                                <span class="inline-flex items-center bg-slate-50 px-3 py-2 rounded-lg font-semibold text-[9px] text-slate-400 uppercase tracking-widest select-none cursor-not-allowed border border-slate-100" title="Nenhum plano PAEE foi emitido para este estudante">
+                                    🔒 PAEE
+                                </span>
+                                {% endif %}
+                                
+                                <div class="w-px h-5 bg-slate-200 mx-2"></div>
+                                
+                                <a href="/{{ g.municipio.slug }}/pei/editar/{{ p.id }}" 
+                                   class="inline-flex items-center bg-white hover:bg-slate-50 text-gov-dark px-3 py-2 rounded-lg font-semibold text-[9px] uppercase tracking-widest transition-all shadow-sm border border-slate-200">
+                                    Editar
+                                </a>
+                                
+                                <a href="/{{ g.municipio.slug }}/pei/excluir/{{ p.id }}" 
+                                   onclick="return confirm('CONFIRMAÇÃO EXECUTIVA: Deseja realmente remover este plano PEI permanentemente do sistema municipal?')"
+                                   class="inline-flex items-center bg-red-50 hover:bg-red-500 text-red-600 hover:text-white px-3 py-2 rounded-lg font-semibold text-[9px] uppercase tracking-widest transition-all shadow-sm border border-red-100 hover:border-red-500">
+                                    Excluir
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr id="linha_peis_vazia">
+                            <td colspan="4" class="p-16 text-center text-slate-400 text-xs font-normal bg-slate-50/50">
+                                Nenhum Plano de Desenvolvimento Individualizado (PEI) foi emitido para esta rede municipal até o momento.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        <tr id="linha_busca_pei_vazia" class="hidden">
+                            <td colspan="4" class="p-16 text-center text-slate-400 text-xs font-normal bg-slate-50/50">
+                                Nenhum plano PEI corresponde aos termos informados na pesquisa.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. FILTRAGEM INSTANTÂNEA DA BASE DE ALUNOS DISPONÍVEIS
+    document.getElementById('campo_pesquisa').addEventListener('input', function(e) {
+        const termo = e.target.value.toLowerCase().trim();
+        const linhas = document.querySelectorAll('.item-aluno-linha');
+        const linhaAlerta = document.getElementById('linha_sem_resultados');
+        let encontrouAlgum = false;
+
+        linhas.forEach(function(linha) {
+            const nome = inline = linha.querySelector('.nome-target').textContent.toLowerCase();
+            const matricula = linha.querySelector('.matricula-target').textContent.toLowerCase();
+            const condicao = linha.querySelector('.condition-target').textContent.toLowerCase();
+
+            if (nome.includes(termo) || matricula.includes(termo) || condicao.includes(termo)) {
+                linha.classList.remove('hidden');
+                encontrouAlgum = true;
+            } else {
+                linha.classList.add('hidden');
+            }
+        });
+
+        if (!encontrouAlgum && termo !== "") {
+            linhaAlerta.classList.remove('hidden');
+        } else {
+            linhaAlerta.classList.add('hidden');
+        }
+    });
+
+    // 2. FILTRO JAVASCRIPT: BUSCA EM TEMPO REAL NOS PEIS EMITIDOS (ALTA ESCALA)
+    document.getElementById('busca_peis_emitidos').addEventListener('input', function(e) {
+        const termo = e.target.value.toLowerCase().trim();
+        const linhas = document.querySelectorAll('.item-pei-linha');
+        const avisoBusca = document.getElementById('linha_busca_pei_vazia');
+        const contador = document.getElementById('contador_peis');
+        let encontrados = 0;
+
+        linhas.forEach(function(linha) {
+            const nomeAluno = linha.querySelector('.target-pei-aluno').textContent.toLowerCase();
+            const matricula = linha.querySelector('.target-pei-matricula').textContent.toLowerCase();
+
+            if (nomeAluno.includes(termo) || matricula.includes(termo)) {
+                linha.classList.remove('hidden');
+                encontrados++;
+            } else {
+                linha.classList.add('hidden');
+            }
+        });
+
+        contador.textContent = encontrados;
+
+        if (encontrados === 0 && termo !== "") {
+            avisoBusca.classList.remove('hidden');
+        } else {
+            avisoBusca.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

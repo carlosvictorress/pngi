@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar com gov.br — {{ municipio.nome }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gov: {
+                            blue: '#1351B4',     /* Azul Oficial GOV.BR */
+                            dark: '#333333',     /* Texto Principal */
+                            light: '#888888',    /* Texto Secundário */
+                            gray: '#E9ECEF'      /* Bordas Sutis */
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white text-gov-dark min-h-screen flex flex-col justify-between font-sans antialiased">
+
+    <header class="border-b border-gov-gray py-4 px-6 md:px-12 bg-white">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-black text-gov-blue tracking-tighter">gov<span class="text-amber-500">.</span>br</span>
+            </div>
+            <div class="text-right">
+                <span class="block text-xs font-black text-gov-blue uppercase tracking-tight">Educação Especial Inclusiva</span>
+                <span class="block text-[10px] text-gov-light font-bold uppercase tracking-widest -mt-0.5">Prefeitura de {{ municipio.nome }} — {{ municipio.estado }}</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center px-6 py-12">
+        <div class="max-w-[420px] w-full space-y-8">
+            
+            <div class="text-center space-y-1">
+                <h2 class="text-xl font-bold tracking-tight text-gov-dark">Identificação do Servidor</h2>
+                <p class="text-xs text-gov-light font-medium">Digite suas credenciais institucionais para acessar o painel municipal</p>
+            </div>
+
+            <form method="POST" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-gov-dark mb-1.5">E-mail Institucional</label>
+                    <input type="email" name="email" required 
+                        class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none transition-all font-medium"
+                        placeholder="Ex: nome@{{ municipio.slug }}.gov.br">
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-center mb-1.5">
+                        <label class="block text-xs font-bold text-gov-dark">Sua senha</label>
+                        <a href="#" class="text-xs text-gov-blue hover:underline font-semibold">Esqueceu a senha?</a>
+                    </div>
+                    <input type="password" name="senha" required 
+                        class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none transition-all font-medium"
+                        placeholder="••••••••">
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" 
+                        class="w-full bg-gov-blue hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-full text-sm transition-all shadow-sm active:scale-[0.99]">
+                        Entrar no Painel de Gestão
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center space-y-4 pt-2">
+                <a href="/" class="text-xs font-semibold text-gov-blue hover:underline block">
+                    Voltar para o Portal de Entrada Nacional
+                </a>
+                <p class="text-[10px] text-gov-light leading-relaxed px-4">
+                    O acesso não autorizado a este ambiente constitui infração legal. Todas as ações são monitoradas em conformidade com as diretrizes de segurança pública.
+                </p>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="border-t border-gov-gray py-6 text-center text-[11px] text-gov-light font-medium bg-white">
+        Plataforma de Governança Inclusiva Municipal — {{ municipio.nome }} © 2026
+    </footer>
+
+</body>
+</html>

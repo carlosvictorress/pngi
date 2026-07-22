@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Emissão de Pareceres e Estatísticas — Gestoor 360</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'] },
+                    colors: {
+                        gov: { blue: '#003366', green: '#00875a', dark: '#1e293b', border: '#cbd5e1' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS PRINT MEDIA — ENGENHARIA DE IMPRESSÃO PAPEL TIMBRADO */
+        @media print {
+            body { background: #ffffff !important; color: #000000 !important; font-size: 10px !important; }
+            header, .no-print, #campo_pesquisa, .sub-nav-print { display: none !important; }
+            main { padding: 0 !important; margin: 0 !important; max-w: 100% !important; }
+            .shadow-md, .shadow-sm { shadow: none !important; box-shadow: none !important; border: none !important; }
+            .print-block { display: block !important; }
+            .print-card-border { border: 1px solid #000000 !important; border-radius: 0px !important; }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+        }
+    </style>
+</head>
+<body class="bg-[#f8fafc] text-gov-dark min-h-screen flex flex-col font-sans antialiased">
+
+    <header class="border-b-2 border-gov-blue bg-white sticky top-0 z-50 shadow-md no-print">
+        <div class="max-w-[1600px] mx-auto px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gov-blue rounded-xl flex flex-col items-center justify-center text-white font-black text-sm tracking-tighter shadow-inner">
+                    <span>GOV</span>
+                    <span class="text-[9px] -mt-1 text-emerald-400">360</span>
+                </div>
+                <div class="border-l border-slate-300 pl-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gov-blue block">Secretaria Municipal de Educação</span>
+                    <h1 class="text-lg font-black text-slate-800 tracking-tight uppercase">{{ g.municipio.nome }} — PORTAL DE INCLUSÃO</h1>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3 self-end md:self-center">
+                <span class="text-[11px] bg-slate-100 text-slate-700 border border-slate-300 px-3 py-1 rounded-md font-bold font-mono">ANO LETIVO: 2026</span>
+                <a href="/{{ g.municipio.slug }}/dashboard" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all shadow-sm">&larr; Painel Geral</a>
+            </div>
+        </div>
+        
+        <div class="bg-slate-50 border-t border-slate-200 px-6 shadow-sm sub-nav-print">
+            <div class="max-w-[1600px] mx-auto flex flex-wrap gap-1 text-xs font-bold text-slate-500">
+                <a href="/{{ g.municipio.slug }}/aee/" class="px-4 py-3 hover:bg-slate-200/60 hover:text-gov-blue transition-colors">Equipe Técnica</a>
+                <a href="/{{ g.municipio.slug }}/aee/planos" class="px-4 py-3 hover:bg-slate-200/60 hover:text-gov-blue transition-colors">Planos Pedagógicos (PAEE/PDI)</a>
+                <a href="/{{ g.municipio.slug }}/aee/agenda" class="px-4 py-3 hover:bg-slate-200/60 hover:text-gov-blue transition-colors">Grade de Horários / Salas</a>
+                <a href="/{{ g.municipio.slug }}/aee/evolucoes" class="px-4 py-3 hover:bg-slate-200/60 hover:text-gov-blue transition-colors">Prontuário de Evoluções</a>
+                <a href="/{{ g.municipio.slug }}/aee/documentos" class="px-4 py-3 hover:bg-slate-200/60 hover:text-gov-blue transition-colors">Laudos e Pareceres</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="hidden print-block w-full text-center space-y-1 border-b-2 border-slate-900 pb-4 mb-6">
+        <h2 class="text-xs font-black uppercase tracking-widest text-slate-500">Estado do Piauí</h2>
+        <h1 class="text-sm font-black uppercase tracking-tight text-slate-900">Prefeitura Municipal de {{ g.municipio.nome }}</h1>
+        <h3 class="text-xs font-bold uppercase text-slate-700">Secretaria Municipal de Educação e Cultura — SEMEC</h3>
+        <p class="text-[9px] text-slate-400 font-mono mt-1">COORDENADORIA DE EDUCAÇÃO ESPECIAL E INCLUSIVA &bull; EMISSÃO DE BALANÇO OFICIAL</p>
+    </div>
+
+    <main class="flex-grow max-w-[1600px] mx-auto w-full px-6 py-8 space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white border border-slate-200 rounded-xl p-6 shadow-sm no-print">
+            <div class="space-y-1">
+                <span class="text-[10px] uppercase font-black tracking-widest text-gov-blue block">Auditoria & Prestação de Contas</span>
+                <h2 class="text-xl font-black text-slate-800 tracking-tight uppercase">Central de Pareceres e Estatísticas Consolidadas</h2>
+                <p class="text-xs text-slate-500 font-medium">Balanço de cobertura técnica da rede inclusiva para comprovação regulamentar perante órgãos fiscalizadores.</p>
+            </div>
+            
+            <div class="shrink-0">
+                <button onclick="window.print()" class="inline-flex items-center text-xs font-black text-white bg-gov-blue hover:bg-slate-800 px-5 py-3.5 rounded-lg gap-2 transition-all shadow-md uppercase tracking-wider">
+                    🖨️ Gerar PDF / Imprimir Relatório
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 print-block">
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-md print-card-border">
+                <span class="text-[9px] uppercase font-black text-slate-400 tracking-wider block">Alunos Inclusos</span>
+                <div class="text-2xl font-black text-gov-blue mt-0.5">{{ total_alunos }}</div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-md print-card-border">
+                <span class="text-[9px] uppercase font-black text-slate-400 tracking-wider block">Notificações TEA</span>
+                <div class="text-2xl font-black text-purple-700 mt-0.5">{{ total_tea }}</div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-md print-card-border">
+                <span class="text-[9px] uppercase font-black text-slate-400 tracking-wider block">Planos Gerados</span>
+                <div class="text-2xl font-black text-gov-green mt-0.5">{{ total_pdi_emitidos }}</div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-md print-card-border">
+                <span class="text-[9px] uppercase font-black text-slate-400 tracking-wider block">Profissionais Alocados</span>
+                <div class="text-2xl font-black text-amber-700 mt-0.5">{{ total_profissionais }}</div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex items-center gap-3 no-print">
+            <div class="text-slate-400 pl-2 text-base">🔍</div>
+            <input type="text" 
+                   id="campo_pesquisa" 
+                   placeholder="Filtrar base consolidada de auditoria por Nome, Matrícula, Escola ou Tipo de Deficiência..." 
+                   autocomplete="off"
+                   class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-semibold text-slate-700 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none placeholder:text-slate-400">
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-md print-card-border">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-900 text-white border-b border-slate-200 text-[10px] font-black uppercase tracking-wider">
+                        <th class="py-3 px-4 pl-5">Estudante Registrado</th>
+                        <th class="py-3 px-4">Lotação Escolar</th>
+                        <th class="py-3 px-4">Enquadramento Censo MEC</th>
+                        <th class="py-3 px-4 text-center">Classificação CID</th>
+                        <th class="py-3 px-5 text-center">Metas Homologadas (PDI)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-gov-dark font-medium">
+                    {% for aluno in alunos %}
+                    <tr class="hover:bg-slate-50 transition-colors item-relatorio-linha">
+                        <td class="py-3.5 px-4 pl-5 font-black text-slate-900 nome-target">{{ aluno.nome }}</td>
+                        <td class="py-3.5 px-4 escola-target">🏫 {{ aluno.escola }} <span class="block text-[10px] text-slate-400 mt-0.5 font-bold font-mono">MATRÍCULA: {{ aluno.matricula }}</span></td>
+                        <td class="py-3.5 px-4 condicao-target">
+                            <span class="font-black text-gov-blue uppercase text-[10px] block">{{ aluno.tipo_deficiencia }}</span>
+                            {% if aluno.possui_tea %}<span class="text-[9px] font-bold text-purple-700 bg-purple-50 border border-purple-200 px-1 py-0.5 rounded mt-0.5 inline-block">● Transtorno do Espectro Autista</span>{% endif %}
+                        </td>
+                        <td class="py-3.5 px-4 text-center font-mono font-black text-slate-700 text-xs cid-target">
+                            {{ aluno.cid if aluno.cid else '—' }}
+                        </td>
+                        <td class="py-3.5 px-5 text-center">
+                            <span class="px-2 py-1 rounded border font-black text-[9px] uppercase tracking-wide
+                                {% if total_pdi_emitidos > 0 %} bg-emerald-50 text-gov-green border-emerald-200
+                                {% else %} bg-rose-50 text-rose-600 border-rose-200 {% endif %}">
+                                {% if total_pdi_emitidos > 0 %} Homologado {% else %} Pendente {% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="py-16 text-center text-slate-400 italic font-semibold bg-slate-50/50">
+                            ⚠️ Nenhum dado consolidado para emissão estatística nesta base de dados municipal.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <tr id="linha_sem_resultados" class="hidden no-print">
+                        <td colspan="5" class="py-16 text-center text-slate-400 italic font-semibold bg-slate-50/50">
+                            ❌ Nenhum registro atende aos parâmetros de filtragem estatística informados.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="hidden print-block w-full pt-16 grid grid-cols-2 gap-12 text-center text-xs font-bold">
+            <div class="space-y-1">
+                <div class="border-t border-slate-900 mx-auto w-64 pt-2"></div>
+                <p class="text-slate-800 uppercase">Supervisor Operacional do AEE</p>
+                <p class="text-[10px] text-slate-400 font-mono">Carimbo / Matrícula Funcional</p>
+            </div>
+            <div class="space-y-1">
+                <div class="border-t border-slate-900 mx-auto w-64 pt-2"></div>
+                <p class="text-slate-800 uppercase">Secretário Municipal de Educação</p>
+                <p class="text-[10px] text-slate-400 font-mono">Chancela e Homologação Governamental</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        document.getElementById('campo_pesquisa').addEventListener('input', function(e) {
+            const termo = e.target.value.toLowerCase().trim();
+            const linhas = document.querySelectorAll('.item-relatorio-linha');
+            const linhaAlerta = document.getElementById('linha_sem_resultados');
+            let encontrouAlgum = false;
+
+            linhas.forEach(function(linha) {
+                const nome = linha.querySelector('.nome-target').textContent.toLowerCase();
+                const escola = linha.querySelector('.escola-target').textContent.toLowerCase();
+                const condicao = linha.querySelector('.condicao-target').textContent.toLowerCase();
+                const cid = linha.querySelector('.cid-target').textContent.toLowerCase();
+
+                if (nome.includes(termo) || escola.includes(termo) || condicao.includes(termo) || cid.includes(termo)) {
+                    linha.classList.remove('hidden');
+                    encontrouAlgum = true;
+                } else {
+                    linha.classList.add('hidden');
+                }
+            });
+
+            if (!encontrouAlgum && termo !== "") {
+                linhaAlerta.classList.remove('hidden');
+            } else {
+                linhaAlerta.classList.add('hidden');
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Infraestrutura Rede — Cadastro e Auditoria de Unidades Escolares{% endblock %}
+
+{% block content %}
+<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-gov-dark space-y-6">
+
+    <!-- CABEÇALHO DA PÁGINA -->
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gov-blue"></div>
+        <div class="flex flex-col lg:flex-row justify-between items-start sm:items-center gap-4">
+            <div class="space-y-1">
+                <span class="text-[10px] uppercase font-black tracking-widest text-gov-blue block">Censo & Infraestrutura Municipal</span>
+                <h2 class="text-xl font-black text-slate-800 tracking-tight uppercase">Mapeamento de Unidades de Ensino</h2>
+                <p class="text-slate-500 text-xs font-medium leading-relaxed">
+                    Registre e monitore os dados cadastrais, localizações geográficas e o nível de acessibilidade arquitetônica das escolas ativas na rede pública.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAINEL COM ABAS DE CADASTRO -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
+        
+        <!-- SELEÇÃO DE ETAPAS -->
+        <div class="flex flex-wrap border-b border-slate-200 bg-slate-900 text-xs font-black uppercase tracking-wider text-slate-400">
+            <button type="button" onclick="mudarBloco(1)" id="aba-1" class="flex-1 py-4 px-4 text-center border-b-2 border-emerald-400 text-white font-black bg-slate-800/50 transition-all focus:outline-none">
+                1. Identificação Jurídica & Gestão
+            </button>
+            <button type="button" onclick="mudarBloco(2)" id="aba-2" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                2. Localização & Endereço
+            </button>
+            <button type="button" onclick="mudarBloco(3)" id="aba-3" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                3. Acessibilidade & Estrutura Física
+            </button>
+        </div>
+
+        <form method="POST" class="p-6 md:p-8 space-y-6 text-xs font-medium">
+            
+            <!-- BLOCO 1: JURÍDICO -->
+            <div id="bloco-1" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Nome Oficial da Escola *</label>
+                        <input type="text" name="nome" placeholder="Ex: Unidade Escolar Amando da Costa Lima" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Código INEP (MEC) *</label>
+                        <input type="text" name="codigo_inep" placeholder="Ex: 22074312" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono font-bold focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">CNPJ da Unidade</label>
+                        <input type="text" name="cnpj" placeholder="00.000.000/0001-00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Nome Completo do Gestor / Diretor *</label>
+                        <input type="text" name="diretora_nome" placeholder="Nome do gestor escolar em exercício" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">CPF do Gestor</label>
+                        <input type="text" name="diretora_cpf" placeholder="000.000.000-00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Telefone de Contato / Secretaria</label>
+                        <input type="text" name="telefone" placeholder="(86) 3465-1122" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">E-mail Institucional (@municipio.pi.gov.br)</label>
+                        <input type="email" name="email_institucional" placeholder="escola.nome@municipio.pi.gov.br" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOCO 2: LOCALIZAÇÃO -->
+            <div id="bloco-2" class="space-y-6 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Zona de Localização *</label>
+                        <select name="zona" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-bold focus:bg-white focus:outline-none cursor-pointer">
+                            <option value="Urbana">Urbana</option>
+                            <option value="Rural">Rural (Campo)</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Logradouro / Rua / Povoado *</label>
+                        <input type="text" name="endereco_rua" placeholder="Rua, Avenida ou Nome da Comunidade" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Número</label>
+                        <input type="text" name="numero" placeholder="S/N ou número" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-center focus:bg-white focus:outline-none shadow-inner">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Bairro / Região Distrital *</label>
+                        <input type="text" name="bairro" placeholder="Digite o nome do bairro" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block font-bold text-slate-700 uppercase tracking-wide">CEP Escolar</label>
+                        <input type="text" name="cep" placeholder="64300-000" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    </div>
+                </div>
+            </div>
+
+            <!-- BLOCO 3: ACESSIBILIDADE -->
+            <div id="bloco-3" class="space-y-6 hidden">
+                <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4 text-xs text-gov-blue font-semibold shadow-sm leading-relaxed">
+                    ⚠️ <span class="font-black">Indicadores do Censo Escolar INEP:</span> O preenchimento correto das caixas abaixo gera os relatórios estatísticos automáticos exigidos anualmente pelo MEC para calcular o repasse de verbas de acessibilidade de cada prédio escolar.
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3 font-bold text-slate-700 shadow-inner">
+                        <span class="text-[10px] text-gov-blue uppercase font-black block border-b border-slate-200 pb-1">♿ Estrutura Inclusiva Homologada</span>
+                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_sala_recursos" class="w-4 h-4 rounded border-slate-300 text-gov-blue cursor-pointer"> Possui Sala de Recursos Multifuncionais (SRM / Atendimento AEE)</label>
+                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_rampas" class="w-4 h-4 rounded border-slate-300 text-gov-blue cursor-pointer"> Possui Acessibilidade por Rampas ou Elevadores</label>
+                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_banheiro_adaptado" class="w-4 h-4 rounded border-slate-300 text-gov-blue cursor-pointer"> Possui Banheiros Próprios Adaptados para PCD</label>
+                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_portas_largas" class="w-4 h-4 rounded border-slate-300 text-gov-blue cursor-pointer"> Possui Vias de Acesso e Portas Largas para Cadeirantes</label>
+                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_sinalizacao_tatil" class="w-4 h-4 rounded border-slate-300 text-gov-blue cursor-pointer"> Possui Sinalização Tátil/Visual de Direcionamento</label>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700 uppercase tracking-wide">Modalidades de Ensino Ofertadas</label>
+                            <input type="text" name="modalidades_atendidas" placeholder="Ex: Educação Infantil, Ensino Fundamental I e II, EJA" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-700 uppercase tracking-wide">Quantidade Total de Salas de Aula Ativas</label>
+                            <input type="number" name="total_salas_aula" value="4" min="1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-bold focus:bg-white focus:outline-none shadow-inner">
+                        </div>
+
+                        <div class="pt-4 flex justify-end">
+                            <button type="submit" class="w-full bg-gov-blue hover:bg-slate-800 text-white font-black py-4 px-6 rounded-lg uppercase tracking-wider transition-all shadow-md active:scale-95">
+                                💾 Homologar Unidade Escolar na Rede
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- LISTAGEM GERAL DE UNIDADES MAPEADAS -->
+    <div class="space-y-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-md space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-2">
+                <h3 class="text-xs font-black uppercase tracking-wider text-gov-blue flex items-center gap-1.5">
+                    🏢 Unidades Escolares Mapeadas na Jurisdição
+                </h3>
+                <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                    Total na Rede: <b id="contador_escolas" class="text-gov-blue">{{ escolas_rede|length if escolas_rede else 0 }}</b>
+                </span>
+            </div>
+            
+            <input type="text" 
+                   id="busca_escolas_infra" 
+                   placeholder="Pesquisar escola instantaneamente por Nome Oficial, Código INEP ou Diretor Técnico..." 
+                   autocomplete="off"
+                   class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs font-semibold text-slate-700 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none shadow-inner placeholder:text-slate-400">
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-md">
+            <table class="w-full text-left border-collapse text-xs" id="tabela_escolas_rede">
+                <thead>
+                    <tr class="bg-slate-900 text-white border-b border-slate-200 text-[10px] font-black uppercase tracking-wider">
+                        <th class="p-4 pl-6">Nome Oficial da Instituição</th>
+                        <th class="p-4">Código INEP</th>
+                        <th class="p-4">Gestão / Diretor</th>
+                        <th class="p-4">Localização / Zona</th>
+                        <th class="p-4 text-center">Indicadores SRM</th>
+                        <th class="p-4 text-center">Ações Gerenciais</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-gov-dark font-medium">
+                    {% for e in escolas_rede %}
+                    <tr class="hover:bg-slate-50/80 transition-colors item-escola-linha">
+                        <td class="p-4 pl-6">
+                            <span class="font-black text-sm text-slate-900 block uppercase tracking-tight target-escola-nome">🏢 {{ e.nome }}</span>
+                            <span class="text-slate-400 font-bold block text-[10px] mt-0.5">BAIRRO: {{ e.bairro }} • TEL: {{ e.telefone if e.telefone else 'Não cadastrado' }}</span>
+                        </td>
+                        <td class="p-4 font-mono font-bold text-slate-700 text-[11px] tracking-tight target-escola-inep">
+                            {{ e.codigo_inep }}
+                        </td>
+                        <td class="p-4">
+                            <span class="font-bold text-slate-800 text-sm block target-escola-diretor">👤 {{ e.diretora_nome }}</span>
+                            <span class="text-slate-400 font-medium block text-[10px] truncate mt-0.5">{{ e.email_institucional if e.email_institucional else '' }}</span>
+                        </td>
+                        <td class="p-4 text-slate-600 font-bold text-sm">
+                            <span class="px-2.5 py-1 rounded border font-bold text-[9px] uppercase tracking-wider
+                                {% if e.zona == 'Urbana' %} bg-blue-50 text-blue-700 border-blue-200
+                                {% else %} bg-amber-50 text-amber-700 border-amber-200 {% endif %}">
+                                {{ e.zona }}
+                            </span>
+                        </td>
+                        <td class="p-4 text-center">
+                            {% if e.possui_sala_recursos %}
+                            <span class="bg-emerald-50 text-gov-green border border-emerald-200 font-black text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-md">
+                                ● Sala SRM Ativa
+                            </span>
+                            {% else %}
+                            <span class="bg-slate-100 text-slate-400 border border-slate-200 font-bold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-md">
+                                Sem SRM
+                            </span>
+                            {% endif %}
+                        </td>
+                        <!-- COLUNA GERENCIAL INTEGRADA -->
+                        <td class="p-4 text-center space-x-1 whitespace-nowrap">
+                            <a href="{{ url_for('escolas.editar_escola', municipio_slug=g.municipio.slug, id=e.id) }}" 
+                               class="inline-flex items-center gap-1 border border-slate-300 bg-white hover:bg-gov-blue hover:text-white px-2.5 py-1.5 rounded-md font-bold text-[10px] uppercase tracking-wider transition-all shadow-sm shadow-slate-100">
+                                ✏️ Editar
+                            </a>
+                            <a href="{{ url_for('escolas.excluir_escola', municipio_slug=g.municipio.slug, id=e.id) }}" 
+                               onclick="return confirm('ATENÇÃO OPERACIONAL: Confirma a remoção definitiva desta unidade escolar da infraestrutura municipal? Isso impactará turmas vinculadas.')"
+                               class="inline-flex items-center gap-1 border border-red-200 bg-red-50 hover:bg-red-600 hover:text-white hover:border-red-600 px-2.5 py-1.5 rounded-md font-bold text-[10px] text-red-600 uppercase tracking-wider transition-all shadow-sm">
+                                🗑️ Remover
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr id="linha_rede_vazia">
+                        <td colspan="6" class="p-16 text-center text-slate-400 italic font-semibold bg-slate-50/50">
+                            ⚠️ Nenhuma unidade escolar cadastrada ou mapeada no sistema para esta rede de ensino.
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                    <tr id="linha_busca_vazia" class="hidden">
+                        <td colspan="6" class="p-16 text-center text-slate-400 italic font-semibold bg-slate-50/50">
+                            ❌ Nenhuma unidade escolar localizada para os parâmetros informados.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // SCRIPT DE CONTROLE DINÂMICO DE ABAS (ORIGINAL MANTER INTEGRALIDADE)
+    function mudarBloco(blocoAlvo) {
+        document.getElementById('bloco-1').classList.add('hidden');
+        document.getElementById('bloco-2').classList.add('hidden');
+        document.getElementById('bloco-3').classList.add('hidden');
+
+        for (let i = 1; i <= 3; i++) {
+            let aba = document.getElementById('aba-' + i);
+            aba.classList.remove('border-emerald-400', 'text-white', 'bg-slate-800/50');
+            aba.classList.add('border-transparent', 'text-slate-400');
+        }
+
+        document.getElementById('bloco-' + blocoAlvo).classList.remove('hidden');
+        let abaAtiva = document.getElementById('aba-' + blocoAlvo);
+        abaAtiva.classList.remove('border-transparent', 'text-slate-400');
+        abaAtiva.classList.add('border-emerald-400', 'text-white', 'bg-slate-800/50');
+    }
+
+    // MECANISMO DE FILTRAGEM INSTANTÂNEA PARA ALTOS VOLUMES DE DADOS
+    document.getElementById('busca_escolas_infra').addEventListener('input', function(e) {
+        const termo = e.target.value.toLowerCase().trim();
+        const linhas = document.querySelectorAll('.item-escola-linha');
+        const avisoBusca = document.getElementById('linha_busca_vazia');
+        const contador = document.getElementById('contador_escolas');
+        let encontrados = 0;
+
+        linhas.forEach(function(linha) {
+            const nome = linha.querySelector('.target-escola-nome').textContent.toLowerCase();
+            const inep = linha.querySelector('.target-escola-inep').textContent.toLowerCase();
+            const diretor = linha.querySelector('.target-escola-diretor').textContent.toLowerCase();
+
+            if (nome.includes(termo) || inep.includes(termo) || diretor.includes(termo)) {
+                linha.classList.remove('hidden');
+                encontrados++;
+            } else {
+                linha.classList.add('hidden');
+            }
+        });
+
+        contador.textContent = encontrados;
+
+        if (encontrados === 0 && termo !== "") {
+            avisoBusca.classList.remove('hidden');
+        } else {
+            avisoBusca.classList.add('hidden');
+        }
+    });
+</script>
+{% endblock %}

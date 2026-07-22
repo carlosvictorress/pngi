@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Módulo 3 — Grade de Horários e Alocação de Salas (AEE){% endblock %}
+
+{% block content %}
+<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-gov-dark space-y-6">
+
+    <div class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm flex flex-wrap gap-1 text-xs font-black uppercase tracking-wider text-slate-500">
+        <a href="/{{ g.municipio.slug }}/aee/" class="px-4 py-2.5 hover:bg-slate-100 hover:text-gov-blue rounded-lg transition-colors">Equipe Técnica</a>
+        <a href="/{{ g.municipio.slug }}/aee/planos" class="px-4 py-2.5 hover:bg-slate-100 hover:text-gov-blue rounded-lg transition-colors">Planos Pedagógicos (PAEE/PDI)</a>
+        <a href="/{{ g.municipio.slug }}/aee/agenda" class="px-4 py-2.5 bg-gov-blue text-white rounded-lg shadow-sm">Grade de Horários / Salas</a>
+        <a href="/{{ g.municipio.slug }}/aee/evolucoes" class="px-4 py-2.5 hover:bg-slate-100 hover:text-gov-blue rounded-lg transition-colors">Prontuário de Evoluções</a>
+        <a href="/{{ g.municipio.slug }}/aee/documentos" class="px-4 py-2.5 hover:bg-slate-100 hover:text-gov-blue rounded-lg transition-colors">Laudos e Pareceres</a>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gov-blue"></div>
+        <div class="space-y-1">
+            <span class="text-[10px] uppercase font-black tracking-widest text-gov-blue block">Logística de Atendimento</span>
+            <h2 class="text-xl font-black text-slate-800 tracking-tight uppercase">Gestão da Sala de Recursos Multifuncionais</h2>
+            <p class="text-slate-500 text-xs font-medium leading-relaxed max-w-5xl">
+                Controle do fluxo de alunos, horários de contra-turno e alocação de especialistas. A organização prévia é fundamental para otimizar o transporte escolar e a rotina da unidade de ensino.
+            </p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+        
+        <div class="xl:col-span-4 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden sticky top-24">
+            <div class="bg-slate-900 p-4 text-white flex items-center justify-between">
+                <div>
+                    <span class="text-[9px] text-emerald-400 font-black block tracking-widest">NOVA RESERVA</span>
+                    <h3 class="text-sm font-black uppercase">Agendar Horário</h3>
+                </div>
+                <span class="text-xl">📅</span>
+            </div>
+
+            <form method="POST" class="p-5 space-y-4 text-xs font-bold text-slate-700">
+                <div>
+                    <label class="block mb-1 text-slate-600">Estudante (Paciente) *</label>
+                    <input type="text" id="busca_aluno_agenda" list="lista_alunos_agenda" placeholder="Pesquise o nome do aluno..." autocomplete="off" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none shadow-inner">
+                    <input type="hidden" name="aluno_id" id="aluno_id_agenda_hidden">
+                    <datalist id="lista_alunos_agenda">
+                        {% for a in alunos %}
+                        <option data-id="{{ a.id }}" value="{{ a.nome }} (Matrícula: {{ a.matricula }})"></option>
+                        {% endfor %}
+                    </datalist>
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-slate-600">Especialista / Professor AEE *</label>
+                    <select name="profissional_id" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none cursor-pointer">
+                        <option value="" disabled selected>Selecione o profissional...</option>
+                        {% for p in profissionais %}
+                        <option value="{{ p.id }}">{{ p.nome }} ({{ p.cargo }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="block mb-1 text-slate-600">Dia da Semana *</label>
+                        <select name="dia_semana" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-bold focus:bg-white focus:outline-none cursor-pointer">
+                            <option value="Segunda-feira">Segunda-feira</option>
+                            <option value="Terça-feira">Terça-feira</option>
+                            <option value="Quarta-feira">Quarta-feira</option>
+                            <option value="Quinta-feira">Quinta-feira</option>
+                            <option value="Sexta-feira">Sexta-feira</option>
+                            <option value="Sábado">Sábado (Reposição)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-slate-600">Horário Início *</label>
+                        <input type="time" name="horario_inicio" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none text-center">
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-slate-600">Horário Fim *</label>
+                        <input type="time" name="horario_fim" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none text-center">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block mb-1 text-slate-600">Local de Atendimento / Polo *</label>
+                    <input type="text" name="sala_recurso" placeholder="Ex: Sala de Recursos 01 - Escola Municipal Centro..." required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none">
+                </div>
+
+                <button type="submit" class="w-full bg-gov-blue hover:bg-slate-800 text-white font-black py-3.5 rounded-lg uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 mt-4">
+                    ✅ Confirmar Agendamento
+                </button>
+            </form>
+        </div>
+
+        <div class="xl:col-span-8 space-y-4">
+            
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-md flex flex-wrap gap-2 justify-center lg:justify-start">
+                <button onclick="filtrarDia('TODOS')" class="btn-filtro-dia px-4 py-2 bg-slate-800 text-white font-black text-[10px] rounded-lg uppercase tracking-wide transition-all shadow-sm">Visão Geral</button>
+                <button onclick="filtrarDia('Segunda-feira')" class="btn-filtro-dia px-4 py-2 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 font-black text-[10px] rounded-lg uppercase tracking-wide transition-all">Segunda</button>
+                <button onclick="filtrarDia('Terça-feira')" class="btn-filtro-dia px-4 py-2 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 font-black text-[10px] rounded-lg uppercase tracking-wide transition-all">Terça</button>
+                <button onclick="filtrarDia('Quarta-feira')" class="btn-filtro-dia px-4 py-2 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 font-black text-[10px] rounded-lg uppercase tracking-wide transition-all">Quarta</button>
+                <button onclick="filtrarDia('Quinta-feira')" class="btn-filtro-dia px-4 py-2 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 font-black text-[10px] rounded-lg uppercase tracking-wide transition-all">Quinta</button>
+                <button onclick="filtrarDia('Sexta-feira')" class="btn-filtro-dia px-4 py-2 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 font-black text-[10px] rounded-lg uppercase tracking-wide transition-all">Sexta</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="container_agendamentos">
+                {% for ag in agenda %}
+                <div class="card-agenda bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow p-5 flex flex-col justify-between target-dia-semana" data-dia="{{ ag.dia_semana }}">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-start border-b border-slate-100 pb-3">
+                            <div>
+                                <span class="text-[10px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 px-2 py-0.5 rounded">{{ ag.dia_semana }}</span>
+                                <h4 class="font-black text-slate-800 text-base mt-1.5 leading-tight">{{ ag.aluno.nome if ag.aluno else 'Aluno Não Identificado' }}</h4>
+                                <p class="text-[10px] font-bold text-slate-400 uppercase mt-0.5">Deficiência: {{ ag.aluno.tipo_deficiencia if ag.aluno else 'N/A' }}</p>
+                            </div>
+                            <div class="text-right shrink-0 bg-slate-50 border border-slate-200 rounded-lg p-2 text-center">
+                                <span class="block text-xs font-black text-slate-700">{{ ag.horario_inicio }}</span>
+                                <span class="block text-[8px] font-black text-slate-400 uppercase">Até</span>
+                                <span class="block text-xs font-black text-slate-700">{{ ag.horario_fim }}</span>
+                            </div>
+                        </div>
+
+                        <div class="text-xs font-medium space-y-1.5 text-slate-600">
+                            <p class="flex items-center gap-2">
+                                <span class="text-lg">👨‍🏫</span> 
+                                <span><b class="text-slate-800">Prof:</b> {{ ag.profissional.nome if ag.profissional else 'Não Atribuído' }}</span>
+                            </p>
+                            <p class="flex items-center gap-2">
+                                <span class="text-lg">🏫</span> 
+                                <span><b class="text-slate-800">Local:</b> {{ ag.sala_recurso }}</span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex justify-end">
+                        <form action="{{ url_for('aee.desativar_agendamento', municipio_slug=g.municipio.slug, id=ag.id) }}" method="POST" onsubmit="return confirm('Tem certeza que deseja cancelar este horário? O histórico permanecerá salvo para auditoria.');">
+                            <button type="submit" class="text-[10px] font-black uppercase tracking-wider text-red-500 hover:text-white border border-red-200 hover:bg-red-500 px-3 py-1.5 rounded transition-colors">
+                                ❌ Cancelar Horário
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-span-full bg-white border-2 border-dashed border-slate-200 rounded-xl p-16 text-center text-slate-400 italic text-xs shadow-sm">
+                    📭 Nenhum horário reservado na grade até o momento.
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Filtro dinâmico da Agenda (Sem recarregar a página)
+    function filtrarDia(diaSelecionado) {
+        const cards = document.querySelectorAll('.card-agenda');
+        const botoes = document.querySelectorAll('.btn-filtro-dia');
+
+        // Atualiza estilo dos botões
+        botoes.forEach(btn => {
+            if (btn.textContent.toUpperCase() === diaSelecionado.toUpperCase() || (diaSelecionado === 'TODOS' && btn.textContent === 'VISÃO GERAL')) {
+                btn.classList.remove('bg-white', 'text-slate-500', 'border', 'border-slate-200', 'hover:bg-slate-50');
+                btn.classList.add('bg-slate-800', 'text-white');
+            } else {
+                btn.classList.remove('bg-slate-800', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-500', 'border', 'border-slate-200', 'hover:bg-slate-50');
+            }
+        });
+
+        // Filtra os cards
+        cards.forEach(card => {
+            const diaDoCard = card.getAttribute('data-dia');
+            if (diaSelecionado === 'TODOS' || diaDoCard === diaSelecionado) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Captura do input datalist (mesma engenharia do Prontuário)
+    document.getElementById('busca_aluno_agenda').addEventListener('input', function(e) {
+        const input = e.target;
+        const val = input.value;
+        const list = document.getElementById('lista_alunos_agenda').options;
+        const hiddenInput = document.getElementById('aluno_id_agenda_hidden');
+        
+        hiddenInput.value = ""; 
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].value === val) {
+                hiddenInput.value = list[i].getAttribute('data-id');
+                break;
+            }
+        }
+    });
+</script>
+{% endblock %}

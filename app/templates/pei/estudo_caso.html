@@ -1,0 +1,458 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Módulo 2 — Protocolo Clínico e Pedagógico de Estudo de Caso{% endblock %}
+
+{% block content %}
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: { 
+                    sans: ['Inter', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'] 
+                },
+                colors: {
+                    gov: { 
+                        navy: '#0A192F', 
+                        blue: '#1351B4', 
+                        green: '#00A859', 
+                        yellow: '#FFCD00', 
+                        dark: '#1E293B', 
+                        light: '#64748B', 
+                        bg: '#F8FAFC' 
+                    }
+                },
+                boxShadow: {
+                    glow: '0 0 20px rgba(19, 81, 180, 0.3)',
+                    card: '0 10px 30px -5px rgba(0, 0, 0, 0.1)'
+                }
+            }
+        }
+    }
+</script>
+
+<div class="max-w-[1400px] mx-auto px-6 py-8 font-sans antialiased text-gov-dark space-y-8">
+    
+    <div class="bg-gov-navy rounded-3xl p-8 md:p-10 shadow-card relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gov-blue opacity-20 blur-3xl rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+        
+        <div class="relative z-10 flex flex-col lg:flex-row justify-between items-start gap-8">
+            <div class="space-y-3 flex-grow">
+                <span class="inline-block bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[9px] font-semibold uppercase tracking-widest px-3 py-1.5 rounded-md">
+                    Fase Preliminar Regulamentar (Padrão SECADI / MEC)
+                </span>
+                <h2 class="text-2xl md:text-3xl font-bold text-white tracking-tight">Análise Diagnóstica e Estudo de Caso</h2>
+                <p class="text-xs text-slate-300 font-normal max-w-3xl leading-relaxed">
+                    Abertura de protocolo de triagem multidimensional. Os dados consolidados neste instrumento fundamentam juridicamente a obrigatoriedade de emissão do PEI, PAEE e alocações de cuidadores ou mediadores na rede municipal.
+                </p>
+            </div>
+            
+            <div class="text-left text-xs space-y-2 min-w-[300px] w-full lg:w-auto bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-inner">
+                <p class="flex justify-between border-b border-white/10 pb-2">
+                    <span class="text-blue-200 uppercase text-[9px] font-semibold tracking-widest">Estudante:</span> 
+                    <span class="text-white uppercase font-bold tracking-tight">{{ aluno.nome }}</span>
+                </p>
+                <p class="flex justify-between border-b border-white/10 pb-2">
+                    <span class="text-blue-200 uppercase text-[9px] font-semibold tracking-widest">INEP / Matrícula:</span> 
+                    <span class="text-white font-mono font-medium">{{ aluno.matricula }}</span>
+                </p>
+                <p class="flex justify-between pt-1">
+                    <span class="text-blue-200 uppercase text-[9px] font-semibold tracking-widest">Escola / Lotação:</span> 
+                    <span class="text-white font-medium">{{ aluno.escola.nome if aluno.escola is mapping else (aluno.escola if aluno.escola else 'Não Informada') }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden">
+        
+        <div class="flex flex-wrap border-b border-slate-800 bg-slate-900 text-[10px] font-semibold uppercase tracking-widest">
+            <button type="button" onclick="mudarBloco(1)" id="aba-1" class="flex-1 py-5 px-4 text-center border-b-2 border-emerald-400 text-white bg-slate-800/50 transition-all focus:outline-none">
+                1. Histórico Escolar & Familiar
+            </button>
+            <button type="button" onclick="mudarBloco(2)" id="aba-2" class="flex-1 py-5 px-4 text-center border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                2. Observação Pedagógica
+            </button>
+            <button type="button" onclick="mudarBloco(3)" id="aba-3" class="flex-1 py-5 px-4 text-center border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                3. Barreiras & Necessidades
+            </button>
+            <button type="button" onclick="mudarBloco(4)" id="aba-4" class="flex-1 py-5 px-4 text-center border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                4. Suportes, PEI & Parecer
+            </button>
+        </div>
+
+        <form method="POST" class="p-8 md:p-10 text-xs font-normal bg-gov-bg">
+            {% if caso %}
+            <input type="hidden" name="caso_id" value="{{ caso.id }}">
+            {% endif %}
+            
+            <div id="bloco-1" class="space-y-8">
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-1.5">
+                        <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Professor Regente da Classe *</label>
+                        <input type="text" name="professor_regente" value="{{ caso.professor_regente if caso else '' }}" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Professor Especialista do AEE *</label>
+                        <input type="text" name="professor_aee" value="{{ caso.professor_aee if caso else '' }}" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Responsável Familiar Entrevistado *</label>
+                        <input type="text" name="responsavel_familiar" value="{{ caso.responsavel_familiar if caso else '' }}" required class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-slate-100 pb-3">
+                        <h4 class="text-sm font-bold tracking-tight text-gov-dark">2. Levantamento de Informações Escolares</h4>
+                        <button type="button" onclick="gerarIA('historico')" class="bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white border border-purple-100 font-semibold px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest transition-all shadow-sm">
+                            🤖 Preencher Histórico via IA
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Frequência Escolar</label>
+                            <textarea id="hist_frequencia_escolar" name="hist_frequencia_escolar" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.hist_frequencia_escolar if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Desenvolvimento Acadêmico</label>
+                            <textarea id="hist_desenvolvimento_academico" name="hist_desenvolvimento_academico" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.hist_desenvolvimento_academico if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Dificuldades Observadas</label>
+                            <textarea id="hist_dificuldades_observadas" name="hist_dificuldades_observadas" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.hist_dificuldades_observadas if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Potencialidades Identificadas</label>
+                            <textarea id="hist_potencialidades_identificadas" name="hist_potencialidades_identificadas" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.hist_potencialidades_identificadas if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Relatórios Anteriores</label>
+                            <textarea id="hist_relatorios_anteriores" name="hist_relatorios_anteriores" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.hist_relatorios_anteriores if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Participação em Projetos e Atividades</label>
+                            <textarea id="hist_participacao_projetos" name="hist_participacao_projetos" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.hist_participacao_projetos if caso else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-slate-100 pb-3">
+                        <h4 class="text-sm font-bold tracking-tight text-gov-dark">3. Entrevista com a Família</h4>
+                        <button type="button" onclick="gerarIA('familia')" class="bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white border border-purple-100 font-semibold px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest transition-all shadow-sm">
+                            🤖 Preencher Família via IA
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Histórico do Desenvolvimento Infantil</label>
+                            <textarea id="fam_historico_desenvolvimento" name="fam_historico_desenvolvimento" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.fam_historico_desenvolvimento if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Diagnósticos Apresentados</label>
+                            <textarea id="fam_diagnosticos_apresentados" name="fam_diagnosticos_apresentados" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.fam_diagnosticos_apresentados if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Acompanhamentos Terapêuticos</label>
+                            <textarea id="fam_acompanhamentos_terapeuticos" name="fam_acompanhamentos_terapeuticos" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.fam_acompanhamentos_terapeuticos if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Rotina Familiar</label>
+                            <textarea id="fam_rotina_familiar" name="fam_rotina_familiar" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.fam_rotina_familiar if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Comportamento em Casa</label>
+                            <textarea id="fam_comportamento_casa" name="fam_comportamento_casa" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.fam_comportamento_casa if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Interação Social Familiar</label>
+                            <textarea id="fam_interacao_social" name="fam_interacao_social" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.fam_interacao_social if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Autonomia</label>
+                            <textarea id="fam_autonomia" name="fam_autonomia" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.fam_autonomia if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Expectativas da Família</label>
+                            <textarea id="fam_expectativas_familia" name="fam_expectativas_familia" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.fam_expectativas_familia if caso else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bloco-2" class="space-y-8 hidden">
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 border-b border-slate-100 pb-3">
+                        <h4 class="text-sm font-bold tracking-tight text-gov-dark">4. Observação Pedagógica em Sala de Aula</h4>
+                        <button type="button" onclick="gerarIA('observacao')" class="bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white border border-purple-100 font-semibold px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest transition-all shadow-sm">
+                            🤖 Rodar Observação via IA
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Participação nas Atividades</label>
+                            <textarea id="obs_participacao_atividades" name="obs_participacao_atividades" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.obs_participacao_atividades if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Comunicação</label>
+                            <textarea id="obs_comunicacao" name="obs_comunicacao" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.obs_comunicacao if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Interação Social em Sala</label>
+                            <textarea id="obs_interacao_social" name="obs_interacao_social" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.obs_interacao_social if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Atenção e Concentração</label>
+                            <textarea id="obs_atencao_concentracao" name="obs_atencao_concentracao" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.obs_atencao_concentracao if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Coordenação Motora</label>
+                            <textarea id="obs_coordenacao_motora" name="obs_coordenacao_motora" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.obs_coordenacao_motora if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Compreensão de Comandos</label>
+                            <textarea id="obs_compreensao_comandos" name="obs_compreensao_comandos" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.obs_compreensao_comandos if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Tempo de Execução das Atividades</label>
+                            <textarea id="obs_tempo_execucao" name="obs_tempo_execucao" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.obs_tempo_execucao if caso else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Necessidade de Mediação</label>
+                            <textarea id="obs_necessidade_mediacao" name="obs_necessidade_mediacao" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.obs_necessidade_mediacao if caso else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bloco-3" class="space-y-8 hidden">
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-1.5">
+                        <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Barreiras Arquitetônicas / Físicas</label>
+                        <textarea name="barreiras_arquitetonicas" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.barreiras_arquitetonicas if caso else '' }}</textarea>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Barreiras Pedagógicas</label>
+                        <textarea name="barreiras_pedagogicas" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.barreiras_pedagogicas if caso else '' }}</textarea>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Barreiras Comunicacionais</label>
+                        <textarea name="barreiras_comunicacionais" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.barreiras_comunicacionais if caso else '' }}</textarea>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">Barreiras Atitudinais</label>
+                        <textarea name="barreiras_atitudinais" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ caso.barreiras_atitudinais if caso else '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card space-y-4">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">6. Levantamento das Necessidades Educacionais Específicas</label>
+                    <textarea name="necessidades_especificas" rows="4" placeholder="Adaptação curricular, tecnologia assistiva, recursos acessíveis, apoio humano..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none" required>{{ caso.necessidades_especificas if caso else '' }}</textarea>
+                </div>
+
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card space-y-6">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                        <h4 class="text-sm font-bold tracking-tight text-gov-dark">7. Matriz de Intervenções e Estratégias</h4>
+                        <button type="button" onclick="adicionarLinhaIntervencao()" class="bg-gov-navy text-white font-semibold px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm">
+                            + Adicionar Linha
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-100">
+                        <table class="w-full text-left" id="tabela_intervencoes">
+                            <thead class="bg-slate-50 border-b border-slate-100 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                                <tr>
+                                    <th class="p-4">Necessidade</th>
+                                    <th class="p-4">Estratégia</th>
+                                    <th class="p-4">Responsável</th>
+                                    <th class="p-4">Periodicidade</th>
+                                    <th class="p-4 text-center">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs" id="corpo_intervencoes">
+                                <tr class="linha-intervencao-item hover:bg-slate-50/50 transition-colors">
+                                    <td class="p-3"><input type="text" name="nec_id[]" placeholder="Ex: Flexibilização Curricular" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal"></td>
+                                    <td class="p-3"><input type="text" name="est_int[]" placeholder="Ex: Redução de enunciados" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal"></td>
+                                    <td class="p-3"><input type="text" name="resp[]" placeholder="Ex: Professor Regente" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal"></td>
+                                    <td class="p-3"><input type="text" name="periodo[]" placeholder="Ex: Contínuo" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal"></td>
+                                    <td class="p-3 text-center">
+                                        <button type="button" onclick="removerLinha(this)" class="text-red-400 hover:text-red-600 font-bold p-2 transition-colors">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bloco-4" class="space-y-8 hidden">
+                
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="space-y-4">
+                        <span class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 block border-b border-slate-100 pb-2">Diretriz Processual</span>
+                        <div class="space-y-3 text-xs text-gov-dark font-medium">
+                            <label class="flex items-center gap-3 cursor-pointer group">
+                                <input type="checkbox" name="necessita_pei" {% if caso and caso.necessita_pei %}checked{% endif %} class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue transition-all">
+                                <span class="group-hover:text-gov-blue transition-colors">Necessita de PEI?</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer group">
+                                <input type="checkbox" name="necessita_paee" {% if caso and caso.necessita_paee %}checked{% endif %} class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue transition-all">
+                                <span class="group-hover:text-gov-blue transition-colors">Necessita de PAEE?</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer group">
+                                <input type="checkbox" name="necessita_aee" {% if caso and caso.necessita_aee %}checked{% endif %} class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue transition-all">
+                                <span class="group-hover:text-gov-blue transition-colors">Necessita de AEE?</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer group">
+                                <input type="checkbox" name="necessita_apoio" {% if caso and caso.necessita_apoio %}checked{% endif %} class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue transition-all">
+                                <span class="group-hover:text-gov-blue transition-colors">Necessita de Apoio Humano?</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2 space-y-4 md:border-l md:border-slate-100 md:pl-6">
+                        <span class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 block border-b border-slate-100 pb-2">Tipo de Apoio Necessário</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600 font-medium">
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="apoio_pedagogico" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Apoio pedagógico</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="apoio_locomocao" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Apoio à locomoção</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="apoio_alimentacao" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Apoio à alimentação</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="apoio_higiene" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Apoio à higiene</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="apoio_comportamental" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Apoio comportamental</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="apoio_comunicacional" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Apoio comunicacional</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="media_escolar" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Mediação escolar</span></label>
+                            <div class="flex items-center gap-2"><span class="text-slate-400">Outro:</span><input type="text" name="apoio_outro" class="bg-slate-50 border border-slate-200 rounded flex-grow p-1.5 focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-4">
+                        <span class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 block border-b border-slate-100 pb-2">Intensidade do Suporte</span>
+                        <div class="space-y-3 text-xs text-slate-600 font-medium">
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Leve" class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Suporte Leve</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Moderado" checked class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Suporte Moderado</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Intenso" class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Suporte Intenso</span></label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 md:border-l md:border-slate-100 md:pl-8">
+                        <span class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 block border-b border-slate-100 pb-2">Encaminhamentos Necessários</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-slate-600 font-medium">
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="enc_psicopedagogo" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Psicopedagogo(a)</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="enc_psicologo" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Psicólogo(a)</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="enc_fono" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Fonoaudiólogo(a)</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="enc_to" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Terapeuta Ocupacional</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="enc_fisioterapeuta" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Fisioterapeuta</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="enc_neuropediatra" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Neuropediatra</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card space-y-4">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">9. Parecer Pedagógico Inicial da Equipe Técnica</label>
+                    <textarea name="parecer_pedagogico" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs text-slate-600 font-normal focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none" required>{{ caso.parecer_pedagogico if caso else '' }}</textarea>
+                </div>
+
+                <div class="bg-amber-50/50 border border-amber-200 rounded-2xl p-8 shadow-sm space-y-6">
+                    <div class="text-sm leading-relaxed text-slate-600">
+                        <p class="font-bold text-amber-800 tracking-tight flex items-center gap-2 border-b border-amber-200/50 pb-2 mb-3">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            10. Termo de Encerramento e Encaminhamento Regulamentar
+                        </p>
+                        <p class="font-normal text-xs text-slate-500">Após análise das informações coletadas no estudo de caso, observações pedagógicas, entrevista familiar e levantamento das necessidades educacionais específicas, recomenda-se a elaboração e acompanhamento do Plano Educacional Individualizado – PEI.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row justify-end gap-4 pt-2">
+                        <button type="submit" name="salvar_rascunho" class="bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 px-6 py-3 rounded-lg shadow-sm text-xs font-semibold uppercase tracking-wider transition-all">
+                            Salvar Rascunho
+                        </button>
+                        <button type="submit" name="homologar_caso" class="bg-gov-blue hover:bg-blue-600 text-white px-8 py-3 rounded-lg shadow-md text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            Homologar Estudo de Caso
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function mudarBloco(blocoAlvo) {
+        document.getElementById('bloco-1').classList.add('hidden');
+        document.getElementById('bloco-2').classList.add('hidden');
+        document.getElementById('bloco-3').classList.add('hidden');
+        document.getElementById('bloco-4').classList.add('hidden');
+
+        for (let i = 1; i <= 4; i++) {
+            let aba = document.getElementById('aba-' + i);
+            aba.classList.remove('border-emerald-400', 'text-white', 'bg-slate-800/50');
+            aba.classList.add('border-transparent', 'text-slate-400');
+        }
+
+        document.getElementById('bloco-' + blocoAlvo).classList.remove('hidden');
+        let abaAtiva = document.getElementById('aba-' + blocoAlvo);
+        abaAtiva.classList.remove('border-transparent', 'text-slate-400');
+        abaAtiva.classList.add('border-emerald-400', 'text-white', 'bg-slate-800/50');
+    }
+
+    function adicionarLinhaIntervencao() {
+        const corpo = document.getElementById('corpo_intervencoes');
+        const novaLinha = document.createElement('tr');
+        novaLinha.className = 'linha-intervencao-item hover:bg-slate-50/50 transition-colors';
+        novaLinha.innerHTML = `
+            <td class="p-3"><input type="text" name="nec_id[]" placeholder="Necessidade" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal"></td>
+            <td class="p-3"><input type="text" name="est_int[]" placeholder="Estratégia" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal"></td>
+            <td class="p-3"><input type="text" name="resp[]" placeholder="Responsável" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal"></td>
+            <td class="p-3"><input type="text" name="periodo[]" placeholder="Periodicidade" class="w-full bg-slate-50 border border-slate-200 p-2.5 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all font-normal"></td>
+            <td class="p-3 text-center">
+                <button type="button" onclick="removerLinha(this)" class="text-red-400 hover:text-red-600 font-bold p-2 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </td>
+        `;
+        corpo.appendChild(novaLinha);
+    }
+
+    function removerLinha(botao) {
+        const linha = botao.closest('tr');
+        const corpo = document.getElementById('corpo_intervencoes');
+        if (corpo.querySelectorAll('tr').length > 1) { linha.remove(); }
+    }
+
+    // COPILOTO DE IA ATUALIZADO PARA PREENCHIMENTO INDIVIDUALIZADO DE ALTA ESCALA
+    function gerarIA(contexto) {
+        if (contexto === 'historico') {
+            document.getElementById('hist_frequencia_escolar').value = "Frequência regular (92%), com pequenos atrasos em dias de terapia externa.";
+            document.getElementById('hist_desenvolvimento_academico').value = "Demonstra evolução na alfabetização inicial e excelente desempenho em lógica visual.";
+            document.getElementById('hist_dificuldades_observadas').value = "Dificuldade na interpretação de enunciados longos e abstração de conceitos complexos.";
+            document.getElementById('hist_potencialidades_identificadas').value = "Foco concentrado em tarefas estruturadas por imagens e forte memória de longo prazo.";
+            document.getElementById('hist_relatorios_anteriores').value = "Parecer do ano anterior sugere continuidade de tempo estendido e apoio de Comunicação Alternativa.";
+            document.getElementById('hist_participacao_projetos').value = "Participação ativa nas oficinas de artes e jogos matemáticos da unidade.";
+        } else if (contexto === 'familia') {
+            document.getElementById('fam_historico_desenvolvimento').value = "Marcos do desenvolvimento motor atingidos no tempo esperado; atraso global na aquisição de fala ativa.";
+            document.getElementById('fam_diagnosticos_apresentados').value = "Laudo médico definitivo anexado atestando Transtorno do Espectro Autista (F84.0).";
+            document.getElementById('fam_acompanhamentos_terapeuticos').value = "Sessões de Fonoaudiologia e Terapia Ocupacional contraturno duas vezes por semana.";
+            document.getElementById('fam_rotina_familiar').value = "Ambiente familiar bem estruturado, com horários previsíveis para alimentação e sono.";
+            document.getElementById('fam_comportamento_casa').value = "Tranquilo, apresentando agitação pontual apenas mediante quebra brusca de rotina.";
+            document.getElementById('fam_interacao_social').value = "Interage bem com os familiares diretos; demonstra timidez e isolamento com terceiros.";
+            document.getElementById('fam_autonomia').value = "Realiza alimentação independente; necessita de auxílio para amarrar calçados e higiene íntima completa.";
+            document.getElementById('fam_expectativas_familia').value = "A família espera o desenvolvimento da autonomia social e consolidação da leitura funcional.";
+        } else if (contexto === 'observacao') {
+            document.getElementById('obs_participacao_atividades').value = "Participa ativamente quando estimulado por reforçadores visuais concretos.";
+            document.getElementById('obs_comunicacao').value = "Usa frases curtas de forma funcional; apoia-se em gestos e apontamentos quando sob estresse.";
+            document.getElementById('obs_interacao_social').value = "Prefere brincadeiras isoladas, mas aceita a aproximação de colegas em jogos de regras simples.";
+            document.getElementById('obs_atencao_concentracao').value = "Hiperfoco estável em atividades de seu interesse; dispersão rápida em explicações puramente expositivas.";
+            document.getElementById('obs_coordenacao_motora').value = "Apresenta leve hipotonia global; escrita necessita de pauta ampliada e adaptadores de lápis.";
+            document.getElementById('obs_compreensao_comandos').value = "Compreende comandos diretos fracionados (passo a passo); ignora ordens sequenciais longas.";
+            document.getElementById('obs_tempo_execucao').value = "Exige cerca de 50% a mais de tempo comparado à média da turma regular.";
+            document.getElementById('obs_necessidade_mediacao').value = "Exige mediação frequente para manutenção do foco e transição entre atividades.";
+        }
+        alert("🤖 Copiloto IA: Campos específicos alimentados com base técnica regulamentar!");
+    }
+</script>
+{% endblock %}

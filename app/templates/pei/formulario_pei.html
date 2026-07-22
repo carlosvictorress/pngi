@@ -1,0 +1,591 @@
+{% extends 'base.html' %}
+
+{% block header_title %}Módulo 2 — Prontuário Técnico e Pedagógico do PEI Escolar (Padrão MEC){% endblock %}
+
+{% block content %}
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: { 
+                    sans: ['Inter', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'] 
+                },
+                colors: {
+                    gov: { 
+                        navy: '#0A192F', 
+                        blue: '#1351B4', 
+                        green: '#00A859', 
+                        yellow: '#FFCD00', 
+                        dark: '#1E293B', 
+                        light: '#64748B', 
+                        bg: '#F8FAFC' 
+                    }
+                },
+                boxShadow: {
+                    glow: '0 0 20px rgba(19, 81, 180, 0.3)',
+                    card: '0 10px 30px -5px rgba(0, 0, 0, 0.1)'
+                }
+            }
+        }
+    }
+</script>
+
+<div class="max-w-[1400px] mx-auto px-6 py-8 font-sans antialiased text-gov-dark space-y-8 bg-gov-bg min-h-screen">
+    
+    <div class="bg-gov-navy rounded-3xl p-8 md:p-10 shadow-card relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gov-blue opacity-20 blur-3xl rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none"></div>
+        
+        <div class="relative z-10 flex flex-col lg:flex-row justify-between items-start gap-8">
+            <div class="space-y-3 flex-grow">
+                <span class="inline-block bg-blue-500/10 border border-blue-400/20 text-blue-300 text-[9px] font-semibold uppercase tracking-widest px-3 py-1.5 rounded-md">
+                    Instrumento Oficial de Governança Inclusiva (Padrão SECADI/MEC)
+                </span>
+                <h2 class="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                    {% if pei %}Editando Prontuário de:{% else %}Estudante:{% endif %} 
+                    <span class="text-blue-400 uppercase ml-2">{{ aluno.nome }}</span>
+                </h2>
+                <p class="text-xs text-slate-300 font-normal max-w-3xl leading-relaxed">
+                    Emissão e acompanhamento de plano institucional individualizado conforme diretrizes técnicas da SECADI/MEC, alinhado às variáveis regulamentares do Censo Escolar INEP.
+                </p>
+            </div>
+            
+            <div class="text-left text-xs space-y-2 min-w-[320px] w-full lg:w-auto bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-inner">
+                <p class="flex justify-between border-b border-white/10 pb-2">
+                    <span class="text-blue-200 uppercase text-[9px] font-semibold tracking-widest">Escola Lotação:</span> 
+                    <span class="text-white font-medium">{{ aluno.escola.nome if aluno.escola is mapping else (aluno.escola if aluno.escola else 'Não Informada') }}</span>
+                </p>
+                <p class="flex justify-between border-b border-white/10 pb-2">
+                    <span class="text-blue-200 uppercase text-[9px] font-semibold tracking-widest">Turma / Turno:</span> 
+                    <span class="text-white font-medium">{{ aluno.turma if aluno.turma else '5º Ano B / Manhã' }}</span>
+                </p>
+                <p class="flex justify-between pt-1">
+                    <span class="text-blue-200 uppercase text-[9px] font-semibold tracking-widest">Condição Censo:</span> 
+                    <span class="text-white font-bold uppercase tracking-wider">{{ aluno.tipo_deficiencia }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-card overflow-hidden">
+        
+        <div class="flex flex-wrap border-b border-slate-800 bg-slate-900 text-[9px] font-semibold uppercase tracking-widest">
+            <button type="button" onclick="mudarBloco(1)" id="aba-1" class="flex-1 py-5 px-4 text-center border-b-[3px] border-emerald-400 text-white bg-slate-800/50 transition-all focus:outline-none">
+                1. Contexto & Base
+            </button>
+            <button type="button" onclick="mudarBloco(2)" id="aba-2" class="flex-1 py-5 px-4 text-center border-b-[3px] border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                2. Entrevista Família
+            </button>
+            <button type="button" onclick="mudarBloco(3)" id="aba-3" class="flex-1 py-5 px-4 text-center border-b-[3px] border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                3. Perfil & Barreiras
+            </button>
+            <button type="button" onclick="mudarBloco(4)" id="aba-4" class="flex-1 py-5 px-4 text-center border-b-[3px] border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                4. Metas & Cronograma
+            </button>
+            <button type="button" onclick="mudarBloco(5)" id="aba-5" class="flex-1 py-5 px-4 text-center border-b-[3px] border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                5. BNCC & Adaptações
+            </button>
+            <button type="button" onclick="mudarBloco(6)" id="aba-6" class="flex-1 py-5 px-4 text-center border-b-[3px] border-transparent text-slate-400 hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
+                6. Recursos SRM
+            </button>
+        </div>
+
+        <form method="POST" class="p-8 md:p-12 text-xs font-normal bg-gov-bg">
+            {% if pei %}
+            <input type="hidden" name="pei_id" value="{{ pei.id }}">
+            {% endif %}
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200 mb-10 shadow-sm">
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Ano Letivo *</label>
+                    <input type="number" name="ano_letivo" value="{{ pei.ano_letivo if pei else 2026 }}" required class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-mono font-bold text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Período Avaliativo *</label>
+                    <select name="periodo_trimestre" required class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-bold text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                        <option value="1" {% if pei and pei.periodo_trimestre == 1 %}selected{% endif %}>1º Tri — Diagnóstico Base</option>
+                        <option value="2" {% if pei and pei.periodo_trimestre == 2 %}selected{% endif %}>2º Tri — Progresso</option>
+                        <option value="3" {% if pei and pei.periodo_trimestre == 3 %}selected{% endif %}>3º Tri — Relatório Final</option>
+                    </select>
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Coordenador Pedagógico</label>
+                    <input type="text" name="coordenador_pedagogico" value="{{ pei.coordenador_pedagogico if pei else '' }}" class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Período de Vigência</label>
+                    <input type="text" name="periodo_vigencia" value="{{ pei.periodo_vigencia if pei else 'Fevereiro a Dezembro de 2026' }}" class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                </div>
+            </div>
+
+            <div id="bloco-1" class="space-y-6">
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-4">
+                    <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">2. Base Legal e Normativa</h4>
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-xs text-slate-600 space-y-3 font-normal leading-relaxed">
+                        <p class="text-gov-dark font-semibold">Este Plano Educacional Individualizado está fundamentado estritamente nos seguintes dispositivos legais:</p>
+                        <ul class="list-disc list-inside space-y-1.5 pl-2">
+                            <li>Constituição Federal de 1988;</li>
+                            <li>Lei nº 9.394/96 – Lei de Diretrizes e Bases da Educação Nacional (LDB);</li>
+                            <li>Lei Brasileira de Inclusão – Lei nº 13.146/2015;</li>
+                            <li>Política Nacional de Educação Especial na Perspectiva da Educação Inclusiva;</li>
+                            <li>Base Nacional Comum Curricular (BNCC);</li>
+                            <li>Decreto nº 7.611/2011;</li>
+                            <li>Resoluções do Conselho Nacional de Educação referentes ao AEE;</li>
+                            <li>Normativas municipais vigentes sobre Educação Inclusiva e elaboração do PEI.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bloco-2" class="space-y-6 hidden">
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-3 gap-4">
+                        <h4 class="text-sm font-bold tracking-tight text-gov-dark">3. Entrevista com os Responsáveis</h4>
+                        <button type="button" onclick="gerarIA('entrevista')" class="bg-purple-50 text-purple-600 hover:bg-purple-600 hover:text-white border border-purple-100 font-semibold px-4 py-2 rounded-lg text-[9px] uppercase tracking-widest transition-all shadow-sm">
+                            🤖 Rodar Anamnese via IA
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-100 mb-6">
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Parentesco</label>
+                            <input type="text" id="resp_parentesco" name="resp_parentesco" value="{{ pei.resp_parentesco if pei else '' }}" class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Contato / Telefone</label>
+                            <input type="text" id="resp_contato" name="resp_contato" value="{{ pei.resp_contato if pei else '' }}" class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Data da Entrevista</label>
+                            <input type="text" id="resp_data_entrevista" name="resp_data_entrevista" value="{{ pei.resp_data_entrevista if pei else '' }}" placeholder="dd/mm/2026" class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Histórico do Desenvolvimento</label>
+                            <textarea id="resp_historico_desenvolvimento" name="resp_historico_desenvolvimento" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_historico_desenvolvimento if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Acompanhamento Médico / Terapêutico</label>
+                            <textarea id="resp_acompanhamento_medico" name="resp_acompanhamento_medico" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_acompanhamento_medico if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Dificuldades Familiares</label>
+                            <textarea id="resp_dificuldades_familiares" name="resp_dificuldades_familiares" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_dificuldades_familiares if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Potencialidades e Habilidades Notadas</label>
+                            <textarea id="resp_potencialidades" name="resp_potencialidades" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_potencialidades if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Rotina da Criança em Casa</label>
+                            <textarea id="resp_rotina_casa" name="resp_rotina_casa" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_rotina_casa if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Uso de Medicação Contínua</label>
+                            <textarea id="resp_medicacao" name="resp_medicacao" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_medicacao if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Laudos ou Relatórios Atualizados</label>
+                            <textarea id="resp_laudos_relatorios" name="resp_laudos_relatorios" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_laudos_relatorios if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Apoio para Cuidados Básicos</label>
+                            <textarea id="resp_necessita_apoio_basico" name="resp_necessita_apoio_basico" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_necessita_apoio_basico if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Interesse pelas Atividades Escolares</label>
+                            <textarea id="resp_interesse_atividades" name="resp_interesse_atividades" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_interesse_atividades if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Nível de Autonomia nas Tarefas</label>
+                            <textarea id="resp_autonomia_tarefas" name="resp_autonomia_tarefas" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_autonomia_tarefas if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Interação Social Familiar</label>
+                            <textarea id="resp_interacao_social" name="resp_interacao_social" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_interacao_social if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Comportamento em Casa</label>
+                            <textarea id="resp_comportamento_domestico" name="resp_comportamento_domestico" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_comportamento_domestico if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Preferências, Estímulos e Sensibilidades</label>
+                            <textarea id="resp_preferencias_sensibilidades" name="resp_preferencias_sensibilidades" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_preferencias_sensibilidades if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Expectativas da Família</label>
+                            <textarea id="resp_expectativas_familia" name="resp_expectativas_familia" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_expectativas_familia if pei else '' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Encaminhamentos Definidos em Conjunto</label>
+                            <textarea id="resp_encaminhamentos_conjuntos" name="resp_encaminhamentos_conjuntos" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.resp_encaminhamentos_conjuntos if pei else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bloco-3" class="space-y-8 hidden">
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+                    <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">4. Caracterização (Aspectos de Desenvolvimento)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Aspectos Cognitivos</label>
+                            <textarea id="char_aspectos_cognitivos" name="char_aspectos_cognitivos" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.char_aspectos_cognitivos if pei else 'O estudante apresenta potencial de aprendizagem compatível com a etapa escolar, necessitando de adaptações metodológicas e acompanhamento contínuo.' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Aspectos Motores</label>
+                            <textarea id="char_aspectos_motores" name="char_aspectos_motores" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.char_aspectos_motores if pei else 'Apresenta limitação física que pode interferir na mobilidade, escrita, postura e realização de atividades que exijam coordenação.' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Aspectos Socioemocionais</label>
+                            <textarea id="char_aspectos_socioemocionais" name="char_aspectos_socioemocionais" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.char_aspectos_socioemocionais if pei else 'Demonstra interação social satisfatória com colegas, necessitando incentivo à autonomia e participação.' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Aspectos Comunicacionais</label>
+                            <textarea id="char_aspectos_comunicacionais" name="char_aspectos_comunicacionais" rows="4" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.char_aspectos_comunicacionais if pei else 'Comunica-se adequadamente, compreendendo comandos simples e instruções pedagógicas.' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+                    <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">5. Mapeamento das Barreiras Encontradas</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Barreiras Arquitetônicas / Físicas</label>
+                            <textarea name="barreiras_arquitetonicas" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.barreiras_arquitetonicas if pei else 'Dificuldade de acessibilidade em alguns espaços; necessidade de mobiliário adaptado.' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Barreiras Pedagógicas</label>
+                            <textarea name="barreiras_pedagogicas" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.barreiras_pedagogicas if pei else 'Necessidade de ampliação do tempo para atividades e adaptação escrita.' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Barreiras de Comunicação</label>
+                            <textarea name="barreiras_comunicacao" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.barreiras_comunicacao if pei else 'Necessidade de instruções claras e uso de recursos visuais.' }}</textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Barreiras Atitudinais</label>
+                            <textarea name="barreiras_atidudinais" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none">{{ pei.barreiras_atidudinais if pei else 'Sensibilização da comunidade escolar quanto à inclusão.' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-4">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">6. Objetivo Geral do PEI</label>
+                    <textarea name="potencialidades_cognitivas" rows="3" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs font-medium text-slate-700 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none" required>{{ pei.potencialidades_cognitivas if pei else 'Garantir ao estudante acesso, permanência, participação e aprendizagem com equidade, por meio de estratégias inclusivas.' }}</textarea>
+                </div>
+            </div>
+
+            <div id="bloco-4" class="space-y-6 hidden">
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-100 pb-4 gap-4">
+                        <div>
+                            <h4 class="text-sm font-bold tracking-tight text-gov-dark">7. Cronograma de Metas Pedagógicas</h4>
+                            <p class="text-[10px] text-slate-400 font-normal mt-1">Selecione a periodização e monte a árvore de objetivos específicos.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <select name="cronograma_periodizacao" class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 font-medium text-gov-dark text-xs focus:outline-none focus:border-gov-blue transition-all">
+                                <option value="Mensais" {% if pei and pei.cronograma_periodizacao == 'Mensais' %}selected{% endif %}>Mensais</option>
+                                <option value="Bimestrais" {% if pei and pei.cronograma_periodizacao == 'Bimestrais' %}selected{% endif %}>Bimestrais</option>
+                                <option value="Trimestrais" {% if not pei or pei.cronograma_periodizacao == 'Trimestrais' %}selected{% endif %}>Trimestrais</option>
+                                <option value="Semestrais" {% if pei and pei.cronograma_periodizacao == 'Semestrais' %}selected{% endif %}>Semestrais</option>
+                            </select>
+                            <button type="button" onclick="adicionarLinhaMeta()" class="bg-gov-navy text-white font-semibold px-4 py-2.5 rounded-lg text-[9px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm">
+                                + Add Meta
+                            </button>
+                            <button type="button" onclick="gerarMetasIA()" class="bg-purple-50 text-purple-600 border border-purple-100 font-semibold px-4 py-2.5 rounded-lg text-[9px] uppercase tracking-widest hover:bg-purple-600 hover:text-white transition-all shadow-sm">
+                                🤖 IA Injetar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-100">
+                        <table class="w-full text-left" id="tabela_metas">
+                            <thead class="bg-slate-50 border-b border-slate-100 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                                <tr>
+                                    <th class="p-4 w-[15%]">Período/Mês</th>
+                                    <th class="p-4 w-[35%]">Objetivos Específicos</th>
+                                    <th class="p-4 w-[35%]">Estratégias Pedagógicas</th>
+                                    <th class="p-4 w-[12%]">Avaliação</th>
+                                    <th class="p-4 text-center w-[3%]">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs font-normal" id="corpo_metas">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bloco-5" class="space-y-6 hidden">
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+                    <div class="flex flex-col lg:flex-row justify-between lg:items-center border-b border-slate-100 pb-4 gap-4">
+                        <div>
+                            <h4 class="text-sm font-bold tracking-tight text-gov-dark">8. Organização Curricular (BNCC)</h4>
+                            <p class="text-[10px] text-slate-400 font-normal mt-1">Mapeamento de conteúdos fracionados, habilidades e recursos didáticos.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" onclick="adicionarLinhaGrade()" class="bg-gov-navy text-white font-semibold px-4 py-2.5 rounded-lg text-[9px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm">
+                                + Add Matéria
+                            </button>
+                            <button type="button" onclick="gerarGradeBNCC_IA()" class="bg-purple-50 text-purple-600 border border-purple-100 font-semibold px-4 py-2.5 rounded-lg text-[9px] uppercase tracking-widest hover:bg-purple-600 hover:text-white transition-all shadow-sm">
+                                🤖 IA Grade Completa
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-100">
+                        <table class="w-full text-left" id="tabela_grade">
+                            <thead class="bg-slate-50 border-b border-slate-100 text-[9px] font-semibold uppercase tracking-widest text-slate-400">
+                                <tr>
+                                    <th class="p-4 w-[12%]">Componente</th>
+                                    <th class="p-4 w-[18%]">Conteúdo Curricular</th>
+                                    <th class="p-4 w-[12%]">Hab. BNCC</th>
+                                    <th class="p-4 w-[25%]">Estratégias</th>
+                                    <th class="p-4 w-[18%]">Recursos</th>
+                                    <th class="p-4 w-[12%]">Avaliação</th>
+                                    <th class="p-4 text-center w-[3%]">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs font-normal" id="corpo_grade">
+                                </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 space-y-4">
+                        <span class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Flexibilizações Gerais Obrigatórias</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-medium text-slate-600">
+                            <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Redução de atividades</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Ampliação do tempo</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Adaptação de linguagem</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Uso de recursos visuais</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Avaliação diferenciada</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Apoio de mediador</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Adequação avaliativa</label>
+                            <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Fragmentação em etapas</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bloco-6" class="space-y-8 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+                        <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">📦 Recursos de Tecnologia Assistiva</h4>
+                        <div class="space-y-4 text-xs font-medium text-slate-600">
+                            <label class="flex items-center gap-3 cursor-pointer group hover:bg-slate-50 p-2 rounded-lg transition-colors">
+                                <input type="checkbox" name="recursos_opticos_adicionais" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue" {% if pei and pei.recursos_opticos_adicionais %}checked{% endif %}>
+                                <span class="group-hover:text-gov-dark">Recursos ópticos / não-ópticos (Baixa Visão / Cegueira)</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer group hover:bg-slate-50 p-2 rounded-lg transition-colors">
+                                <input type="checkbox" name="recursos_comunicacao_alternativa" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue" {% if pei and pei.recursos_comunicacao_alternativa %}checked{% endif %}>
+                                <span class="group-hover:text-gov-dark">Sistemas de Comunicação Alternativa (CAA)</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer group hover:bg-slate-50 p-2 rounded-lg transition-colors">
+                                <input type="checkbox" name="recursos_acessibilidade_informatica" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue" {% if pei and pei.recursos_acessibilidade_informatica %}checked{% endif %}>
+                                <span class="group-hover:text-gov-dark">Periféricos Adaptados (Mouses/Teclados)</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer group hover:bg-slate-50 p-2 rounded-lg transition-colors">
+                                <input type="checkbox" name="recursos_atendimento_libras" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue" {% if pei and pei.recursos_atendimento_libras %}checked{% endif %}>
+                                <span class="group-hover:text-gov-dark">Tradução Pedagógica em LIBRAS</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+                        <h4 class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 border-b border-slate-100 pb-2">🏫 Organização do AEE (Contra-turno)</h4>
+                        <div class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Carga Semanal SRM</label>
+                                <select name="frequencia_srm_semanal" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:outline-none transition-all">
+                                    <option value="1" {% if pei and pei.frequencia_srm_semanal == 1 %}selected{% endif %}>1 Sessão por semana</option>
+                                    <option value="2" {% if not pei or pei.frequencia_srm_semanal == 2 %}selected{% endif %}>2 Sessões por semana (Padrão)</option>
+                                    <option value="3" {% if pei and pei.frequencia_srm_semanal == 3 %}selected{% endif %}>3 Sessões por semana (Crítico)</option>
+                                </select>
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Arquitetura de Agrupamento</label>
+                                <select name="organizacao_atendimento" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:outline-none transition-all">
+                                    <option value="Individual" {% if pei and pei.organizacao_atendimento == 'Individual' %}selected{% endif %}>Atendimento Individualizado</option>
+                                    <option value="Grupo" {% if pei and pei.organizacao_atendimento == 'Grupo' %}selected{% endif %}>Em Pequenos Grupos</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white border-t-[3px] border-t-gov-blue p-8 rounded-b-2xl shadow-card space-y-6">
+                    <div class="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 hover:border-gov-blue/50 transition-colors">
+                        <input type="checkbox" name="necessita_profissional_apoio" id="check-apoio" onchange="document.getElementById('area-apoio').classList.toggle('hidden')" class="w-5 h-5 text-gov-blue border-slate-300 rounded focus:ring-gov-blue cursor-pointer" {% if pei and pei.necessita_profissional_apoio %}checked{% endif %}>
+                        <label for="check-apoio" class="font-bold text-xs text-gov-blue tracking-tight cursor-pointer">⚠️ Requer Profissional de Apoio Escolar Adicional (Art. 3º, XIII da LBI)</label>
+                    </div>
+                    <div id="area-apoio" class="{% if pei and pei.necessita_profissional_apoio %}{% else %}hidden{% endif %} space-y-2 pt-2 transition-all">
+                        <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Plano de Atuação do Profissional de Apoio</label>
+                        <textarea name="atividades_apoio_especificadas" rows="3" placeholder="Descreva os fundamentos de auxílio demandados..." class="w-full bg-slate-50 border border-slate-200 rounded-lg p-4 text-xs font-normal text-slate-600 focus:bg-white focus:border-gov-blue focus:outline-none transition-all resize-none">{{ pei.atividades_apoio_especificadas if pei else 'Auxílio na locomoção interna nos espaços comuns e mediação específica em tarefas de escrita fina.' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 rounded-3xl p-8 md:p-10 shadow-xl relative overflow-hidden space-y-8 border border-slate-800">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-gov-blue opacity-20 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+                    
+                    <div class="relative z-10 text-sm leading-relaxed text-slate-300">
+                        <p class="font-bold text-white tracking-tight flex items-center gap-3 border-b border-slate-700 pb-3 mb-4">
+                            <svg class="w-5 h-5 text-gov-yellow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                            Protocolo de Validação Jurídica, Rastreabilidade e Auditoria
+                        </p>
+                        <p class="text-xs font-normal max-w-4xl">Este documento digitalizado constitui fé pública de prestação de serviço educacional continuado. Ao subscrever e enviar este termo, os metadados técnicos serão vinculados ao prontuário histórico do aluno para aprovação da gestão escolar e arquivamento oficial.</p>
+                    </div>
+                    
+                    <div class="relative z-10 flex flex-col sm:flex-row justify-end gap-4 font-semibold text-xs pt-4 border-t border-slate-800">
+                        <button type="submit" name="salvar_rascunho" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 py-3.5 rounded-xl shadow-sm uppercase tracking-widest transition-all">
+                            Salvar Rascunho
+                        </button>
+                        <button type="submit" name="enviar_validacao" class="bg-gov-blue hover:bg-blue-600 text-white px-8 py-3.5 rounded-xl shadow-glow uppercase tracking-widest transition-all flex items-center justify-center gap-2">
+                            ✍️ Assinar Eletronicamente e Enviar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    const metasSalvas = {{ (pei.metas_pedagogicas_json|safe) if pei and pei.metas_pedagogicas_json else '[]' }};
+    const gradeSalva = {{ (pei.disciplinas_bncc_json|safe) if pei and pei.disciplinas_bncc_json else '[]' }};
+
+    document.addEventListener("DOMContentLoaded", function() {
+        if (metasSalvas.length > 0) {
+            metasSalvas.forEach(m => carregarLinhaMeta(m.periodo, m.objetivo, m.estrategia, m.avaliacao));
+        } else {
+            adicionarLinhaMeta();
+        }
+
+        if (gradeSalva.length > 0) {
+            gradeSalva.forEach(g => carregarLinhaGrade(g.disciplina, g.conteudo, g.bncc, g.metodologia, g.recursos, g.avaliacao));
+        } else {
+            adicionarLinhaGrade();
+        }
+    });
+
+    function mudarBloco(blocoAlvo) {
+        for (let i = 1; i <= 6; i++) {
+            document.getElementById('bloco-' + i)?.classList.add('hidden');
+            let aba = document.getElementById('aba-' + i);
+            aba?.classList.remove('border-emerald-400', 'text-white', 'bg-slate-800/50');
+            aba?.classList.add('border-transparent', 'text-slate-400');
+        }
+        document.getElementById('bloco-' + blocoAlvo).classList.remove('hidden');
+        let abaAtiva = document.getElementById('aba-' + blocoAlvo);
+        abaAtiva.classList.remove('border-transparent', 'text-slate-400');
+        abaAtiva.classList.add('border-emerald-400', 'text-white', 'bg-slate-800/50');
+    }
+
+    function adicionarLinhaMeta() {
+        carregarLinhaMeta('', '', '', '');
+    }
+
+    function carregarLinhaMeta(perioricidade, obj, est, ava) {
+        const corpo = document.getElementById('corpo_metas');
+        const novaLinha = document.createElement('tr');
+        novaLinha.className = 'linha-meta-item hover:bg-slate-50/50 transition-colors';
+        novaLinha.innerHTML = `
+            <td class="p-3"><input type="text" name="meta_periodo[]" value="${perioricidade}" placeholder="Mês/Bim" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
+            <td class="p-3"><textarea name="meta_objetivo[]" rows="2" placeholder="Objetivos" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all resize-none">${obj}</textarea></td>
+            <td class="p-3"><textarea name="meta_estrategia[]" rows="2" placeholder="Estratégias" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all resize-none">${est}</textarea></td>
+            <td class="p-3"><input type="text" name="meta_aval[]" value="${ava}" placeholder="Avaliação" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
+            <td class="p-3 text-center">
+                <button type="button" onclick="removerLinhaTabela(this)" class="text-red-400 hover:text-red-600 font-bold p-2 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </td>
+        `;
+        corpo.appendChild(novaLinha);
+    }
+
+    function adicionarLinhaGrade() {
+        carregarLinhaGrade('', '', '', '', '', '');
+    }
+
+    function carregarLinhaGrade(componente, conteudo, bncc, metodo, recurso, aval) {
+        const corpo = document.getElementById('corpo_grade');
+        const novaLinha = document.createElement('tr');
+        novaLinha.className = 'linha-grade-item hover:bg-slate-50/50 transition-colors';
+        novaLinha.innerHTML = `
+            <td class="p-3"><input type="text" name="disc_nome[]" value="${componente}" placeholder="Matéria" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
+            <td class="p-3"><input type="text" name="disc_conteudo[]" value="${conteudo}" placeholder="Conteúdo" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
+            <td class="p-3"><input type="text" name="disc_bncc[]" value="${bncc}" placeholder="Código" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg font-mono focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
+            <td class="p-3"><textarea name="disc_metodologia[]" rows="2" placeholder="Estratégias" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all resize-none">${metodo}</textarea></td>
+            <td class="p-3"><input type="text" name="disc_recursos[]" value="${recurso}" placeholder="Recursos" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
+            <td class="p-3"><input type="text" name="disc_avaliacao[]" value="${aval}" placeholder="Avaliação" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
+            <td class="p-3 text-center">
+                <button type="button" onclick="removerLinhaTabela(this)" class="text-red-400 hover:text-red-600 font-bold p-2 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </td>
+        `;
+        corpo.appendChild(novaLinha);
+    }
+
+    function removerLinhaTabela(botao) {
+        const linha = botao.closest('tr');
+        const corpo = linha.closest('tbody');
+        if (corpo.querySelectorAll('tr').length > 1) { linha.remove(); }
+    }
+
+    function gerarIA(tipo) {
+        if (tipo === 'entrevista') {
+            document.getElementById('resp_parentesco').value = "Mãe";
+            document.getElementById('resp_contato').value = "(89) 99422-4411";
+            document.getElementById('resp_data_entrevista').value = "12/02/2026";
+            document.getElementById('resp_historico_desenvolvimento').value = "Marcos motores atingidos adequadamente, mas apresentou atraso acentuado no desenvolvimento da fala e da linguagem compreensiva.";
+            document.getElementById('resp_acompanhamento_medico').value = "Acompanhamento regular com neuropediatra semestral e intervenções clínicas semanais com Terapeuta Ocupacional.";
+            document.getElementById('resp_dificuldades_familiares').value = "Dificuldade em manter atenção focada em atividades de rotina doméstica longa e episódios de rigidez comportamental.";
+            document.getElementById('resp_potencialidades').value = "Excelente orientação espacial, memória de longo prazo para imagens e facilidade intuitiva para jogos digitais pedagógicos.";
+            document.getElementById('resp_rotina_casa').value = "Rotina estruturada e previsível com horários bem definidos para sono, alimentação, higiene e lazer em telas fracionadas.";
+            document.getElementById('resp_medicacao').value = "Uso contínuo de medicação prescrita pelo neuropediatra para regulação e modulação atencional, ministrada pela manhã.";
+            document.getElementById('resp_laudos_relatorios').value = "Laudo emitido por equipe multidisciplinar com CID definitivo atestando Transtorno do Espectro Autista.";
+            document.getElementById('resp_necessita_apoio_basico').value = "Independente na alimentação; necessita de mediação sutil na locomoção em escadas e supervisão na higiene.";
+            document.getElementById('resp_interesse_atividades').value = "Manifesta interesse acentuado por atividades visuais baseadas em computadores, pranchas ilustradas e quebra-cabeças.";
+            document.getElementById('resp_autonomia_tarefas').value = "Realiza tarefas escolares simples quando fracionadas em etapas; dispersa-se diante de enunciados longos.";
+            document.getElementById('resp_interacao_social').value = "Interage bem no ambiente familiar restrito; demonstra timidez e isolamento interpares na presença de muitos estímulos.";
+            document.getElementById('resp_comportamento_domestico').value = "Comportamento calmo quando mantida a previsibilidade do ambiente; agitação esporádica sob quebras abruptas de rotina.";
+            document.getElementById('resp_preferencias_sensibilidades').value = "Preferência por estímulos cromáticos vivos e hipersensibilidade a ruídos agudos de alta intensidade.";
+            document.getElementById('resp_expectativas_familia').value = "Ampliação da autonomia funcional, socialização escolar interpares e consolidação da alfabetização funcional.";
+            document.getElementById('resp_encaminhamentos_conjuntos').value = "Pactuado envio de relatórios bimestrais mútuos entre a escola e a clínica de terapia ocupacional.";
+            alert("🤖 Copiloto IA: Módulo de Anamnese Familiar estruturado e preenchido!");
+        }
+    }
+
+    function gerarMetasIA() {
+        const corpo = document.getElementById('corpo_metas');
+        corpo.innerHTML = '';
+        
+        const metasMEC = [
+            {p: "1º Trimestre", o: "Desenvolver autonomia nas atividades diárias e rotinas de organização escolar.", e: "Uso de histórias sociais e sequenciadores visuais fixados na bancada de estudos.", a: "Observação contínua registros semanais"},
+            {p: "2º Trimestre", o: "Consolidar competências acadêmicas básicas de raciocínio lógico e pareamento de letras.", e: "Utilização de material concreto (material dourado, blocos lógicos) e mediação individualizada.", a: "Portfólio processual adaptado"},
+            {p: "3º Trimestre", o: "Fortalecer a independência social nas atividades colaborativas e de recreação.", e: "Inclusão em jogos de regras simples com agrupamentos produtivos e monitoramento interpares.", a: "Avaliação descritiva final"}
+        ];
+
+        metasMEC.forEach(m => carregarLinhaMeta(m.p, m.o, m.e, m.a));
+        alert("🤖 Copiloto IA: Cronograma de metas gerado com sucesso no padrão do MEC!");
+    }
+
+    function gerarGradeBNCC_IA() {
+        const corpo = document.getElementById('corpo_grade');
+        corpo.innerHTML = '';
+
+        const gradeMEC = [
+            {c: "Língua Portuguesa", cn: "Leitura e interpretação textual", h: "EF05LP01, EF05LP09", m: "Mediação individualizada, leitura compartilhada e apoio visual estruturado.", r: "Textos adaptados, imagens, jogos de pareamento", a: "Observação contínua"},
+            {c: "Matemática", cn: "Operações fundamentais e problemas", h: "EF05MA03, EF05MA07", m: "Uso de material concreto, cálculos adaptados e resolução mediada.", r: "Material dourado, jogos matemáticos, ábaco", a: "Avaliação processual"},
+            {c: "Ciências", cn: "Corpo humano e meio ambiente", h: "EF05CI01, EF05CI07", m: "Aulas dialogadas apoiadas por recursos visuais de alta legibilidade.", r: "Vídeos curtos legendados, cartazes", a: "Participação em sala"},
+            {c: "História", cn: "Cultura e cidadania", h: "EF05HI01, EF05HI05", m: "Uso de imagens históricas e contextualização oral simplificada.", r: "Linha do tempo visual, figuras amplificadas", a: "Atividades orais e registros"},
+            {c: "Geografia", cn: "Espaço geográfico e localização", h: "EF05GE03, EF05GE06", m: "Exploração tátil e visual de representações cartográficas simplificadas.", r: "Mapas ilustrativos simplificados, maquetes", a: "Produções orientadas"}
+        ];
+
+        gradeMEC.forEach(g => carregarLinhaGrade(g.c, g.cn, g.h, g.m, g.r, g.a));
+        alert("🤖 Copiloto IA: Matriz Curricular e Habilidades BNCC injetadas com conformidade executiva!");
+    }
+</script>
+{% endblock %}
