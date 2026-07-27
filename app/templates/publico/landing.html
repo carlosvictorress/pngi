@@ -1,373 +1,687 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" id="html-root" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Nacional de Governança e Educação Especial Inclusiva — Gestoor 360</title>
+    <title>Gestoor 360 — Plataforma Nacional de Educação Especial & Governança Inclusiva</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { 
-                        sans: ['Inter', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'] 
+                        sans: ['"Plus Jakarta Sans"', 'Inter', '-apple-system', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
                     },
                     colors: {
-                        gov: { 
-                            navy: '#0A192F',       /* Azul Marinho Profundo (Tech) */
-                            blue: '#1351B4',       /* Azul Federal */
-                            green: '#00A859',      /* Verde Federal */
-                            yellow: '#FFCD00',     /* Amarelo Federal */
-                            dark: '#1E293B',       /* Texto Escuro */
-                            light: '#64748B',      /* Texto Secundário */
-                            bg: '#F8FAFC',         /* Fundo Claro */
+                        brand: { 
+                            50: '#F0F5FF',
+                            100: '#E0EAFF',
+                            500: '#2563EB',
+                            600: '#1D4ED8',
+                            700: '#1D4ED8',
+                            800: '#1E40AF',
+                            900: '#0F172A',
+                            navy: '#0B132B',
+                            teal: '#00F5D4',
+                            emerald: '#10B981',
+                            amber: '#F59E0B',
+                            purple: '#7C3AED'
                         }
                     },
                     boxShadow: {
-                        'glow': '0 0 20px rgba(19, 81, 180, 0.3)',
-                        'card': '0 10px 30px -5px rgba(0, 0, 0, 0.1)',
+                        'glow-blue': '0 0 30px rgba(37, 99, 235, 0.35)',
+                        'glow-teal': '0 0 30px rgba(0, 245, 212, 0.25)',
+                        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.12)',
+                        'card-hover': '0 20px 40px -15px rgba(15, 23, 42, 0.15)',
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Efeitos e Animações Customizadas */
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
+        /* Estilos de Acessibilidade (Alto Contraste) */
+        .alto-contraste {
+            background-color: #000000 !important;
+            color: #FFFF00 !important;
         }
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
+        .alto-contraste * {
+            background-color: #000000 !important;
+            color: #FFFF00 !important;
+            border-color: #FFFF00 !important;
         }
-        .bg-mesh {
-            background-color: #0A192F;
-            background-image: radial-gradient(at 80% 0%, hsla(217, 100%, 45%, 0.25) 0px, transparent 50%),
-                              radial-gradient(at 0% 50%, hsla(152, 100%, 33%, 0.15) 0px, transparent 50%);
+
+        /* Efeitos de Fundo Mesh Gradiente Animado */
+        .bg-hero-mesh {
+            background-color: #0B132B;
+            background-image: 
+                radial-gradient(at 50% 0%, rgba(37, 99, 235, 0.35) 0px, transparent 60%),
+                radial-gradient(at 10% 80%, rgba(0, 245, 212, 0.18) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(124, 58, 237, 0.2) 0px, transparent 50%);
         }
-        /* Separadores de Seção (Ondas e Diagonais) */
-        .wave-bottom {
-            position: absolute; bottom: 0; left: 0; width: 100%; overflow: hidden; line-height: 0;
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
-        .wave-bottom svg { display: block; width: calc(100% + 1.3px); height: 60px; }
-        
-        .diagonal-section {
-            clip-path: polygon(0 4vw, 100% 0, 100% 100%, 0 calc(100% - 4vw));
-            padding-top: 8vw; padding-bottom: 8vw;
+
+        .glass-card-light {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
-        
-        /* Suavização de renderização de fontes */
-        body {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+
+        @keyframes pulseSlow {
+            0%, 100% { opacity: 0.4; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
         }
+        .animate-pulse-slow {
+            animation: pulseSlow 5s ease-in-out infinite;
+        }
+
+        /* Classes de Animação ao Rolar (Scroll Reveal) */
+        .reveal-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .reveal-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0B132B; }
+        ::-webkit-scrollbar-thumb { background: #2563EB; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-gov-bg text-gov-dark min-h-screen flex flex-col font-sans selection:bg-gov-blue selection:text-white">
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col font-sans selection:bg-brand-500 selection:text-white transition-colors duration-300">
 
-    <!-- Topbar Institucional -->
-    <div class="bg-slate-900 text-slate-300 py-2 px-6 text-[9px] font-semibold uppercase tracking-widest border-b border-slate-800">
-        <div class="max-w-[1400px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+    <!-- BARRA SUPERIOR DE ACESSIBILIDADE ULTRA-MINIMALISTA -->
+    <div class="bg-slate-950/90 text-slate-400 py-1.5 px-4 md:px-8 text-[11px] font-normal border-b border-white/5 relative z-50">
+        <div class="max-w-[1400px] mx-auto flex flex-wrap justify-between items-center gap-2">
             <div class="flex items-center gap-2">
-                <span class="w-1.5 h-1.5 rounded-full bg-gov-green animate-pulse"></span>
-                <span>República Federativa do Brasil • Ministério da Educação</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span>Plataforma Nacional de Educação Especial</span>
+                <span class="hidden sm:inline text-slate-600">•</span>
+                <span class="hidden sm:inline text-slate-400">Conformidade LBI (Lei 13.146/2015)</span>
             </div>
-            <span class="font-mono text-gov-blue opacity-80">PNEEI COMPLIANCE — 2026</span>
+
+            <!-- CONTROLES DE ACESSIBILIDADE WCAG 2.1 DISCRETOS -->
+            <div class="flex items-center gap-5">
+                <div class="flex items-center gap-1.5 text-[10px]">
+                    <span class="text-slate-500 uppercase tracking-wider font-semibold mr-0.5">Acessibilidade:</span>
+                    <button onclick="alterarTamanhoFonte(1)" title="Aumentar Fonte" class="px-1 text-slate-300 hover:text-white font-bold transition-colors">A+</button>
+                    <button onclick="alterarTamanhoFonte(-1)" title="Diminuir Fonte" class="px-1 text-slate-300 hover:text-white font-bold transition-colors">A-</button>
+                    <button onclick="resetarTamanhoFonte()" title="Tamanho Padrão" class="px-1 text-slate-400 hover:text-white font-mono text-[9px] transition-colors">100%</button>
+                </div>
+
+                <button onclick="toggleAltoContraste()" class="text-slate-300 hover:text-yellow-300 transition-colors text-[10px] font-medium flex items-center gap-1">
+                    <span>👁️</span> Alto Contraste
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Header Navbar -->
-    <header class="bg-gov-navy/95 backdrop-blur-md border-b border-white/10 py-3.5 px-6 md:px-12 sticky top-0 z-50 transition-all">
+    <!-- CABEÇALHO ULTRA-CLEAN, MINIMALISTA E PROFISSIONAL -->
+    <header class="sticky top-0 z-40 bg-brand-navy/90 backdrop-blur-md border-b border-white/10 py-3 px-4 md:px-8 transition-all">
         <div class="max-w-[1400px] mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3.5">
-                <div class="w-9 h-9 bg-gradient-to-br from-gov-blue to-blue-600 rounded-lg flex flex-col items-center justify-center text-white shadow-glow border border-white/20">
-                    <span class="font-bold text-[9px] tracking-tighter">GOV</span>
-                    <span class="font-semibold text-[7px] -mt-1 text-gov-yellow">360</span>
+            
+            <!-- LOGO MINIMALISTA -->
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-8 h-8 bg-brand-500/20 border border-brand-500/40 rounded-lg flex items-center justify-center text-brand-teal font-extrabold text-xs tracking-tighter group-hover:bg-brand-500 group-hover:text-white transition-all">
+                    360
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-semibold text-white text-xs tracking-wide">Portal Nacional de Inclusão</span>
-                    <span class="text-blue-300 text-[9px] font-medium tracking-widest uppercase">SaaS Municipal</span>
+                    <span class="font-bold text-white text-sm tracking-tight group-hover:text-brand-teal transition-colors">Gestoor 360</span>
+                    <span class="text-[9px] text-slate-400 font-medium tracking-widest uppercase -mt-0.5">Educação Especial Inclusiva</span>
                 </div>
-            </div>
-            <div class="text-[11px] font-semibold tracking-wider flex items-center gap-6">
-                <a href="#solicitar-adesao" class="text-white hover:text-gov-yellow transition-colors hidden md:block">Solicitar Implantação</a>
-                <a href="/auth/login-admin-global" class="bg-white/10 hover:bg-white/20 text-white border border-white/20 transition-all flex items-center gap-2 px-3 py-1.5 rounded-md">
-                    <svg class="w-3.5 h-3.5 text-gov-yellow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </a>
+
+            <!-- NAV LINKS MINIMALISTAS (SEM EMOJIS POLUÍDOS) -->
+            <nav class="hidden lg:flex items-center gap-8 text-xs font-medium text-slate-300 tracking-wide">
+                <a href="#diferenciais" class="hover:text-white transition-colors">Diferenciais</a>
+                <a href="#modulos" class="hover:text-white transition-colors">Módulos</a>
+                <a href="#rede-federada" class="hover:text-white transition-colors">Prefeituras Integradas</a>
+                <a href="#adesao" class="hover:text-white transition-colors">Solicitar Implantação</a>
+            </nav>
+
+            <!-- BOTAO RESTRITO CLEAN -->
+            <div class="flex items-center gap-3">
+                <a href="/auth/login-admin-global" class="text-xs font-semibold text-slate-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/15 px-3.5 py-1.5 rounded-lg transition-all">
                     Painel Mestre
                 </a>
             </div>
         </div>
     </header>
 
-    <!-- SECTION 1: HERO ESCOLAR DARK TECH -->
-    <section class="relative bg-mesh pt-20 pb-36 px-6 md:px-12">
-        <div class="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
-            
-            <div class="space-y-6">
-                <div class="inline-flex items-center gap-2 bg-blue-900/40 text-blue-200 text-[9px] font-semibold tracking-widest px-3 py-1.5 rounded-full border border-blue-500/30 uppercase">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gov-green shadow-[0_0_8px_#00A859]"></span>
-                    Sistema Base de Auditoria MEC
-                </div>
-                
-                <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-white leading-[1.15]">
-                    Governança Integrada da <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-gov-green to-gov-yellow">Educação Inclusiva</span>
-                </h1>
-                
-                <p class="text-sm md:text-base text-slate-300 font-normal leading-relaxed max-w-xl">
-                    Ambiente mestre para monitoramento de Atendimento Educacional Especializado, rastreabilidade de laudos médicos e emissão de PEI.
-                </p>
+    <!-- SECTION 1: HERO CENTRALIZADO E ELEGANTE -->
+    <section class="relative bg-hero-mesh pt-16 md:pt-24 pb-28 md:pb-36 px-4 md:px-8 overflow-hidden">
+        
+        <!-- ELEMENTOS DE LUZ AMBIENTE -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-brand-500/15 rounded-full blur-3xl pointer-events-none animate-pulse-slow"></div>
 
-                <!-- Box de Busca em Destaque -->
-                <div class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 max-w-xl space-y-3.5 shadow-2xl">
-                    <label class="block text-[10px] font-semibold tracking-widest text-slate-300 uppercase">Acessar Jurisdição Municipal</label>
-                    <div class="relative flex flex-col sm:flex-row gap-3">
-                        <div class="relative flex-grow">
-                            <input type="text" 
-                                   id="busca_municipio" 
-                                   list="lista_municipios" 
-                                   placeholder="Digite o nome da sua prefeitura..." 
-                                   autocomplete="off"
-                                   class="w-full bg-white border border-transparent rounded-xl py-3 px-4 text-xs font-medium text-gov-navy focus:border-gov-blue focus:ring-2 focus:ring-gov-blue/20 focus:outline-none transition-all shadow-inner">
-                            
-                            <datalist id="lista_municipios">
-                                {% for m in municipios %}
-                                <option data-slug="{{ m.slug }}" value="{{ m.nome }} — {{ m.estado }}"></option>
-                                {% endfor %}
-                            </datalist>
-                        </div>
-                        <button onclick="irParaLoginHero()" class="bg-gov-blue hover:bg-blue-600 text-white font-semibold text-xs px-6 py-3 rounded-xl transition-colors shrink-0 shadow-lg shadow-blue-900/50">
-                            Ingressar
-                        </button>
-                    </div>
-                </div>
+        <div class="max-w-[1000px] mx-auto text-center space-y-8 relative z-10">
+            
+            <!-- TAG HEADER CENTRALIZADA -->
+            <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md text-brand-teal text-xs font-bold px-4 py-2 rounded-full border border-brand-teal/30 shadow-glow-teal mx-auto">
+                <span class="w-2 h-2 rounded-full bg-brand-teal animate-ping"></span>
+                <span>TECNOLOGIA PÚBLICA PARA SECRETARIAS MUNICIPAIS DE EDUCAÇÃO</span>
             </div>
 
-            <div class="relative lg:h-full flex justify-center items-center">
-                <!-- Efeito de Imagem Flutuante com Bordas Coloridas -->
-                <div class="relative w-full max-w-md aspect-square md:aspect-[4/3] lg:aspect-square animate-float z-10">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-gov-green to-gov-blue rounded-3xl transform rotate-3 scale-105 opacity-40 blur-lg"></div>
-                    <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1000&q=80" 
-                         alt="Tecnologia na Educação Inclusiva" 
-                         class="relative w-full h-full object-cover rounded-3xl border-[3px] border-white shadow-2xl">
+            <!-- TÍTULO PRINCIPAL CENTRALIZADO -->
+            <h1 class="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.15] tracking-tight max-w-4xl mx-auto">
+                Conectando Escolas, Famílias e Gestão para a <br class="hidden sm:inline">
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-teal via-blue-400 to-amber-300">
+                    Educação Especial Inclusiva
+                </span>
+            </h1>
+
+            <!-- SUBTÍTULO CENTRALIZADO -->
+            <p class="text-sm md:text-base text-slate-300 font-normal leading-relaxed max-w-3xl mx-auto">
+                Plataforma SaaS governamental para acompanhamento do <strong>AEE</strong>, emissão simplificada de <strong>PEI, PAEE e Estudo de Caso</strong> com suporte a texto manual em todas as opções, <strong>Prontuário Único PDF com Foto</strong> e transporte de alunos adaptado em conformidade com a LBI.
+            </p>
+
+            <!-- CARD INTERATIVO CENTRALIZADO DE BUSCA DE MUNICÍPIO -->
+            <div class="glass-card rounded-3xl p-6 md:p-8 space-y-4 max-w-2xl mx-auto shadow-2xl relative border border-white/20 text-left">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-extrabold uppercase tracking-wider text-slate-200 flex items-center gap-2">
+                        <span>🏛️</span> Acessar Instância do Seu Município
+                    </span>
+                    <span class="text-[10px] bg-brand-teal/20 text-brand-teal font-bold px-2.5 py-0.5 rounded-full border border-brand-teal/30">
+                        Isolamento Multitenant
+                    </span>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <input type="text" 
+                               id="busca_municipio" 
+                               list="lista_municipios" 
+                               placeholder="Digite o nome da sua cidade (ex: Valença do Piauí...)" 
+                               autocomplete="off"
+                               class="w-full bg-white/95 text-slate-900 placeholder:text-slate-500 font-medium text-xs rounded-2xl py-3.5 px-4 focus:ring-2 focus:ring-brand-teal focus:bg-white focus:outline-none transition-all shadow-inner">
+                        
+                        <datalist id="lista_municipios">
+                            {% for m in municipios %}
+                            <option data-slug="{{ m.slug }}" value="{{ m.nome }} — {{ m.estado }}"></option>
+                            {% endfor %}
+                        </datalist>
+                    </div>
                     
-                    <!-- Selo sobre a imagem -->
-                    <div class="absolute -bottom-4 -left-4 bg-white p-3 rounded-xl shadow-xl border border-slate-100 flex items-center gap-3">
-                        <div class="w-10 h-10 bg-green-50 rounded-full flex items-center justify-center text-gov-green">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-bold text-gov-dark uppercase tracking-tight">Acessibilidade</p>
-                            <p class="text-[9px] text-gov-light font-normal">100% Homologada</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Efeito de Onda (Transição para Branco) -->
-        <div class="wave-bottom text-white">
-            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                <path d="M985.66,92.83C906.67,72,823.78,31,743.84,14.19c-82.26-17.34-168.06-16.33-250.45.39-57.84,11.73-114,31.07-172,41.86A600.21,600.21,0,0,1,0,27.35V120H1200V95.8C1132.19,118.92,1055.71,111.31,985.66,92.83Z" fill="currentColor"></path>
-            </svg>
-        </div>
-    </section>
-
-    <!-- SECTION 2: ATIVIDADES (Fundo Branco, Cards com Efeito) -->
-    <section class="bg-white py-20 px-6 md:px-12 relative z-20">
-        <div class="max-w-[1400px] mx-auto space-y-10">
-            <div class="text-center space-y-3">
-                <h2 class="text-2xl font-bold tracking-tight text-gov-dark uppercase">Atualizações & Compliance</h2>
-                <div class="w-16 h-1 bg-gov-blue mx-auto rounded-full"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Card 1 -->
-                <article class="p-8 bg-white border border-slate-100 rounded-2xl hover:-translate-y-1.5 hover:shadow-card hover:border-gov-blue/30 transition-all duration-300 group cursor-pointer relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-gov-blue transform origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                    <div class="flex items-center gap-3 mb-3.5">
-                        <span class="bg-blue-50 text-gov-blue text-[9px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">22 Mai 2026</span>
-                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Censo MEC</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-gov-dark mb-2 group-hover:text-gov-blue transition-colors leading-snug">Integração estrutural da ficha de matrícula digital com descritores do INEP</h3>
-                    <p class="text-xs text-gov-light leading-relaxed font-normal">Garante que a coleta de dados de alunos com deficiência elimine inconsistências burocráticas e gere planilhas prontas para importação da folha do Fundeb.</p>
-                </article>
-
-                <!-- Card 2 -->
-                <article class="p-8 bg-white border border-slate-100 rounded-2xl hover:-translate-y-1.5 hover:shadow-card hover:border-purple-600/30 transition-all duration-300 group cursor-pointer relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-purple-500 transform origin-bottom scale-y-0 group-hover:scale-y-100 transition-transform duration-300"></div>
-                    <div class="flex items-center gap-3 mb-3.5">
-                        <span class="bg-purple-50 text-purple-600 text-[9px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">15 Mai 2026</span>
-                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Auditoria MP</span>
-                    </div>
-                    <h3 class="text-lg font-bold text-gov-dark mb-2 group-hover:text-purple-600 transition-colors leading-snug">Modelagem de cronogramas técnicos parcelados para conformidade com a LBI</h3>
-                    <p class="text-xs text-gov-light leading-relaxed font-normal">A estruturação do PEI em metas lineares trimestrais oferece total transparência e blindagem jurídica frente à fiscalização do Ministério Público.</p>
-                </article>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECTION 3: REDE FEDERADA (Corte Diagonal + Fundo Gradiente Federal) -->
-    <section class="diagonal-section bg-gradient-to-br from-gov-blue via-blue-800 to-gov-navy text-white px-6 md:px-12 relative shadow-inner">
-        <div class="max-w-[1400px] mx-auto space-y-10 relative z-10">
-            <div class="space-y-3">
-                <div class="flex items-center gap-2.5">
-                    <div class="p-1.5 bg-white/10 rounded-md backdrop-blur-sm border border-white/20">
-                        <svg class="w-4 h-4 text-gov-yellow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    </div>
-                    <span class="text-[10px] font-semibold tracking-widest text-blue-200 uppercase">Isolamento Lógico Multitenant</span>
-                </div>
-                <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Rede Federada de Educação Inclusiva</h2>
-                <p class="text-sm text-blue-100 max-w-2xl font-normal leading-relaxed">Células governamentais isoladas logicamente, garantindo privacidade e blindagem de dados por secretaria municipal.</p>
-            </div>
-
-            <!-- Box Interativo Multitenant -->
-            <div class="bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row overflow-hidden border border-white/20">
-                
-                <!-- Abas -->
-                <div class="w-full md:w-[35%] bg-slate-50 border-r border-slate-100 flex flex-col" id="abas-municipios">
-                    {% for m in municipios %}
-                    <button onclick="alternarAba('{{ m.slug }}')" id="btn-{{ m.slug }}"
-                        class="tab-link w-full text-left px-5 py-4 text-xs font-semibold text-slate-500 hover:bg-slate-100 transition-all flex items-center justify-between border-b border-slate-100 last:border-0 {% if loop.first %}bg-white text-gov-blue border-l-[3px] border-l-gov-blue shadow-sm{% else %}border-l-[3px] border-l-transparent{% endif %}">
-                        <span class="truncate pr-4 uppercase">Prefeitura de {{ m.nome }}</span>
-                        <div class="w-1.5 h-1.5 rounded-full {% if loop.first %}bg-gov-green shadow-[0_0_8px_#00A859]{% else %}bg-slate-300{% endif %} transition-colors" id="dot-{{ m.slug }}"></div>
+                    <button onclick="irParaLoginHero()" class="bg-gradient-to-r from-brand-teal to-emerald-400 hover:from-emerald-400 hover:to-brand-teal text-slate-900 font-extrabold text-xs px-8 py-3.5 rounded-2xl transition-all duration-300 shadow-glow-teal transform hover:scale-105 shrink-0 flex items-center justify-center gap-2">
+                        <span>Entrar na Instância</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
-                    {% endfor %}
-                    {% if not municipios %}
-                    <div class="p-8 text-xs text-slate-400 font-normal italic text-center">Aguardando vinculação técnica de secretarias.</div>
-                    {% endif %}
                 </div>
+                
+                <p class="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1.5 pt-1">
+                    <span>🔒</span> Acesso seguro com criptografia e perfis individuais de servidores públicos.
+                </p>
+            </div>
 
-                <!-- Conteúdo das Abas -->
-                <div class="w-full md:w-[65%] p-8 md:p-10 bg-white flex flex-col justify-center relative text-slate-800" id="conteudo-abas">
-                    {% for m in municipios %}
-                    <div id="panel-{{ m.slug }}" class="tab-panel space-y-5 {% if not loop.first %}hidden{% endif %}">
-                        <div class="space-y-1.5">
-                            <span class="inline-flex bg-green-50 text-gov-green border border-green-100 px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest">
-                                Instância Ativa Segura
-                            </span>
-                            <h3 class="text-2xl font-bold text-gov-navy uppercase tracking-tight">{{ m.nome }} — {{ m.estado }}</h3>
+            <!-- PILLS DE DESTAQUE CENTRALIZADAS -->
+            <div class="pt-4 flex flex-wrap items-center justify-center gap-3 text-xs font-semibold text-slate-300">
+                <div class="bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-full flex items-center gap-2">
+                    <span class="text-brand-teal">✓</span> Opção "Outros: [___]" em Todos os Formulários
+                </div>
+                <div class="bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-full flex items-center gap-2">
+                    <span class="text-emerald-400">✓</span> Prontuário Único Continuado Intermunicipal
+                </div>
+                <div class="bg-white/5 border border-white/10 px-3.5 py-1.5 rounded-full flex items-center gap-2">
+                    <span class="text-amber-400">✓</span> Impressão PDF com Foto & Timbre do Município
+                </div>
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- DIVISOR COM CURVA VETORIAL ELEGANTE -->
+    <div class="relative w-full overflow-hidden leading-none bg-brand-navy -mt-1">
+        <svg class="relative block w-full h-16 md:h-20 text-slate-50" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8A600.21,600.21,0,0,0,321.39,56.44Z" fill="currentColor"></path>
+        </svg>
+    </div>
+
+    <!-- SECTION 2: MÉTRICAS E RECONHECIMENTO GOVERNAMENTAL -->
+    <section class="bg-slate-50 py-12 px-4 md:px-8 relative z-20 border-b border-slate-200">
+        <div class="max-w-[1400px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+            
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-card text-center space-y-1 hover:-translate-y-1 transition-transform">
+                <span class="text-3xl font-extrabold text-brand-500 font-mono">100%</span>
+                <span class="text-xs font-bold text-slate-700 block uppercase tracking-wider">Conformidade LBI & MEC</span>
+                <span class="text-[10px] text-slate-400 block">Relatórios e PEI auditáveis</span>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-card text-center space-y-1 hover:-translate-y-1 transition-transform">
+                <span class="text-3xl font-extrabold text-emerald-600 font-mono">01</span>
+                <span class="text-xs font-bold text-slate-700 block uppercase tracking-wider">Prontuário Integrado</span>
+                <span class="text-[10px] text-slate-400 block">Dossiê único por aluno</span>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-card text-center space-y-1 hover:-translate-y-1 transition-transform">
+                <span class="text-3xl font-extrabold text-amber-500 font-mono">360°</span>
+                <span class="text-xs font-bold text-slate-700 block uppercase tracking-wider">Gestão Multiprofissional</span>
+                <span class="text-[10px] text-slate-400 block">Saúde, AEE e transporte</span>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-card text-center space-y-1 hover:-translate-y-1 transition-transform">
+                <span class="text-3xl font-extrabold text-purple-600 font-mono">Fundeb</span>
+                <span class="text-xs font-bold text-slate-700 block uppercase tracking-wider">Censo Escolar INEP</span>
+                <span class="text-[10px] text-slate-400 block">Blindagem jurídica e financeira</span>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 3: DIFERENCIAIS DA PLATAFORMA (DETALHADOS E ENRIQUECIDOS) -->
+    <section id="diferenciais" class="py-20 md:py-28 px-4 md:px-8 bg-white relative">
+        <div class="max-w-[1400px] mx-auto space-y-16">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto reveal-on-scroll">
+                <span class="text-xs font-extrabold text-brand-500 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                    TECNOLOGIA DESENVOLVIDA PARA A REALIDADE MUNICIPAL
+                </span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+                    Tudo o que sua Secretaria precisa para transformar a Educação Inclusiva
+                </h2>
+                <p class="text-sm text-slate-600 leading-relaxed font-normal">
+                    Elimine processos burocráticos em papel, evite notificações do Ministério Público e garanta o acompanhamento contínuo e transparente de cada estudante.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                
+                <!-- CARD 1: OPÇÃO OUTROS MANUAL -->
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-4 hover:shadow-card-hover hover:border-brand-500/40 transition-all group reveal-on-scroll flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 bg-brand-500 text-white rounded-2xl flex items-center justify-center font-bold text-xl shadow-glow-blue group-hover:scale-110 transition-transform">
+                            ✍️
                         </div>
-                        <p class="text-xs text-slate-500 leading-relaxed font-normal max-w-xl">
-                            Esta unidade operacional atende com exclusividade lógica às diretrizes de auditoria da Secretaria de Educação. Prontuários civis, laudos periciais e gestão de rotas operam em ambiente blindado de outras instâncias.
+                        <h3 class="text-base font-extrabold text-slate-900 group-hover:text-brand-500 transition-colors">
+                            Campos com Opção "Outros: [Texto Manual]"
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Flexibilidade total em todos os campos de marcação de <strong>PEI, PAEE e Estudo de Caso</strong>. Quando o aluno possui uma especificidade não prevista na lista padrão, a opção <em>"Outros"</em> abre automaticamente um campo de digitação livre para o professor ou especialista descrever detalhadamente a necessidade.
                         </p>
-                        <div class="pt-4 border-t border-slate-50">
-                            <a href="/auth/{{ m.slug }}/login" class="inline-flex items-center justify-center gap-2 bg-gov-navy hover:bg-slate-800 text-white font-semibold py-3 px-6 rounded-lg transition-all shadow-md uppercase tracking-wider text-xs">
-                                Ingressar no Painel Local
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                            </a>
+                    </div>
+                    <div class="pt-3 border-t border-slate-200 text-[11px] font-bold text-brand-600">
+                        ✓ 100% de Adaptabilidade Pedagógica
+                    </div>
+                </div>
+
+                <!-- CARD 2: DOSSIÊ E PRONTUÁRIO ÚNICO PDF -->
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-4 hover:shadow-card-hover hover:border-emerald-500/40 transition-all group reveal-on-scroll flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 bg-emerald-600 text-white rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg group-hover:scale-110 transition-transform">
+                            📄
                         </div>
+                        <h3 class="text-base font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors">
+                            Prontuário Completo PDF com Foto & Timbre
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Geração de prontuários em PDF altamente profissionais, contendo a <strong>foto oficial do aluno</strong>, dados de saúde, contatos familiares, tabela detalhada de atendimentos presenciais por profissionais (Psicopedagogo, Psicólogo, Fono, TO, AEE, Libras, Braille) e carimbo com data e hora de emissão em tempo real.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-200 text-[11px] font-bold text-emerald-700">
+                        ✓ Documento Oficial Aceito por Órgãos de Controle
+                    </div>
+                </div>
+
+                <!-- CARD 3: TRANSFERÊNCIA INTERMUNICIPAL CONTINUADA -->
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-4 hover:shadow-card-hover hover:border-purple-600/40 transition-all group reveal-on-scroll flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 bg-purple-600 text-white rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg group-hover:scale-110 transition-transform">
+                            🔄
+                        </div>
+                        <h3 class="text-base font-extrabold text-slate-900 group-hover:text-purple-600 transition-colors">
+                            Transferência Intermunicipal sem Perda de Dados
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Quando o aluno se muda para outra cidade que utiliza o Gestoor 360, seu histórico é inativado na cidade de origem e mantido intacto. Na cidade de destino, o novo prontuário continua exibindo todo o histórico passado com a badge de identificação <code>🏛️ Emitido em [Município de Origem] (Somente Leitura)</code>.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-200 text-[11px] font-bold text-purple-700">
+                        ✓ Rastreabilidade Continuada do Aluno
+                    </div>
+                </div>
+
+                <!-- CARD 4: GOVERNANÇA E AUDITORIA MESTRE -->
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-4 hover:shadow-card-hover hover:border-amber-500/40 transition-all group reveal-on-scroll flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg group-hover:scale-110 transition-transform">
+                            🛡️
+                        </div>
+                        <h3 class="text-base font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors">
+                            Auditoria em Tempo Real & Controle Mestre
+                        </h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            O Administrador Geral (SuperAdmin) e a Secretaria de Educação possuem visão centralizada de todas as unidades escolares, monitorando taxas de presenças AEE, prazos de renovação de laudos periciais e homologação de PEIs de forma integrada.
+                        </p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-200 text-[11px] font-bold text-amber-700">
+                        ✓ Blindagem Jurídica Frente ao Ministério Público
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 4: MÓDULOS NATIVOS COMPLETO DA REDE MUNICIPAL (FALANDO BEM SOBRE CADA MÓDULO) -->
+    <section id="modulos" class="py-20 md:py-28 px-4 md:px-8 bg-slate-900 text-white relative overflow-hidden">
+        
+        <div class="absolute top-0 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-brand-teal/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-[1400px] mx-auto space-y-16 relative z-10">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto reveal-on-scroll">
+                <span class="text-xs font-extrabold text-brand-teal uppercase tracking-widest bg-brand-teal/10 px-3 py-1 rounded-full border border-brand-teal/20">
+                    ARQUITETURA DE ARMAZENAMENTO E GESTÃO
+                </span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+                    Módulos Nativos para Toda a Rede Municipal
+                </h2>
+                <p class="text-sm text-slate-400 font-normal">
+                    Conheça em detalhes as ferramentas especializadas desenvolvidas para cada setor da Secretaria de Educação.
+                </p>
+            </div>
+
+            <!-- GRID DE 6 MÓDULOS EXPANDIDOS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- MÓDULO 01 -->
+                <div class="glass-card rounded-3xl p-8 space-y-4 border border-white/10 hover:border-brand-teal/50 transition-all hover:-translate-y-1.5 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-brand-teal bg-brand-teal/10 px-3 py-1 rounded-full border border-brand-teal/30">MÓDULO 01</span>
+                            <span class="text-2xl">📋</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Estudo de Caso & Anamnese</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                            Coleta estruturada de dados do estudante com 10 seções completas. Explode informações acadêmicas, hábitos familiares, histórico de desenvolvimento, diagnósticos médicos anexados, comportamentos e mapeamento de barreiras pedagógicas e arquitetônicas.
+                        </p>
+                    </div>
+                    <ul class="text-[11px] text-brand-teal space-y-1 pt-3 border-t border-white/10 font-medium">
+                        <li>• Anamnese clínica e rotina domiciliar</li>
+                        <li>• Mapeamento de barreiras físicas e pedagógicas</li>
+                    </ul>
+                </div>
+
+                <!-- MÓDULO 02 -->
+                <div class="glass-card rounded-3xl p-8 space-y-4 border border-white/10 hover:border-blue-400/50 transition-all hover:-translate-y-1.5 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-blue-400 bg-blue-400/10 px-3 py-1 rounded-full border border-blue-400/30">MÓDULO 02</span>
+                            <span class="text-2xl">🎯</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">PEI & PAEE Inteligentes</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                            Construção orientada do Plano Educacional Individualizado (PEI) e Plano de Atendimento Educacional Especializado (PAEE). Conta com banco de respostas pré-configuradas e a opção de preenchimento manual <em>"Outros"</em> em cada critério de avaliação.
+                        </p>
+                    </div>
+                    <ul class="text-[11px] text-blue-300 space-y-1 pt-3 border-t border-white/10 font-medium">
+                        <li>• Metas trimestrais alinhadas com a LBI</li>
+                        <li>• Opção "Outros" com texto manual em todos os campos</li>
+                    </ul>
+                </div>
+
+                <!-- MÓDULO 03 -->
+                <div class="glass-card rounded-3xl p-8 space-y-4 border border-white/10 hover:border-emerald-400/50 transition-all hover:-translate-y-1.5 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-400/10 px-3 py-1 rounded-full border border-emerald-400/30">MÓDULO 03</span>
+                            <span class="text-2xl">🩺</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Atendimento Multiprofissional</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                            Agenda integrada e diário de sessão no formato SOAP (Subjetivo, Objetivo, Avaliação, Plano) para Psicopedagogos, Psicólogos, Fonoaudiólogos, Terapeutas Ocupacionais, Assistentes Sociais e Professores AEE.
+                        </p>
+                    </div>
+                    <ul class="text-[11px] text-emerald-300 space-y-1 pt-3 border-t border-white/10 font-medium">
+                        <li>• Metodologia SOAP de evolução diária</li>
+                        <li>• Controle estrito de faltas e presenças</li>
+                    </ul>
+                </div>
+
+                <!-- MÓDULO 04 -->
+                <div class="glass-card rounded-3xl p-8 space-y-4 border border-white/10 hover:border-amber-400/50 transition-all hover:-translate-y-1.5 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/30">MÓDULO 04</span>
+                            <span class="text-2xl">📄</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Prontuário Único PDF & Foto</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                            Página de prontuário eletrônico completo e emissão de relatório PDF institucional. Exibe foto do estudante, dados civis, contatos de emergência, histórico de evolução pedagógica e atestados de auditoria com hora exata de emissão.
+                        </p>
+                    </div>
+                    <ul class="text-[11px] text-amber-300 space-y-1 pt-3 border-t border-white/10 font-medium">
+                        <li>• Upload e exibição de foto do aluno em HD</li>
+                        <li>• Carimbo temporal de auditoria em tempo real</li>
+                    </ul>
+                </div>
+
+                <!-- MÓDULO 05 -->
+                <div class="glass-card rounded-3xl p-8 space-y-4 border border-white/10 hover:border-purple-400/50 transition-all hover:-translate-y-1.5 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-purple-400 bg-purple-400/10 px-3 py-1 rounded-full border border-purple-400/30">MÓDULO 05</span>
+                            <span class="text-2xl">🚌</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Transporte Escolar Adaptado</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                            Gestão operacional de frotas e rotas de transporte escolar para alunos com deficiência. Rastreia acompanhantes, pontos de embarque, acessibilidade veicular, monitoramento de quilometragem e consumo de combustível.
+                        </p>
+                    </div>
+                    <ul class="text-[11px] text-purple-300 space-y-1 pt-3 border-t border-white/10 font-medium">
+                        <li>• Roteirização de frotas com acessibilidade</li>
+                        <li>• Relatórios de transporte para o Fundeb</li>
+                    </ul>
+                </div>
+
+                <!-- MÓDULO 06 -->
+                <div class="glass-card rounded-3xl p-8 space-y-4 border border-white/10 hover:border-teal-400/50 transition-all hover:-translate-y-1.5 flex flex-col justify-between">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-mono font-bold text-teal-400 bg-teal-400/10 px-3 py-1 rounded-full border border-teal-400/30">MÓDULO 06</span>
+                            <span class="text-2xl">🏛️</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Transferência Intermunicipal</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                            Módulo de transferência de alunos entre redes municipais consorciadas. Garante a desativação limpa no município de origem mantendo a integridade dos dados e a migração automática para a nova prefeitura com selo histórico de leitura.
+                        </p>
+                    </div>
+                    <ul class="text-[11px] text-teal-300 space-y-1 pt-3 border-t border-white/10 font-medium">
+                        <li>• Migração entre prefeituras sem perda de dados</li>
+                        <li>• Selo visual de origem de cada relatório</li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- SECTION 5: REDE FEDERADA DE MUNICÍPIOS (EXIBINDO BRASÕES E SEM LINK DE LOGIN) -->
+    <section id="rede-federada" class="py-20 md:py-28 px-4 md:px-8 bg-slate-50 relative">
+        <div class="max-w-[1400px] mx-auto space-y-12">
+            
+            <div class="text-center space-y-3 max-w-2xl mx-auto">
+                <span class="text-xs font-bold text-brand-500 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                    INSTÂNCIAS MUNICIPAIS IMPLANTADAS
+                </span>
+                <h2 class="text-3xl font-extrabold text-slate-900 tracking-tight">
+                    Rede Federada de Municípios
+                </h2>
+                <p class="text-xs text-slate-600">
+                    Prefeituras e Secretarias Municipais de Educação com o sistema Gestoor 360 ativo em suas redes de ensino.
+                </p>
+            </div>
+
+            <!-- CONTAINER DAS PREFEITURAS COM BRASÕES DE CADA CIDADE -->
+            <div class="bg-white border border-slate-200 rounded-3xl shadow-card p-6 md:p-8 space-y-6">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {% for m in municipios %}
+                    <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl flex flex-col items-center text-center space-y-3 shadow-sm hover:border-brand-500 hover:shadow-md transition-all">
+                        
+                        <!-- BRASÃO OFICIAL DO MUNICÍPIO OU BRASÃO DE CORTE HERALDICO -->
+                        <div class="w-16 h-16 bg-white rounded-2xl p-2 border border-slate-200 shadow-inner flex items-center justify-center overflow-hidden">
+                            {% if m.brasao_url %}
+                                <img src="{{ m.brasao_url }}" alt="Brasão de {{ m.nome }}" class="w-full h-full object-contain">
+                            {% else %}
+                                <div class="w-full h-full bg-gradient-to-br from-brand-navy to-brand-500 rounded-xl flex flex-col items-center justify-center text-white p-1">
+                                    <span class="text-xs font-bold tracking-tighter">🏛️</span>
+                                    <span class="text-[7px] font-extrabold font-mono uppercase text-brand-teal tracking-widest">{{ m.estado }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="space-y-1 w-full">
+                            <h4 class="font-extrabold text-slate-900 text-sm tracking-tight truncate">{{ m.nome }}</h4>
+                            <span class="inline-block bg-blue-100 text-brand-700 text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">
+                                {{ m.estado }} • Brasil
+                            </span>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-200/80 w-full flex items-center justify-center">
+                            {% if m.ativo %}
+                                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Instância Homologada
+                                </span>
+                            {% else %}
+                                <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200">
+                                    Em Homologação
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="col-span-full py-12 text-center text-slate-400 text-xs font-medium">
+                        Nenhum município cadastrado na plataforma até o momento.
                     </div>
                     {% endfor %}
                 </div>
+
             </div>
+
         </div>
     </section>
 
-    <!-- SECTION 4: MÓDULOS (Fundo Cinza Claro) -->
-    <section class="bg-gov-bg py-20 px-6 md:px-12 border-b border-slate-100">
-        <div class="max-w-[1400px] mx-auto space-y-12">
-            <div class="text-center space-y-3">
-                <h2 class="text-2xl font-bold tracking-tight text-gov-dark uppercase">Módulos Nativos do Ecossistema</h2>
-                <div class="w-16 h-1 bg-gov-blue mx-auto rounded-full"></div>
-                <p class="text-sm text-slate-500 font-normal">Divisões funcionais regulamentadas em conformidade com as demandas municipais.</p>
+    <!-- SECTION 6: FORMULÁRIO DE ADESÃO INSTITUCIONAL -->
+    <section id="adesao" class="py-20 md:py-28 px-4 md:px-8 bg-brand-navy text-white relative overflow-hidden">
+        
+        <div class="max-w-[900px] mx-auto">
+            
+            <div class="glass-card rounded-3xl p-8 md:p-12 border border-white/20 shadow-2xl space-y-8 relative">
+                
+                <div class="text-center space-y-3">
+                    <span class="text-xs font-bold text-brand-teal uppercase tracking-widest bg-brand-teal/10 px-3 py-1 rounded-full border border-brand-teal/30">
+                        SOLICITAÇÃO DE IMPLANTAÇÃO MUNICIPAL
+                    </span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold text-white">
+                        Solicitar Adesão Oficial para sua Prefeitura
+                    </h2>
+                    <p class="text-xs text-slate-300 max-w-lg mx-auto font-normal">
+                        Preencha os dados da Secretaria de Educação para receber atendimento de nossa equipe técnica de engenharia de software público.
+                    </p>
+                </div>
+
+                <form action="#" method="POST" onsubmit="alert('Solicitação registrada com sucesso! Nossa equipe técnica entrará em contato com a Secretaria de Educação.'); return false;" class="space-y-5 text-xs">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block mb-1.5 font-bold text-slate-200">Nome do Gestor / Secretário(a) *</label>
+                            <input type="text" name="solicitante_nome" required placeholder="Ex: Profa. Maria dos Santos" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white placeholder:text-slate-400 focus:bg-white/20 focus:border-brand-teal focus:outline-none transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block mb-1.5 font-bold text-slate-200">Cargo Público / Função *</label>
+                            <input type="text" name="solicitante_cargo" required placeholder="Ex: Secretária de Educação / Coordenador AEE" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white placeholder:text-slate-400 focus:bg-white/20 focus:border-brand-teal focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block mb-1.5 font-bold text-slate-200">Município / Estado *</label>
+                            <input type="text" name="solicitante_municipio" required placeholder="Ex: Valença do Piauí - PI" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white placeholder:text-slate-400 focus:bg-white/20 focus:border-brand-teal focus:outline-none transition-all">
+                        </div>
+
+                        <div>
+                            <label class="block mb-1.5 font-bold text-slate-200">E-mail Institucional *</label>
+                            <input type="email" name="solicitante_email" required placeholder="secretaria@municipio.gov.br" class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white placeholder:text-slate-400 focus:bg-white/20 focus:border-brand-teal focus:outline-none transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block mb-1.5 font-bold text-slate-200">Dimensionamento da Rede Escolar (Opcional)</label>
+                        <textarea name="solicitante_mensagem" rows="3" placeholder="Conte-nos brevemente o número de alunos PCD atendidos, escolas polo e demandas prioritárias..." class="w-full bg-white/10 border border-white/20 rounded-xl p-3 text-white placeholder:text-slate-400 focus:bg-white/20 focus:border-brand-teal focus:outline-none transition-all resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-brand-teal to-emerald-400 hover:from-emerald-400 hover:to-brand-teal text-slate-900 font-extrabold py-4 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-glow-teal transform hover:scale-[1.01]">
+                        🚀 Enviar Solicitação Técnica de Implantação
+                    </button>
+
+                </form>
+
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Modulo 1 -->
-                <div class="bg-white border-t-[3px] border-t-gov-blue p-7 rounded-b-2xl shadow-card hover:shadow-lg transition-all space-y-4 relative">
-                    <div class="absolute -top-5 right-6 w-10 h-10 bg-gov-blue rounded-full flex items-center justify-center text-white shadow-md">
-                        <span class="font-bold text-xs">01</span>
-                    </div>
-                    <h3 class="font-bold text-gov-navy text-base uppercase tracking-tight pr-8">Censo e Ficha do Estudante</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed font-normal">Prontuário médico-pedagógico integrado, cruzando dados de saúde civil com variáveis de repasse financeiro do Fundeb.</p>
-                </div>
-
-                <!-- Modulo 2 -->
-                <div class="bg-white border-t-[3px] border-t-purple-500 p-7 rounded-b-2xl shadow-card hover:shadow-lg transition-all space-y-4 relative">
-                    <div class="absolute -top-5 right-6 w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white shadow-md">
-                        <span class="font-bold text-xs">02</span>
-                    </div>
-                    <h3 class="font-bold text-gov-navy text-base uppercase tracking-tight pr-8">Desenvolvimento do PEI</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed font-normal">Geração orientada de Planos Educacionais Individualizados fracionados em metas auditáveis e prazos curtos, alinhados à LBI.</p>
-                </div>
-
-                <!-- Modulo 3 -->
-                <div class="bg-white border-t-[3px] border-t-gov-green p-7 rounded-b-2xl shadow-card hover:shadow-lg transition-all space-y-4 relative">
-                    <div class="absolute -top-5 right-6 w-10 h-10 bg-gov-green rounded-full flex items-center justify-center text-white shadow-md">
-                        <span class="font-bold text-xs">04</span>
-                    </div>
-                    <h3 class="font-bold text-gov-navy text-base uppercase tracking-tight pr-8">Logística de Transporte</h3>
-                    <p class="text-xs text-slate-500 leading-relaxed font-normal">Roteirização geográfica e dimensionamento de frotas para veículos adaptados de atendimento escolar, monitorando combustíveis.</p>
-                </div>
-            </div>
         </div>
+
     </section>
 
-    <!-- SECTION 5: PROTOCOLO DE ADESÃO (Fundo Branco, Form Colorido) -->
-    <section id="solicitar-adesao" class="bg-white py-20 px-6 md:px-12">
-        <div class="max-w-[800px] mx-auto">
-            <div class="bg-slate-900 rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden border border-slate-800">
-                <!-- Efeito Decorativo no Fundo do Form -->
-                <div class="absolute top-0 right-0 w-64 h-64 bg-gov-blue opacity-10 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
-                <div class="absolute bottom-0 left-0 w-64 h-64 bg-gov-green opacity-5 blur-3xl rounded-full -translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
-
-                <div class="relative z-10 space-y-8">
-                    <div class="text-center space-y-3">
-                        <h2 class="text-2xl font-bold tracking-tight text-white uppercase">Protocolo de Adesão Institucional</h2>
-                        <p class="text-xs text-slate-400 max-w-md mx-auto font-normal leading-relaxed">Secretários de educação ou chefes do executivo municipal podem formalizar a solicitação técnica de abertura de instância por meio deste canal.</p>
-                    </div>
-
-                    <form action="#" method="POST" class="space-y-5">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <div class="space-y-1.5">
-                                <label class="block text-[9px] font-semibold tracking-widest text-blue-300 uppercase">Nome da Autoridade</label>
-                                <input type="text" name="solicitante_nome" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 px-3 text-xs text-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all placeholder:text-slate-500">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="block text-[9px] font-semibold tracking-widest text-blue-300 uppercase">Cargo Público</label>
-                                <input type="text" name="solicitante_cargo" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 px-3 text-xs text-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all placeholder:text-slate-500">
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                            <div class="space-y-1.5">
-                                <label class="block text-[9px] font-semibold tracking-widest text-blue-300 uppercase">Município / Estado</label>
-                                <input type="text" name="solicitante_municipio" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 px-3 text-xs text-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all placeholder:text-slate-500">
-                            </div>
-                            <div class="space-y-1.5">
-                                <label class="block text-[9px] font-semibold tracking-widest text-blue-300 uppercase">E-mail Corporativo</label>
-                                <input type="email" name="solicitante_email" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 px-3 text-xs text-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all placeholder:text-slate-500">
-                            </div>
-                        </div>
-
-                        <div class="space-y-1.5">
-                            <label class="block text-[9px] font-semibold tracking-widest text-blue-300 uppercase">Dimensionamento da Rede</label>
-                            <textarea name="solicitante_mensagem" rows="3" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 px-3 text-xs text-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all resize-none placeholder:text-slate-500" placeholder="Quantidade estimada de alunos PCD, escolas polo, monitoramento..."></textarea>
-                        </div>
-
-                        <div class="pt-2">
-                            <button type="submit" onclick="alert('Protocolo enviado. Nossa engenharia de sistemas entrará em contato.'); return false;" class="w-full bg-gradient-to-r from-gov-blue to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white font-bold py-3.5 px-6 rounded-lg text-xs uppercase tracking-wider transition-all shadow-glow">
-                                Enviar Solicitação Oficial de Implantação
-                            </button>
-                        </div>
-                    </form>
+    <!-- FOOTER MODERNO GOVERNAMENTAL INSTITUCIONAL -->
+    <footer class="bg-slate-950 text-slate-400 border-t border-white/10 py-10 px-4 md:px-8 text-xs">
+        <div class="max-w-[1400px] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-7 h-7 bg-brand-500 text-white rounded-lg flex items-center justify-center font-bold text-xs">
+                    360
                 </div>
+                <span class="font-bold text-white text-sm">Gestoor 360</span>
+                <span class="text-[10px] text-slate-500 font-mono">v2026.4</span>
             </div>
-        </div>
-    </section>
 
-    <!-- Footer -->
-    <footer class="bg-gov-navy border-t border-slate-800 py-6 text-center text-[10px] font-semibold text-slate-500 uppercase tracking-widest">
-        Plataforma de Tecnologia Pública Inclusiva — Gestoor 360 © 2026.
+            <p class="text-[11px] text-slate-500 text-center">
+                Plataforma de Tecnologia Pública Inclusiva — Em conformidade com a LBI (Lei 13.146/2015) © 2026
+            </p>
+        </div>
     </footer>
 
+    <!-- SCRIPTS DE NAVEGAÇÃO E REVEAL ON SCROLL -->
     <script>
-        // FILTRO DO SELETOR DE MUNICÍPIO NO HERO
+        // 1. ALTERNAR ALTO CONTRASTE (WCAG 2.1)
+        function toggleAltoContraste() {
+            document.getElementById('html-root').classList.toggle('alto-contraste');
+        }
+
+        // 2. AJUSTE DINÂMICO DO TAMANHO DA FONTE (ACESSIBILIDADE)
+        let tamanhoFonteAtual = 100;
+        function alterarTamanhoFonte(delta) {
+            tamanhoFonteAtual += (delta * 5);
+            if (tamanhoFonteAtual < 85) tamanhoFonteAtual = 85;
+            if (tamanhoFonteAtual > 130) tamanhoFonteAtual = 130;
+            document.documentElement.style.fontSize = tamanhoFonteAtual + '%';
+        }
+        function resetarTamanhoFonte() {
+            tamanhoFonteAtual = 100;
+            document.documentElement.style.fontSize = '100%';
+        }
+
+        // 3. BUSCA RÁPIDA DE MUNICÍPIO NO HERO
         function irParaLoginHero() {
-            const inputBusca = document.getElementById('busca_municipio').value;
+            const inputBusca = document.getElementById('busca_municipio').value.trim();
             const listaOptions = document.getElementById('lista_municipios').options;
             let slugEncontrado = null;
 
@@ -381,39 +695,32 @@
             if (slugEncontrado) {
                 window.location.href = `/auth/${slugEncontrado}/login`;
             } else {
-                alert("Jurisdição não encontrada ou em processo de homologação. Verifique a grafia ou utilize o protocolo de adesão.");
+                alert("Jurisdição não encontrada na busca direta. Por favor, selecione uma das opções da lista de sugestões.");
             }
         }
 
-        // ALTERNADOR DE ABAS DA REDE FEDERADA
-        function alternarAba(slug) {
-            // Oculta todos os painéis
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
-            
-            // Reseta estilo dos botões (abas)
-            document.querySelectorAll('.tab-link').forEach(b => {
-                b.classList.remove('bg-white', 'text-gov-blue', 'border-l-gov-blue', 'shadow-sm');
-                b.classList.add('border-l-transparent');
-            });
-            // Reseta bolinhas de status
-            document.querySelectorAll('[id^="dot-"]').forEach(d => {
-                d.className = "w-1.5 h-1.5 rounded-full bg-slate-300 transition-colors";
-            });
+        // 4. ANIMATED SCROLL REVEAL (REVELAR ELEMENTOS À MEDIDA QUE ROLA A PÁGINA)
+        document.addEventListener("DOMContentLoaded", function() {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15
+            };
 
-            // Ativa o painel selecionado
-            document.getElementById('panel-' + slug).classList.remove('hidden');
-            
-            // Ativa estilo do botão clicado
-            const btnAtivo = document.getElementById('btn-' + slug);
-            btnAtivo.classList.add('bg-white', 'text-gov-blue', 'border-l-gov-blue', 'shadow-sm');
-            btnAtivo.classList.remove('border-l-transparent');
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
 
-            // Ativa bolinha de status
-            const dotAtivo = document.getElementById('dot-' + slug);
-            if(dotAtivo) {
-                dotAtivo.className = "w-1.5 h-1.5 rounded-full bg-gov-green shadow-[0_0_8px_#00A859] transition-colors";
-            }
-        }
+            document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        });
     </script>
+
 </body>
 </html>

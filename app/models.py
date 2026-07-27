@@ -28,7 +28,7 @@ class Municipio(db.Model):
 
     # Relacionamentos Globais do Município
     usuarios = db.relationship('Usuario', backref='municipio', lazy=True, cascade='all, delete-orphan')
-    alunos = db.relationship('Aluno', backref='municipio', lazy=True, cascade='all, delete-orphan')
+    alunos = db.relationship('Aluno', foreign_keys='Aluno.municipio_id', backref='municipio', lazy=True, cascade='all, delete-orphan')
 
     def __repr__(self):
         return f"<Municipio {self.nome}-{self.estado}>"
@@ -51,6 +51,7 @@ class Usuario(db.Model, UserMixin):
     # Perfis: 'superadmin', 'secretaria', 'diretor', 'professor', 'aee', 'transporte', 'familia'
     perfil = db.Column(db.String(30), nullable=False, default='professor')
     
+    senha_provisoria = db.Column(db.Boolean, default=False, nullable=False)
     ativo = db.Column(db.Boolean, default=True, nullable=False)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -84,6 +85,7 @@ class Aluno(db.Model):
     sexo = db.Column(db.String(20), nullable=True)
     raca_cor = db.Column(db.String(30), nullable=True)
     naturalidade = db.Column(db.String(100), nullable=True)
+    foto_url = db.Column(db.String(255), nullable=True)
     
     # Filiação e Indicadores Sociais
     nome_mae = db.Column(db.String(100), nullable=True)
@@ -123,10 +125,16 @@ class Aluno(db.Model):
     necessita_acompanhante = db.Column(db.Boolean, default=False, nullable=True)
     possui_monitor_rota = db.Column(db.Boolean, default=False, nullable=True)
 
-    # Controle Operacional e Segurança Familiar
+    # Controle Operacional, Segurança Familiar & Histórico de Transferências Intermunicipais
     responsavel_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
     contato_urgencia = db.Column(db.String(50), nullable=False)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    municipio_origem_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=True)
+    status_transferencia = db.Column(db.String(50), default='Regular')
+    data_transferencia = db.Column(db.DateTime, nullable=True)
+
+    municipio_origem = db.relationship('Municipio', foreign_keys=[municipio_origem_id], lazy=True)
 
     # Relacionamentos Mapeados do Ecossistema Gestoor 360
     escola = db.relationship('Escola', backref=db.backref('alunos_matriculados', lazy=True))
@@ -470,7 +478,7 @@ class EstudoCaso(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False)
-    professor_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    professor_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
     ano_letivo = db.Column(db.Integer, default=2026, nullable=False)
     
     # 1. Identificação Adicional
@@ -550,7 +558,7 @@ class EstudoCaso(db.Model):
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relacionamentos utilitários organizados com backref limpo
-    aluno = db.relationship('Aluno', backref=db.backref('estudos_caso', lazy=True))
+    aluno = db.relationship('Aluno', backref=db.backref('estudos_caso', lazy=True, cascade='all, delete-orphan'))
     professor = db.relationship('Usuario', backref=db.backref('estudos_caso_criados', lazy=True))
     
 class Paee(db.Model):
@@ -606,3 +614,19 @@ class Paee(db.Model):
     # Relacionamentos
     aluno = db.relationship('Aluno', backref=db.backref('paees_emitidos', lazy=True, cascade='all, delete-orphan'))
     professor = db.relationship('Usuario', backref=db.backref('paees_criados', lazy=True), overlaps="peis_criados,professor_criador")
+
+class TransferenciaAluno(db.Model):
+    __tablename__ = 'transferencias_alunos'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False)
+    municipio_origem_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False)
+    municipio_destino_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False)
+    data_transferencia = db.Column(db.DateTime, default=datetime.utcnow)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    motivo = db.Column(db.Text, nullable=True)
+    
+    aluno = db.relationship('Aluno', backref=db.backref('historico_transferencias', lazy=True), foreign_keys=[aluno_id])
+    municipio_origem = db.relationship('Municipio', foreign_keys=[municipio_origem_id], lazy=True)
+    municipio_destino = db.relationship('Municipio', foreign_keys=[municipio_destino_id], lazy=True)
+    usuario = db.relationship('Usuario', lazy=True)

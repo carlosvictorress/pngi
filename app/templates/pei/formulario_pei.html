@@ -101,11 +101,15 @@
                 </div>
                 <div class="space-y-1.5">
                     <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Período Avaliativo *</label>
-                    <select name="periodo_trimestre" required class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-bold text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                    <select name="periodo_trimestre" onchange="checkSelectOutros(this, 'tri_outros_box')" required class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-bold text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
                         <option value="1" {% if pei and pei.periodo_trimestre == 1 %}selected{% endif %}>1º Tri — Diagnóstico Base</option>
                         <option value="2" {% if pei and pei.periodo_trimestre == 2 %}selected{% endif %}>2º Tri — Progresso</option>
                         <option value="3" {% if pei and pei.periodo_trimestre == 3 %}selected{% endif %}>3º Tri — Relatório Final</option>
+                        <option value="Outros">Outro Período (Especificar)</option>
                     </select>
+                    <div id="tri_outros_box" class="hidden mt-2">
+                        <input type="text" id="tri_outros_input" name="periodo_trimestre_outros" placeholder="Especificar outro período..." class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 focus:border-gov-blue focus:outline-none">
+                    </div>
                 </div>
                 <div class="space-y-1.5">
                     <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Coordenador Pedagógico</label>
@@ -284,12 +288,16 @@
                             <p class="text-[10px] text-slate-400 font-normal mt-1">Selecione a periodização e monte a árvore de objetivos específicos.</p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <select name="cronograma_periodizacao" class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 font-medium text-gov-dark text-xs focus:outline-none focus:border-gov-blue transition-all">
+                            <select name="cronograma_periodizacao" onchange="checkSelectOutros(this, 'crono_outros_box')" class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 font-medium text-gov-dark text-xs focus:outline-none focus:border-gov-blue transition-all">
                                 <option value="Mensais" {% if pei and pei.cronograma_periodizacao == 'Mensais' %}selected{% endif %}>Mensais</option>
                                 <option value="Bimestrais" {% if pei and pei.cronograma_periodizacao == 'Bimestrais' %}selected{% endif %}>Bimestrais</option>
                                 <option value="Trimestrais" {% if not pei or pei.cronograma_periodizacao == 'Trimestrais' %}selected{% endif %}>Trimestrais</option>
                                 <option value="Semestrais" {% if pei and pei.cronograma_periodizacao == 'Semestrais' %}selected{% endif %}>Semestrais</option>
+                                <option value="Outros">Outra Periodização (Especificar)</option>
                             </select>
+                            <div id="crono_outros_box" class="hidden">
+                                <input type="text" id="crono_outros_input" name="cronograma_periodizacao_outros" placeholder="Especifique..." class="bg-white border border-slate-300 rounded-lg p-2 text-xs font-medium text-slate-800 focus:border-gov-blue focus:outline-none">
+                            </div>
                             <button type="button" onclick="adicionarLinhaMeta()" class="bg-gov-navy text-white font-semibold px-4 py-2.5 rounded-lg text-[9px] uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm">
                                 + Add Meta
                             </button>
@@ -363,6 +371,10 @@
                             <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Apoio de mediador</label>
                             <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Adequação avaliativa</label>
                             <label class="flex items-center gap-3"><input type="checkbox" checked class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Fragmentação em etapas</label>
+                            <label class="flex items-center gap-3 font-bold text-gov-blue cursor-pointer"><input type="checkbox" name="flexibilizacao_outros_check" onchange="document.getElementById('flex_outros_box').classList.toggle('hidden', !this.checked); if(this.checked) document.getElementById('flex_outros_input').focus();" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"> Outras Flexibilizações:</label>
+                        </div>
+                        <div id="flex_outros_box" class="hidden mt-2">
+                            <input type="text" id="flex_outros_input" name="flexibilizacao_outros_texto" placeholder="Descreva outras flexibilizações ou adequações curriculares..." class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 focus:border-gov-blue focus:outline-none">
                         </div>
                     </div>
                 </div>
@@ -389,6 +401,13 @@
                                 <input type="checkbox" name="recursos_atendimento_libras" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue" {% if pei and pei.recursos_atendimento_libras %}checked{% endif %}>
                                 <span class="group-hover:text-gov-dark">Tradução Pedagógica em LIBRAS</span>
                             </label>
+                            <label class="flex items-center gap-3 cursor-pointer group hover:bg-slate-50 p-2 rounded-lg transition-colors">
+                                <input type="checkbox" name="recursos_outros_check" onchange="document.getElementById('recursos_outros_box').classList.toggle('hidden', !this.checked); if(this.checked) document.getElementById('recursos_outros_input').focus();" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue">
+                                <span class="group-hover:text-gov-dark font-bold text-gov-blue">Outros Recursos (Especificar)</span>
+                            </label>
+                            <div id="recursos_outros_box" class="hidden pl-7">
+                                <input type="text" id="recursos_outros_input" name="recursos_outros_texto" placeholder="Descreva outros recursos de tecnologia assistiva..." class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs text-slate-800 focus:border-gov-blue focus:outline-none">
+                            </div>
                         </div>
                     </div>
 
@@ -397,18 +416,26 @@
                         <div class="space-y-6">
                             <div class="space-y-2">
                                 <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Carga Semanal SRM</label>
-                                <select name="frequencia_srm_semanal" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:outline-none transition-all">
+                                <select name="frequencia_srm_semanal" onchange="checkSelectOutros(this, 'srm_freq_outros_box')" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:outline-none transition-all">
                                     <option value="1" {% if pei and pei.frequencia_srm_semanal == 1 %}selected{% endif %}>1 Sessão por semana</option>
                                     <option value="2" {% if not pei or pei.frequencia_srm_semanal == 2 %}selected{% endif %}>2 Sessões por semana (Padrão)</option>
                                     <option value="3" {% if pei and pei.frequencia_srm_semanal == 3 %}selected{% endif %}>3 Sessões por semana (Crítico)</option>
+                                    <option value="Outros">Outra Frequência (Especificar)</option>
                                 </select>
+                                <div id="srm_freq_outros_box" class="hidden mt-2">
+                                    <input type="text" id="srm_freq_outros_input" name="frequencia_srm_outros" placeholder="Descreva a frequência..." class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs font-medium text-slate-800 focus:border-gov-blue focus:outline-none">
+                                </div>
                             </div>
                             <div class="space-y-2">
                                 <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Arquitetura de Agrupamento</label>
-                                <select name="organizacao_atendimento" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:outline-none transition-all">
+                                <select name="organizacao_atendimento" onchange="checkSelectOutros(this, 'org_atend_outros_box')" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:outline-none transition-all">
                                     <option value="Individual" {% if pei and pei.organizacao_atendimento == 'Individual' %}selected{% endif %}>Atendimento Individualizado</option>
                                     <option value="Grupo" {% if pei and pei.organizacao_atendimento == 'Grupo' %}selected{% endif %}>Em Pequenos Grupos</option>
+                                    <option value="Outros">Outra Organização (Especificar)</option>
                                 </select>
+                                <div id="org_atend_outros_box" class="hidden mt-2">
+                                    <input type="text" id="org_atend_outros_input" name="organizacao_atendimento_outros" placeholder="Descreva a organização..." class="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-xs font-medium text-slate-800 focus:border-gov-blue focus:outline-none">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -586,6 +613,19 @@
 
         gradeMEC.forEach(g => carregarLinhaGrade(g.c, g.cn, g.h, g.m, g.r, g.a));
         alert("🤖 Copiloto IA: Matriz Curricular e Habilidades BNCC injetadas com conformidade executiva!");
+    }
+
+    function checkSelectOutros(selectEl, containerId) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            if (selectEl.value === 'Outros' || selectEl.value === 'Outro(s)') {
+                container.classList.remove('hidden');
+                const inp = container.querySelector('input, textarea');
+                if (inp) inp.focus();
+            } else {
+                container.classList.add('hidden');
+            }
+        }
     }
 </script>
 {% endblock %}

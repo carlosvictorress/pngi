@@ -311,6 +311,15 @@
                                 <input type="checkbox" name="necessita_apoio" {% if caso and caso.necessita_apoio %}checked{% endif %} class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue transition-all">
                                 <span class="group-hover:text-gov-blue transition-colors">Necessita de Apoio Humano?</span>
                             </label>
+                            <div class="space-y-1 pt-1">
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" name="necessita_outros" onchange="document.getElementById('necessita_outros_box').classList.toggle('hidden', !this.checked); if(this.checked) document.getElementById('necessita_outros_input').focus();" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue transition-all">
+                                    <span class="group-hover:text-gov-blue font-bold text-gov-blue transition-colors">Outros Suportes:</span>
+                                </label>
+                                <div id="necessita_outros_box" class="hidden">
+                                    <input type="text" id="necessita_outros_input" name="necessita_outros_texto" placeholder="Especifique outros suportes..." class="w-full bg-slate-50 border border-slate-300 rounded p-1.5 text-xs focus:bg-white focus:border-gov-blue focus:outline-none transition-all">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -324,7 +333,15 @@
                             <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="apoio_comportamental" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Apoio comportamental</span></label>
                             <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="apoio_comunicacional" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Apoio comunicacional</span></label>
                             <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="media_escolar" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Mediação escolar</span></label>
-                            <div class="flex items-center gap-2"><span class="text-slate-400">Outro:</span><input type="text" name="apoio_outro" class="bg-slate-50 border border-slate-200 rounded flex-grow p-1.5 focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></div>
+                            <div class="flex flex-col space-y-1">
+                                <label class="flex items-center gap-2 font-bold text-gov-blue cursor-pointer">
+                                    <input type="checkbox" name="apoio_outros_check" onchange="document.getElementById('apoio_outro_box').classList.toggle('hidden', !this.checked); if(this.checked) document.getElementById('apoio_outro_input').focus();" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue">
+                                    <span>Outros Apoios:</span>
+                                </label>
+                                <div id="apoio_outro_box" class="hidden">
+                                    <input type="text" id="apoio_outro_input" name="apoio_outro" placeholder="Especifique..." class="w-full bg-slate-50 border border-slate-300 rounded p-1.5 text-xs focus:bg-white focus:border-gov-blue focus:outline-none transition-all">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -333,9 +350,13 @@
                     <div class="space-y-4">
                         <span class="text-[9px] font-semibold uppercase tracking-widest text-slate-400 block border-b border-slate-100 pb-2">Intensidade do Suporte</span>
                         <div class="space-y-3 text-xs text-slate-600 font-medium">
-                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Leve" class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Suporte Leve</span></label>
-                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Moderado" checked class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Suporte Moderado</span></label>
-                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Intenso" class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Suporte Intenso</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Leve" class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue" onchange="document.getElementById('intensidade_outros_box').classList.add('hidden')"><span class="group-hover:text-gov-dark">Suporte Leve</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Moderado" checked class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue" onchange="document.getElementById('intensidade_outros_box').classList.add('hidden')"><span class="group-hover:text-gov-dark">Suporte Moderado</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Intenso" class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue" onchange="document.getElementById('intensidade_outros_box').classList.add('hidden')"><span class="group-hover:text-gov-dark">Suporte Intenso</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer group"><input type="radio" name="intensidade_suporte" value="Outros" class="w-4 h-4 text-gov-blue border-slate-300 focus:ring-gov-blue" onchange="document.getElementById('intensidade_outros_box').classList.remove('hidden'); document.getElementById('intensidade_outros_input').focus();"><span class="group-hover:text-gov-dark font-bold text-gov-blue">Outros (Especificar)</span></label>
+                            <div id="intensidade_outros_box" class="hidden pl-7">
+                                <input type="text" id="intensidade_outros_input" name="intensidade_suporte_outros" placeholder="Descreva a intensidade..." class="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs focus:bg-white focus:border-gov-blue focus:outline-none transition-all">
+                            </div>
                         </div>
                     </div>
 
@@ -348,6 +369,15 @@
                             <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="enc_to" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Terapeuta Ocupacional</span></label>
                             <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="enc_fisioterapeuta" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Fisioterapeuta</span></label>
                             <label class="flex items-center gap-3 cursor-pointer group"><input type="checkbox" name="enc_neuropediatra" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue"><span class="group-hover:text-gov-dark">Neuropediatra</span></label>
+                            <div class="col-span-full space-y-1 pt-1">
+                                <label class="flex items-center gap-3 cursor-pointer group">
+                                    <input type="checkbox" name="enc_outros" onchange="document.getElementById('enc_outros_box').classList.toggle('hidden', !this.checked); if(this.checked) document.getElementById('enc_outros_input').focus();" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue">
+                                    <span class="group-hover:text-gov-dark font-bold text-gov-blue">Outro Encaminhamento:</span>
+                                </label>
+                                <div id="enc_outros_box" class="hidden">
+                                    <input type="text" id="enc_outros_input" name="enc_outros_texto" placeholder="Especifique outros encaminhamentos..." class="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs focus:bg-white focus:border-gov-blue focus:outline-none transition-all">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

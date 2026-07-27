@@ -86,6 +86,14 @@
                     <span class="group-hover:text-gov-dark transition-colors">{{ item }}</span>
                 </label>
                 {% endfor %}
+                <label class="flex items-center gap-3 cursor-pointer group bg-blue-50/50 border border-blue-200 p-3.5 rounded-xl hover:bg-white hover:border-gov-blue hover:shadow-sm transition-all text-xs font-medium text-slate-700">
+                    <input type="checkbox" name="needs[]" value="Outros" onchange="document.getElementById('needs_outros_box').classList.toggle('hidden', !this.checked); if(this.checked) document.getElementById('needs_outros_input').focus();" class="w-4 h-4 text-gov-blue border-slate-300 rounded focus:ring-gov-blue transition-all">
+                    <span class="group-hover:text-gov-dark font-bold text-gov-blue transition-colors">Outros:</span>
+                </label>
+            </div>
+
+            <div id="needs_outros_box" class="hidden mt-3">
+                <input type="text" id="needs_outros_input" name="needs_outros" placeholder="Descreva outras necessidades educacionais específicas..." class="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all shadow-sm">
             </div>
         </section>
 

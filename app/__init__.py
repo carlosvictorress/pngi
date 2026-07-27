@@ -85,9 +85,16 @@ def create_app():
             PERFIS={
                 'SUPERADMIN': 'superadmin',
                 'SECRETARIA': 'secretaria',
-                'DIRETOR': 'diretor',
-                'PROFESSOR': 'professor',
+                'PSICOPEDAGOGO': 'psicopedagogo',
+                'PSICOLOGO': 'psicologo',
                 'AEE': 'aee',
+                'PROFESSOR': 'professor',
+                'LIBRAS': 'professor_libras',
+                'BRAILLE': 'professor_braille',
+                'FONOAUDIOLOGO': 'fonoaudiologo',
+                'TERAPEUTA_OCUPACIONAL': 'terapeuta_ocupacional',
+                'ASSISTENTE_SOCIAL': 'assistente_social',
+                'DIRETOR': 'diretor',
                 'TRANSPORTE': 'transporte',
                 'FAMILIA': 'familia'
             }

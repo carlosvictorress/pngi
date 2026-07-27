@@ -70,7 +70,20 @@
         }
     </style>
 </head>
-<body class="bg-gov-bg text-gov-dark min-h-screen flex font-sans">
+<body class="bg-gov-bg text-gov-dark min-h-screen flex font-sans {% if session.get('impersonator_id') %}pt-10{% endif %}">
+
+    {% if session.get('impersonator_id') %}
+    <!-- BANNER FIXO DE IMPERSONAÇÃO DO SUPERADMIN -->
+    <div class="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-slate-900 px-4 py-2 text-xs font-bold flex items-center justify-between shadow-lg border-b border-amber-600">
+        <div class="flex items-center gap-2">
+            <span class="text-base animate-bounce">🎭</span>
+            <span>MODO IMPERSONAÇÃO ATIVO: Você está navegando como <u>{{ current_user.nome }}</u> ({{ current_user.perfil.upper() }})</span>
+        </div>
+        <a href="{{ url_for('auth.parar_impersonacao') }}" class="bg-slate-900 hover:bg-black text-white px-3 py-1 rounded-lg font-bold text-[11px] transition-all shadow border border-white/20 flex items-center gap-1.5">
+            <span>🔙</span> Sair do Modo Impersonação & Voltar ao SuperAdmin
+        </a>
+    </div>
+    {% endif %}
 
     <aside class="w-64 bg-gov-navy text-slate-300 flex flex-col justify-between fixed inset-y-0 left-0 z-40 border-r border-white/5 hidden md:flex shadow-xl">
         <div class="flex flex-col">
@@ -95,6 +108,13 @@
                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
                    <span class="opacity-80">🏢</span> Painel da Secretaria
                 </a>
+
+                {% if current_user.perfil in ['secretaria', 'superadmin'] %}
+                <a href="/{{ g.municipio.slug }}/usuarios" 
+                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
+                   <span class="opacity-80">👥</span> Equipe Multidisciplinar
+                </a>
+                {% endif %}
                 
                 <a href="{{ url_for('escolas.cadastrar_escola', municipio_slug=g.municipio.slug) }}" 
                    class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
@@ -187,6 +207,48 @@
         </footer>
 
     </div>
+
+    {% if current_user.is_authenticated and current_user.senha_provisoria %}
+    <!-- MODAL BLOQUEANTE: TROCA OBRIGATÓRIA DE SENHA PROVISÓRIA -->
+    <div id="modal_senha_provisoria" class="fixed inset-0 z-50 bg-slate-900/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-white border-t-8 border-t-amber-500 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                <div class="w-12 h-12 bg-amber-100 border border-amber-300 text-amber-800 rounded-xl flex items-center justify-center text-2xl font-bold">
+                    🔒
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-gov-navy">Substituição de Senha Provisória</h3>
+                    <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Primeiro acesso detectado na plataforma</p>
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed bg-amber-50 border border-amber-200 p-3 rounded-xl">
+                Por razões de segurança governamental, você está utilizando uma <strong>senha provisória</strong>. Cadastre sua nova senha pessoal antes de navegar.
+            </p>
+
+            <form action="{{ url_for('auth.alterar_senha_provisoria') }}" method="POST" class="space-y-4 text-xs">
+                <div>
+                    <label class="block mb-1 font-bold text-slate-700">Senha Provisória Atual *</label>
+                    <input type="password" name="senha_atual" placeholder="Digite a senha provisória informada" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:bg-white focus:border-gov-blue focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block mb-1 font-bold text-slate-700">Nova Senha Pessoal *</label>
+                    <input type="password" name="nova_senha" minlength="6" placeholder="No mínimo 6 caracteres" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:bg-white focus:border-gov-blue focus:outline-none">
+                </div>
+
+                <div>
+                    <label class="block mb-1 font-bold text-slate-700">Confirmar Nova Senha *</label>
+                    <input type="password" name="confirmar_senha" minlength="6" placeholder="Repita a nova senha" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:bg-white focus:border-gov-blue focus:outline-none">
+                </div>
+
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold py-3 rounded-xl transition-all shadow-md text-xs uppercase tracking-wider">
+                    🔑 Cadastrar Nova Senha & Acessar
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 
     <script>
         function toggleContraste() {

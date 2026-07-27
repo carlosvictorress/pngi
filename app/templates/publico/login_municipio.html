@@ -1,90 +1,375 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" id="html-root" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Entrar com gov.br — {{ municipio.nome }}</title>
+    <title>Acesso Restrito — Prefeitura de {{ municipio.nome }} (Gestoor 360)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: { 
+                        sans: ['"Plus Jakarta Sans"', 'Inter', '-apple-system', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    },
                     colors: {
-                        gov: {
-                            blue: '#1351B4',     /* Azul Oficial GOV.BR */
-                            dark: '#333333',     /* Texto Principal */
-                            light: '#888888',    /* Texto Secundário */
-                            gray: '#E9ECEF'      /* Bordas Sutis */
+                        brand: { 
+                            50: '#F0F5FF',
+                            100: '#E0EAFF',
+                            500: '#2563EB',
+                            600: '#1D4ED8',
+                            700: '#1D4ED8',
+                            800: '#1E40AF',
+                            900: '#0F172A',
+                            navy: '#0B132B',
+                            teal: '#00F5D4',
+                            emerald: '#10B981',
+                            amber: '#F59E0B'
+                        },
+                        govbr: {
+                            blue: '#1351B4',
+                            darkblue: '#0C326F',
+                            green: '#00A859',
+                            yellow: '#FFCD00'
                         }
+                    },
+                    boxShadow: {
+                        'soft-card': '0 20px 40px -15px rgba(15, 23, 42, 0.07), 0 0 1px 1px rgba(15, 23, 42, 0.05)',
+                        'glow-blue': '0 0 25px rgba(37, 99, 235, 0.25)',
                     }
                 }
             }
         }
     </script>
-</head>
-<body class="bg-white text-gov-dark min-h-screen flex flex-col justify-between font-sans antialiased">
+    <style>
+        /* Estilos de Acessibilidade (Alto Contraste) */
+        .alto-contraste {
+            background-color: #000000 !important;
+            color: #FFFF00 !important;
+        }
+        .alto-contraste * {
+            background-color: #000000 !important;
+            color: #FFFF00 !important;
+            border-color: #FFFF00 !important;
+        }
 
-    <header class="border-b border-gov-gray py-4 px-6 md:px-12 bg-white">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="text-2xl font-black text-gov-blue tracking-tighter">gov<span class="text-amber-500">.</span>br</span>
+        /* Fundo Mesh Claro, Delicado e Suave */
+        .bg-light-mesh {
+            background-color: #F8FAFC;
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(37, 99, 235, 0.06) 0px, transparent 60%),
+                radial-gradient(at 90% 90%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(245, 158, 11, 0.04) 0px, transparent 60%);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #F1F5F9; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-light-mesh text-slate-900 min-h-screen flex flex-col justify-between font-sans selection:bg-brand-500 selection:text-white transition-colors duration-300 antialiased">
+
+    <!-- BARRA SUPERIOR DE ACESSIBILIDADE DELICADA & CLARA -->
+    <div class="bg-white border-b border-slate-200/80 py-2.5 px-4 md:px-8 text-xs text-slate-600 relative z-50 shadow-sm">
+        <div class="max-w-[1400px] mx-auto flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <a href="/" class="text-slate-700 hover:text-brand-600 font-semibold flex items-center gap-1.5 transition-colors">
+                    <span>←</span> Voltar ao Portal Nacional
+                </a>
+                <span class="text-slate-300 hidden sm:inline">•</span>
+                <span class="hidden sm:inline text-slate-500 font-medium">Instância Municipal de Educação Especial</span>
             </div>
-            <div class="text-right">
-                <span class="block text-xs font-black text-gov-blue uppercase tracking-tight">Educação Especial Inclusiva</span>
-                <span class="block text-[10px] text-gov-light font-bold uppercase tracking-widest -mt-0.5">Prefeitura de {{ municipio.nome }} — {{ municipio.estado }}</span>
+
+            <!-- CONTROLES DE ACESSIBILIDADE WCAG 2.1 -->
+            <div class="flex items-center gap-5">
+                <div class="flex items-center gap-1.5 text-[11px]">
+                    <span class="text-slate-400 uppercase tracking-wider font-bold mr-0.5">Fonte:</span>
+                    <button onclick="alterarTamanhoFonte(1)" title="Aumentar Fonte" class="px-1.5 text-slate-700 hover:text-brand-600 font-bold transition-colors">A+</button>
+                    <button onclick="alterarTamanhoFonte(-1)" title="Diminuir Fonte" class="px-1.5 text-slate-700 hover:text-brand-600 font-bold transition-colors">A-</button>
+                    <button onclick="resetarTamanhoFonte()" title="Tamanho Padrão" class="px-1.5 text-slate-500 hover:text-brand-600 font-mono text-[10px] transition-colors">100%</button>
+                </div>
+
+                <button onclick="toggleAltoContraste()" class="text-slate-700 hover:text-brand-600 transition-colors text-[11px] font-bold flex items-center gap-1.5 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-lg">
+                    <span>👁️</span> Alto Contraste
+                </button>
             </div>
         </div>
-    </header>
+    </div>
 
-    <main class="flex-grow flex items-center justify-center px-6 py-12">
-        <div class="max-w-[420px] w-full space-y-8">
-            
-            <div class="text-center space-y-1">
-                <h2 class="text-xl font-bold tracking-tight text-gov-dark">Identificação do Servidor</h2>
-                <p class="text-xs text-gov-light font-medium">Digite suas credenciais institucionais para acessar o painel municipal</p>
+    <!-- ÁREA PRINCIPAL DE LOGIN CENTRALIZADA E CLARA -->
+    <main class="flex-grow flex items-center justify-center px-4 py-12 relative z-10">
+        <div class="max-w-[460px] w-full space-y-6">
+
+            <!-- CARD DE ERRO DE CREDENCIAIS -->
+            {% if erro %}
+            <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-bold flex items-center gap-3 shadow-sm animate-shake">
+                <div class="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center shrink-0 text-red-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <span>{{ erro }}</span>
             </div>
+            {% endif %}
 
-            <form method="POST" class="space-y-5">
-                <div>
-                    <label class="block text-xs font-bold text-gov-dark mb-1.5">E-mail Institucional</label>
-                    <input type="email" name="email" required 
-                        class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none transition-all font-medium"
-                        placeholder="Ex: nome@{{ municipio.slug }}.gov.br">
+            <!-- CARD DE ALERTA SE O MUNICÍPIO ESTIVER SUSPENSO -->
+            {% if not municipio.ativo %}
+            <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium space-y-2.5 shadow-sm">
+                <div class="flex items-center gap-2 font-bold text-amber-800">
+                    <span class="text-base">⚠️</span>
+                    <span>Ambiente Municipal Temporariamente Inativo</span>
                 </div>
-
-                <div>
-                    <div class="flex justify-between items-center mb-1.5">
-                        <label class="block text-xs font-bold text-gov-dark">Sua senha</label>
-                        <a href="#" class="text-xs text-gov-blue hover:underline font-semibold">Esqueceu a senha?</a>
-                    </div>
-                    <input type="password" name="senha" required 
-                        class="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 text-sm focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none transition-all font-medium"
-                        placeholder="••••••••">
-                </div>
-
-                <div class="pt-2">
-                    <button type="submit" 
-                        class="w-full bg-gov-blue hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-full text-sm transition-all shadow-sm active:scale-[0.99]">
-                        Entrar no Painel de Gestão
-                    </button>
-                </div>
-            </form>
-
-            <div class="text-center space-y-4 pt-2">
-                <a href="/" class="text-xs font-semibold text-gov-blue hover:underline block">
-                    Voltar para o Portal de Entrada Nacional
-                </a>
-                <p class="text-[10px] text-gov-light leading-relaxed px-4">
-                    O acesso não autorizado a este ambiente constitui infração legal. Todas as ações são monitoradas em conformidade com as diretrizes de segurança pública.
+                <p class="text-[11px] leading-relaxed text-amber-800">
+                    O acesso aos formulários desta instância foi pausado. Clique abaixo para consultar os detalhes ou solicitar a regularização técnica.
                 </p>
+                <button onclick="openModalSuspenso()" class="bg-amber-600 hover:bg-amber-700 text-white font-extrabold px-4 py-2 rounded-xl text-xs transition-all shadow-sm">
+                    Ver Informações Oficiais de Governança
+                </button>
+            </div>
+            {% endif %}
+
+            <!-- CONTAINER PRINCIPAL DO FORMULÁRIO (BRANCO CLEAN E DELICADO) -->
+            <div class="bg-white rounded-3xl p-8 md:p-10 shadow-soft-card space-y-7 border border-slate-200/90 relative">
+                
+                <!-- IDENTIDADE DO MUNICÍPIO & BRASÃO -->
+                <div class="flex flex-col items-center text-center space-y-3.5 pb-2 border-b border-slate-100">
+                    
+                    <!-- BRASÃO MUNICIPAL DELICADO -->
+                    <div class="w-20 h-20 bg-slate-50 rounded-2xl p-2.5 border border-slate-200 shadow-sm flex items-center justify-center overflow-hidden">
+                        {% if municipio.brasao_url %}
+                            <img src="{{ municipio.brasao_url }}" alt="Brasão de {{ municipio.nome }}" class="w-full h-full object-contain">
+                        {% else %}
+                            <div class="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex flex-col items-center justify-center text-white">
+                                <span class="text-xl">🏛️</span>
+                                <span class="text-[8px] font-extrabold font-mono text-brand-teal uppercase">{{ municipio.estado }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">Prefeitura de {{ municipio.nome }}</h1>
+                        <p class="text-xs text-brand-600 font-semibold tracking-wide">
+                            Secretaria Municipal de Educação — {{ municipio.estado }}
+                        </p>
+                        <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider mt-0.5">
+                            Ambiente de Governança & AEE
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- FORMULÁRIO DE LOGIN POR E-MAIL E SENHA (PRIMEIRA OPÇÃO) -->
+                <form method="POST" class="space-y-4">
+                    
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700">E-mail Corporativo do Servidor</label>
+                        <div class="relative">
+                            <input type="email" name="email" required 
+                                {% if not municipio.ativo %}disabled{% endif %}
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                placeholder="nome@{{ municipio.slug }}.pi.gov.br">
+                            <span class="absolute right-3.5 top-3 text-slate-400 text-sm pointer-events-none">✉️</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between items-center">
+                            <label class="block text-xs font-bold text-slate-700">Senha de Acesso</label>
+                            <a href="#" onclick="alert('Entre em contato com a coordenação da Secretaria de Educação do seu município para redefinir sua senha.'); return false;" class="text-[11px] text-brand-600 hover:underline font-bold">Esqueceu a senha?</a>
+                        </div>
+                        <div class="relative">
+                            <input type="password" id="input_senha" name="senha" required 
+                                {% if not municipio.ativo %}disabled{% endif %}
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                                placeholder="••••••••">
+                            <button type="button" onclick="toggleSenhaVisivel()" class="absolute right-3.5 top-3 text-slate-400 hover:text-slate-700 text-xs transition-colors focus:outline-none">
+                                <span id="icon_senha">👁️</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" 
+                            {% if not municipio.ativo %}disabled{% endif %}
+                            class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-md active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed">
+                            Ingressar no Painel de Gestão
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- DIVISOR ELEGANTE OU -->
+                <div class="relative flex items-center justify-center my-3">
+                    <div class="border-t border-slate-200 w-full"></div>
+                    <span class="bg-white px-3 text-[10px] font-mono text-slate-400 uppercase tracking-widest shrink-0 border border-slate-200 rounded-full">
+                        ou acesse via conta federal
+                    </span>
+                    <div class="border-t border-slate-200 w-full"></div>
+                </div>
+
+                <!-- BOTÃO OFICIAL DE ALTA PRECISÃO ENTRAR COM GOV.BR (ABAIXO DO LOGIN) -->
+                <div class="space-y-2">
+                    <button onclick="loginGovBr()" 
+                        {% if not municipio.ativo %}disabled{% endif %}
+                        class="w-full bg-gradient-to-r from-[#1351B4] via-[#0C326F] to-[#1351B4] hover:from-[#0C326F] hover:to-[#1351B4] text-white font-extrabold py-3.5 px-5 rounded-2xl text-xs transition-all duration-300 shadow-md hover:shadow-lg border border-blue-400/30 flex items-center justify-between transform hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden">
+                        
+                        <!-- EFEITO DE BRILHO FLUTUANTE NO HOVER -->
+                        <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+
+                        <div class="flex items-center gap-3 relative z-10">
+                            <!-- EMBLEMA DA BANDEIRA NACIONAL GOV.BR -->
+                            <div class="w-7 h-7 rounded-full bg-white flex items-center justify-center shrink-0 shadow-md border border-white/40">
+                                <span class="font-black text-[10px] text-[#1351B4] tracking-tighter">gov<span class="text-[#FFCD00]">.</span>br</span>
+                            </div>
+
+                            <div class="text-left">
+                                <span class="block text-xs font-extrabold text-white leading-tight">Entrar com <strong>gov.br</strong></span>
+                                <span class="block text-[9px] text-blue-200 font-normal">Identificação da Conta Única Federal</span>
+                            </div>
+                        </div>
+
+                        <div class="w-7 h-7 rounded-xl bg-white/10 group-hover:bg-white/20 border border-white/20 flex items-center justify-center text-white relative z-10 transition-all">
+                            <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                    </button>
+                    
+                    <p class="text-[10px] text-center text-slate-400 font-medium">
+                        Integração SSO de Autenticação Segura do Governo Federal
+                    </p>
+                </div>
+
+                <!-- NOTA DE SEGURANÇA INSTITUCIONAL -->
+                <p class="text-[10px] text-slate-400 leading-relaxed text-center font-normal pt-2 border-t border-slate-100">
+                    🔒 Acesso monitorado pela Secretaria de Educação. O uso indevido está sujeito a sanções administrativas e legais.
+                </p>
+
             </div>
 
         </div>
     </main>
 
-    <footer class="border-t border-gov-gray py-6 text-center text-[11px] text-gov-light font-medium bg-white">
+    <!-- MODAL OFICIAL DE MUNICÍPIO SUSPENSO -->
+    <div id="modal-suspenso" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 {% if not modal_suspenso %}hidden{% endif %} flex items-center justify-center p-4">
+        <div class="bg-white max-w-lg w-full rounded-3xl shadow-2xl border border-slate-200 overflow-hidden transform transition-all">
+            
+            <!-- HEADER DO MODAL -->
+            <div class="bg-amber-500 text-white p-6 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0 text-white text-2xl font-bold">
+                    ⚠️
+                </div>
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest bg-amber-700/40 text-amber-100 px-2 py-0.5 rounded">AVISO DE GOVERNANÇA</span>
+                    <h3 class="text-base font-extrabold text-white tracking-tight mt-0.5">Instância Temporariamente Suspensa</h3>
+                </div>
+            </div>
+
+            <!-- CORPO DO MODAL -->
+            <div class="p-6 space-y-5 text-xs text-slate-700">
+                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1">
+                    <div class="font-extrabold text-slate-900 text-sm">
+                        Prefeitura de {{ municipio.nome }} — {{ municipio.estado }}
+                    </div>
+                    <div class="font-mono text-[11px] text-brand-600 font-bold">
+                        Instância Municipal: /{{ municipio.slug }}
+                    </div>
+                </div>
+
+                <div class="space-y-3 leading-relaxed">
+                    <p>
+                        Informamos aos servidores públicos que a instância de <b>{{ municipio.nome }}</b> encontra-se <b>temporariamente inativa</b> na plataforma.
+                    </p>
+
+                    <!-- CARD DE SEGURANÇA DOS DADOS -->
+                    <div class="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl text-emerald-900 space-y-1">
+                        <div class="font-bold flex items-center gap-2 text-emerald-800 text-xs">
+                            <span>🛡️</span> Seus dados continuam 100% seguros
+                        </div>
+                        <p class="text-[11px] text-slate-600 leading-relaxed">
+                            Todos os prontuários dos alunos, relatórios AEE, laudos periciais e planos PEI permanecem totalmente protegidos e preservados no banco de dados governamental.
+                        </p>
+                    </div>
+
+                    <div class="space-y-2 pt-1">
+                        <div class="font-bold text-slate-900">Como regularizar o acesso?</div>
+                        <ul class="list-disc list-inside space-y-1 text-slate-600">
+                            <li>Entre em contato com a <b>Secretaria Municipal de Educação</b>.</li>
+                            <li>Solicite a atualização do contrato junto à equipe mestre.</li>
+                            <li>O ambiente será desbloqueado imediatamente após a regularização.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- BOTÕES DE AÇÃO -->
+                <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <a href="mailto:suporte@plataforma.com?subject=Regularizacao%20do%20Municipio%20{{ municipio.nome }}" 
+                       class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 text-white font-bold px-4 py-2.5 rounded-xl text-center transition-all shadow-sm flex items-center justify-center gap-2">
+                        <span>✉️</span> Falar com o Suporte Mestre
+                    </a>
+                    
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <a href="/" class="w-full sm:w-auto text-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all">
+                            Página Inicial
+                        </a>
+                        <button onclick="closeModalSuspenso()" class="w-full sm:w-auto px-4 py-2.5 bg-slate-800 text-white rounded-xl font-bold transition-all">
+                            Entendido
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER CLARO -->
+    <footer class="border-t border-slate-200 py-6 text-center text-[11px] text-slate-500 font-medium bg-white">
         Plataforma de Governança Inclusiva Municipal — {{ municipio.nome }} © 2026
     </footer>
 
+    <script>
+        // 1. MODAL DE MUNICÍPIO SUSPENSO
+        function openModalSuspenso() {
+            document.getElementById('modal-suspenso').classList.remove('hidden');
+        }
+        function closeModalSuspenso() {
+            document.getElementById('modal-suspenso').classList.add('hidden');
+        }
+
+        // 2. MOSTRAR / OCULTAR SENHA
+        function toggleSenhaVisivel() {
+            const inputSenha = document.getElementById('input_senha');
+            const iconSenha = document.getElementById('icon_senha');
+            if (inputSenha.type === 'password') {
+                inputSenha.type = 'text';
+                iconSenha.textContent = '🙈';
+            } else {
+                inputSenha.type = 'password';
+                iconSenha.textContent = '👁️';
+            }
+        }
+
+        // 3. INTEGRAÇÃO GOV.BR (PREPARADO PARA HOMOLOGAÇÃO)
+        function loginGovBr() {
+            alert("A integração com a conta GOV.BR SSO para a Prefeitura de {{ municipio.nome }} está pronta e em fase final de homologação técnica com o Ministério da Economia.");
+        }
+
+        // 4. ACESSIBILIDADE (WCAG 2.1)
+        function toggleAltoContraste() {
+            document.getElementById('html-root').classList.toggle('alto-contraste');
+        }
+        let tamanhoFonteAtual = 100;
+        function alterarTamanhoFonte(delta) {
+            tamanhoFonteAtual += (delta * 5);
+            if (tamanhoFonteAtual < 85) tamanhoFonteAtual = 85;
+            if (tamanhoFonteAtual > 130) tamanhoFonteAtual = 130;
+            document.documentElement.style.fontSize = tamanhoFonteAtual + '%';
+        }
+        function resetarTamanhoFonte() {
+            tamanhoFonteAtual = 100;
+            document.documentElement.style.fontSize = '100%';
+        }
+    </script>
 </body>
 </html>

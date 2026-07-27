@@ -326,16 +326,19 @@ def imprimir_pei(pei_id):
     if not g.municipio: 
         abort(404)
         
-    # Busca o PEI específico pelo ID único dele, validando o isolamento do município
-    pei = (
-        Pei.query.join(Aluno)
-        .filter(Pei.id == pei_id, Aluno.municipio_id == g.municipio.id)
-        .first_or_404()
-    )
-    
-    # Captura o aluno diretamente pelo relacionamento mapeado no model
+    pei = Pei.query.get_or_404(pei_id)
     aluno = pei.aluno
 
+    # Validação de permissão: município atual do aluno OU município por onde o aluno já passou
+    if aluno.municipio_id != g.municipio.id:
+        condicoes = [Aluno.id == aluno.id]
+        if aluno.cpf: condicoes.append(Aluno.cpf == aluno.cpf)
+        if aluno.codigo_inep: condicoes.append(Aluno.codigo_inep == aluno.codigo_inep)
+        alunos_rel = Aluno.query.filter(db.or_(*condicoes)).all()
+        muns = [a.municipio_id for a in alunos_rel]
+        if g.municipio.id not in muns:
+            abort(403)
+            
     return render_template('pei/imprimir_pei.html', aluno=aluno, pei=pei)
 
 @pei_bp.route('/aluno/<int:aluno_id>/estudo-caso', methods=['GET', 'POST'])
@@ -469,13 +472,17 @@ def criar_paee(aluno_id):
 
         # 2. Captura de Checklists (Item 3)
         needs = request.form.getlist('needs[]')
+        needs_outros = request.form.get('needs_outros', '').strip()
+        if 'Outros' in needs and needs_outros:
+            needs.remove('Outros')
+            needs.append(f"Outros: {needs_outros}")
 
         # 3. Criação do Objeto com o novo Modelo
         novo_paee = Paee(
             aluno_id=aluno.id,
             professor_id=current_user.id,
             # Campos do Checklist
-            necessidades_checklist_json=json.dumps(needs),
+            necessidades_checklist_json=json.dumps(needs, ensure_ascii=False),
             objetivo_geral=request.form.get('obj_geral'),
             objetivos_especificos=request.form.get('obj_especificos'),
             organizacao_atendimento_json=json.dumps(cronograma_data),

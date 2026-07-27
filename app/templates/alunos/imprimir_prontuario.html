@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRONTUÁRIO OFICIAL — {{ aluno.nome }} — PREFEITURA MUNICIPAL DE {{ g.municipio.nome|upper }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @page {
+            size: A4;
+            margin: 12mm;
+        }
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-900 p-4 md:p-8 antialiased">
+
+    <!-- BARRA FLUTUANTE DE IMPRESSÃO (VISÍVEL APENAS NA TELA) -->
+    <div class="no-print max-w-4xl mx-auto mb-6 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <span class="text-xl">🖨️</span>
+            <div>
+                <h3 class="text-sm font-bold">Documento Oficial Pronto para Impressão / Salvar PDF</h3>
+                <p class="text-[10px] text-slate-300">Layout A4 com cabeçalho prefeitura, foto do aluno e agenda por profissional.</p>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-500 text-white font-black text-xs uppercase px-5 py-2.5 rounded-xl shadow-lg transition-transform active:scale-95">
+                🖨️ Imprimir / Salvar PDF
+            </button>
+            <button onclick="window.close()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold uppercase px-4 py-2.5 rounded-xl border border-slate-700">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <!-- DOCUMENTO A4 OFICIAL -->
+    <div class="max-w-[210mm] mx-auto bg-white border border-slate-300 shadow-2xl p-8 md:p-10 space-y-6">
+
+        <!-- CABEÇALHO GOVERNAMENTAL COM BRASÃO E FOTO -->
+        <header class="border-b-2 border-slate-900 pb-6 flex justify-between items-center gap-6">
+            <div class="flex items-center gap-5">
+                <!-- LOGO / BRASÃO MUNICIPAL -->
+                {% if g.municipio and g.municipio.brasao_url %}
+                    <img src="{{ g.municipio.brasao_url }}" alt="Brasão {{ g.municipio.nome }}" class="w-20 h-20 object-contain">
+                {% else %}
+                    <div class="w-16 h-16 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-2xl">
+                        🏛️
+                    </div>
+                {% endif %}
+
+                <div class="space-y-1">
+                    <span class="block text-[10px] font-black uppercase tracking-widest text-slate-500">ESTADO DO {{ g.municipio.estado|upper if g.municipio else 'PI' }} — PODER EXECUTIVO MUNICIPAL</span>
+                    <h1 class="text-lg font-black uppercase text-slate-900 tracking-tight">PREFEITURA MUNICIPAL DE {{ g.municipio.nome|upper if g.municipio else 'MUNICÍPIO' }}</h1>
+                    <h2 class="text-xs font-bold text-blue-900 uppercase tracking-wider">SECRETARIA MUNICIPAL DE EDUCAÇÃO & DEPARTAMENTO DE EDUCAÇÃO INCLUSIVA</h2>
+                    <p class="text-[9px] text-slate-600 font-mono pt-1">
+                        <b>DOCUMENTO REGULAMENTAR:</b> PRONTUÁRIO TÉCNICO MULTIDISCIPLINAR DO ESTUDANTE (LEI Nº 13.146/2015)
+                    </p>
+                </div>
+            </div>
+
+            <!-- FOTO DO ALUNO NO CABEÇALHO -->
+            <div class="text-center">
+                {% if aluno.foto_url %}
+                    <img src="{{ url_for('static', filename=aluno.foto_url) }}" alt="{{ aluno.nome }}" class="w-24 h-28 object-cover rounded-xl border-2 border-slate-800 shadow-md mx-auto">
+                {% else %}
+                    <div class="w-24 h-28 bg-slate-100 border-2 border-dashed border-slate-400 rounded-xl flex flex-col items-center justify-center text-slate-400 text-xs text-center p-2 mx-auto">
+                        <span class="text-xl">👤</span>
+                        <span class="text-[8px] uppercase font-bold mt-1">Sem Foto</span>
+                    </div>
+                {% endif %}
+                <span class="block text-[8px] font-mono text-slate-500 font-bold mt-1">FOTO OFICIAL</span>
+            </div>
+        </header>
+
+        <!-- TIMESTAMP DINÂMICO DE EMISSÃO -->
+        <div class="bg-slate-100 border border-slate-300 rounded-xl p-3 flex justify-between items-center text-[10px] font-mono">
+            <span class="font-bold text-slate-700">🕒 DATA E HORA DE EMISSÃO EM TEMPO REAL:</span>
+            <span class="bg-white border border-slate-300 px-3 py-1 rounded font-black text-blue-900">{{ timestamp_emissao }}</span>
+        </div>
+
+        <!-- DADOS CENTRAIS DO ESTUDANTE -->
+        <section class="border border-slate-900 rounded-xl p-5 space-y-4">
+            <div class="border-b border-slate-200 pb-2">
+                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 block">NOME DO ESTUDANTE (PACIENTE ATENDIDO):</span>
+                <h2 class="text-xl font-black uppercase text-slate-900">{{ aluno.nome }}</h2>
+            </div>
+
+            <div class="grid grid-cols-4 gap-4 text-xs">
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Código INEP:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.codigo_inep or 'N/A' }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Matrícula:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.matricula }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Data Nascimento:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.data_nascimento or 'N/A' }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Benefício BPC:</span>
+                    <span class="font-bold text-slate-900">{{ 'SIM' if aluno.recebe_bpc else 'NÃO' }}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 text-xs pt-2 border-t border-slate-100">
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Escola Matriculado:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.escola.nome if aluno.escola else 'Não Informada' }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Turma / Etapa:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.turma or 'N/A' }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">CID-10/11:</span>
+                    <span class="font-bold text-purple-900">{{ aluno.cid or 'Em Investigação' }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 1: FILIAÇÃO E CONTATOS FAMILIARES -->
+        <section class="space-y-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 border-b-2 border-slate-900 pb-1">
+                1. DADOS FAMILIARES E RESPONSÁVEIS LEGAL
+            </h3>
+
+            <div class="grid grid-cols-3 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Nome da Mãe:</span>
+                    <span class="font-semibold text-slate-900">{{ aluno.nome_mae or 'Não Informado' }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Nome do Pai:</span>
+                    <span class="font-semibold text-slate-900">{{ aluno.nome_pai or 'Não Informado' }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Contato Telefônico Urgência:</span>
+                    <span class="font-mono font-bold text-slate-900">{{ aluno.contato_urgencia }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 2: DADOS CLÍNICOS E REQUISITOS DE SAÚDE -->
+        <section class="space-y-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 border-b-2 border-slate-900 pb-1">
+                2. PRONTUÁRIO CLÍNICO, MEDICAÇÕES E REFEIÇÕES
+            </h3>
+
+            <div class="grid grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Condição de Deficiência / Transtorno:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.tipo_deficiencia }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Transtorno do Espectro Autista (TEA):</span>
+                    <span class="font-bold text-slate-900">{{ 'Sim' if aluno.possui_tea else 'Não' }}</span>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Medicações em Uso Contínuo:</span>
+                    <p class="font-normal text-slate-800 mt-1 italic">{{ aluno.medicacoes or 'Nenhuma medicação contínua registrada.' }}</p>
+                </div>
+                <div>
+                    <span class="text-[9px] font-bold text-slate-500 uppercase block">Restrições Alimentares / Alergias:</span>
+                    <p class="font-normal text-slate-800 mt-1 italic">{{ aluno.restricoes_alimentares or 'Sem restrições declaradas.' }}</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 3: HORÁRIOS DE ATENDIMENTOS E PRESENÇAS POR PROFISSIONAL -->
+        <section class="space-y-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 border-b-2 border-slate-900 pb-1">
+                3. AGENDA HISTÓRICA E HORÁRIOS DE ATENDIMENTOS MULTIDISCIPLINARES (AEE)
+            </h3>
+
+            <table class="w-full text-left border-collapse border border-slate-300 text-xs">
+                <thead>
+                    <tr class="bg-slate-200 text-[9px] font-black uppercase text-slate-800 border-b border-slate-300">
+                        <th class="p-2.5 border-r border-slate-300">Dia / Horário</th>
+                        <th class="p-2.5 border-r border-slate-300">Profissional Responsável</th>
+                        <th class="p-2.5 border-r border-slate-300">Cargo / Especialidade</th>
+                        <th class="p-2.5 border-r border-slate-300">Espaço Físico</th>
+                        <th class="p-2.5 text-center">Status Frequência</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 font-normal">
+                    {% for item in agendamentos %}
+                    <tr>
+                        <td class="p-2.5 border-r border-slate-300 font-bold">
+                            {{ item.dia_semana }} ({{ item.horario_inicio }} às {{ item.horario_fim }})
+                        </td>
+                        <td class="p-2.5 border-r border-slate-300 font-medium">
+                            {{ item.profissional.nome if item.profissional else 'Especialista AEE' }}
+                        </td>
+                        <td class="p-2.5 border-r border-slate-300 font-bold uppercase text-[9px]">
+                            {{ item.profissional.cargo if item.profissional else 'Psicopedagogo / AEE' }}
+                        </td>
+                        <td class="p-2.5 border-r border-slate-300">
+                            {{ item.sala_recurso or 'Sala de Recursos' }}
+                        </td>
+                        <td class="p-2.5 text-center font-bold uppercase text-[9px]">
+                            {{ item.status or 'REGULAR' }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="p-4 text-center text-slate-500 italic">
+                            Nenhum horário de atendimento fixado no prontuário AEE para este estudante.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SEÇÃO 4: HISTÓRICO PEDAGÓGICO (PEI, PAEE, ESTUDOS DE CASO) -->
+        <section class="space-y-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 border-b-2 border-slate-900 pb-1">
+                4. RESUMO HISTÓRICO DE INSTRUMENTOS PEDAGÓGICOS REGISTRADOS
+            </h3>
+
+            <div class="grid grid-cols-3 gap-3 text-xs">
+                <div class="border border-slate-300 p-3 rounded-lg bg-slate-50">
+                    <span class="text-[9px] font-bold uppercase text-slate-500 block">PEIs Emitidos:</span>
+                    <span class="text-sm font-black text-slate-900">{{ peis|length }} Instrumento(s)</span>
+                </div>
+                <div class="border border-slate-300 p-3 rounded-lg bg-slate-50">
+                    <span class="text-[9px] font-bold uppercase text-slate-500 block">PAEEs Registrados:</span>
+                    <span class="text-sm font-black text-slate-900">{{ paees|length }} Instrumento(s)</span>
+                </div>
+                <div class="border border-slate-300 p-3 rounded-lg bg-slate-50">
+                    <span class="text-[9px] font-bold uppercase text-slate-500 block">Estudos de Caso:</span>
+                    <span class="text-sm font-black text-slate-900">{{ estudos_caso|length }} Homologado(s)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SEÇÃO 5: ASSINATURAS E TERMO DE AUTENTICIDADE GOVERNAMENTAL -->
+        <section class="pt-8 space-y-8 page-break">
+            <div class="border border-slate-400 p-4 rounded-xl text-[10px] leading-relaxed text-slate-700 bg-slate-50">
+                <b>DECLARAÇÃO REGULAMENTAR:</b> Atestamos para os devidos fins legais, médicos e educacionais que o presente Prontuário Técnico do estudante <b>{{ aluno.nome }}</b> reúne as informações consolidadas de atendimento no âmbito do Município de {{ g.municipio.nome if g.municipio else 'Município' }}. Este documento possui validade institucional em consonância com a Lei Federal nº 13.146/2015 (Estatuto da Pessoa com Deficiência).
+            </div>
+
+            <div class="grid grid-cols-3 gap-8 pt-8">
+                <div class="border-t border-slate-900 pt-2 text-center">
+                    <span class="block text-xs font-bold text-slate-900">Especialista Responsável AEE</span>
+                    <span class="block text-[9px] text-slate-600">Assinatura / Carimbo</span>
+                </div>
+                <div class="border-t border-slate-900 pt-2 text-center">
+                    <span class="block text-xs font-bold text-slate-900">Direção da Unidade Escolar</span>
+                    <span class="block text-[9px] text-slate-600">Matrícula / Portaria</span>
+                </div>
+                <div class="border-t border-slate-900 pt-2 text-center">
+                    <span class="block text-xs font-bold text-slate-900">Secretaria Municipal de Educação</span>
+                    <span class="block text-[9px] text-slate-600">Homologação Oficial</span>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</body>
+</html>
