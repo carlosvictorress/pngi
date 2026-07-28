@@ -112,8 +112,13 @@
                     </div>
                 </div>
                 <div class="space-y-1.5">
-                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Coordenador Pedagógico</label>
-                    <input type="text" name="coordenador_pedagogico" value="{{ pei.coordenador_pedagogico if pei else '' }}" class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-medium text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                    <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Coordenador / Especialista AEE *</label>
+                    <select name="coordenador_pedagogico" required class="w-full bg-white border border-slate-200 rounded-lg p-3 text-xs font-bold text-gov-dark focus:border-gov-blue focus:ring-1 focus:ring-gov-blue/50 focus:outline-none transition-all">
+                        <option value="">-- Selecione o Especialista --</option>
+                        {% for p in profissionais_aee %}
+                        <option value="{{ p.nome }} — {{ p.cargo }}" {% if pei and pei.coordenador_pedagogico == (p.nome ~ ' — ' ~ p.cargo) %}selected{% endif %}>{{ p.nome }} ({{ p.cargo }})</option>
+                        {% endfor %}
+                    </select>
                 </div>
                 <div class="space-y-1.5">
                     <label class="block text-[9px] font-semibold uppercase tracking-widest text-slate-400">Período de Vigência</label>
@@ -479,18 +484,32 @@
 </div>
 
 <script>
+    const currentUserId = {{ current_user.id }};
+    const currentUserName = {{ current_user.nome | tojson }};
+    const currentUserPerfil = {{ current_user.perfil | tojson }};
+    const isAdminUser = (currentUserPerfil === 'superadmin');
+
+    const defaultPeiAutorId = {{ pei.professor_id if (pei and pei.professor_id) else 'null' }};
+    const defaultPeiAutorNome = {{ (pei.professor.nome if (pei and pei.professor) else 'Docente Responsável') | tojson }};
+
     const metasSalvas = {{ (pei.metas_pedagogicas_json|safe) if pei and pei.metas_pedagogicas_json else '[]' }};
     const gradeSalva = {{ (pei.disciplinas_bncc_json|safe) if pei and pei.disciplinas_bncc_json else '[]' }};
 
     document.addEventListener("DOMContentLoaded", function() {
         if (metasSalvas.length > 0) {
-            metasSalvas.forEach(m => carregarLinhaMeta(m.periodo, m.objetivo, m.estrategia, m.avaliacao));
+            metasSalvas.forEach(m => carregarLinhaMeta(
+                m.periodo || '', m.objetivo || '', m.estrategia || '', m.avaliacao || '',
+                m.autor_id, m.autor_nome, m.criado_em
+            ));
         } else {
             adicionarLinhaMeta();
         }
 
         if (gradeSalva.length > 0) {
-            gradeSalva.forEach(g => carregarLinhaGrade(g.disciplina, g.conteudo, g.bncc, g.metodologia, g.recursos, g.avaliacao));
+            gradeSalva.forEach(g => carregarLinhaGrade(
+                g.disciplina || '', g.conteudo || '', g.bncc || '', g.metodologia || '', g.recursos || '', g.avaliacao || '',
+                g.autor_id, g.autor_nome, g.criado_em
+            ));
         } else {
             adicionarLinhaGrade();
         }
@@ -510,47 +529,107 @@
     }
 
     function adicionarLinhaMeta() {
-        carregarLinhaMeta('', '', '', '');
+        carregarLinhaMeta('', '', '', '', currentUserId, currentUserName, '');
     }
 
-    function carregarLinhaMeta(perioricidade, obj, est, ava) {
+    function carregarLinhaMeta(perioricidade, obj, est, ava, autorId, autorNome, criadoEm) {
         const corpo = document.getElementById('corpo_metas');
         const novaLinha = document.createElement('tr');
-        novaLinha.className = 'linha-meta-item hover:bg-slate-50/50 transition-colors';
+        
+        const rowAutorId = autorId ? parseInt(autorId) : (defaultPeiAutorId !== null ? defaultPeiAutorId : currentUserId);
+        const rowAutorNome = autorNome || (autorId ? 'Docente' : defaultPeiAutorNome);
+        const rowCriadoEm = criadoEm || new Date().toLocaleDateString('pt-BR');
+        
+        const podeEditar = (rowAutorId === currentUserId) || isAdminUser;
+        
+        novaLinha.className = `linha-meta-item transition-colors ${podeEditar ? 'hover:bg-slate-50/50' : 'bg-amber-50/60 border-l-4 border-l-amber-500'}`;
+        
+        const disabledAttr = podeEditar ? '' : 'disabled readonly';
+        const inputClass = podeEditar 
+            ? 'w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all'
+            : 'w-full bg-slate-200/70 border border-slate-300 p-3 rounded-lg text-slate-700 font-semibold cursor-not-allowed opacity-90';
+
+        const selClass = podeEditar
+            ? 'w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all resize-none'
+            : 'w-full bg-slate-200/70 border border-slate-300 p-3 rounded-lg text-slate-700 font-semibold cursor-not-allowed opacity-90 resize-none';
+
+        const badge = podeEditar
+            ? `<span class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-1">✍️ Seu Registro (${rowCriadoEm})</span>`
+            : `<span class="inline-flex items-center gap-1 text-[9px] font-bold text-slate-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 shadow-sm mt-1" title="Registro protegido: criado por ${rowAutorNome}">🔒 ${rowAutorNome} (${rowCriadoEm})</span>`;
+
+        const botaoRemover = podeEditar
+            ? `<button type="button" onclick="removerLinhaTabela(this)" class="text-red-400 hover:text-red-600 font-bold p-2 transition-colors" title="Excluir meu registro">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+               </button>`
+            : `<span title="Registro bloqueado: pertence a outro docente" class="text-slate-400 cursor-not-allowed p-2 inline-block">🔒</span>`;
+
         novaLinha.innerHTML = `
-            <td class="p-3"><input type="text" name="meta_periodo[]" value="${perioricidade}" placeholder="Mês/Bim" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
-            <td class="p-3"><textarea name="meta_objetivo[]" rows="2" placeholder="Objetivos" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all resize-none">${obj}</textarea></td>
-            <td class="p-3"><textarea name="meta_estrategia[]" rows="2" placeholder="Estratégias" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all resize-none">${est}</textarea></td>
-            <td class="p-3"><input type="text" name="meta_aval[]" value="${ava}" placeholder="Avaliação" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
-            <td class="p-3 text-center">
-                <button type="button" onclick="removerLinhaTabela(this)" class="text-red-400 hover:text-red-600 font-bold p-2 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+            <input type="hidden" name="meta_autor_id[]" value="${rowAutorId}">
+            <input type="hidden" name="meta_autor_nome[]" value="${rowAutorNome}">
+            <input type="hidden" name="meta_criado_em[]" value="${rowCriadoEm}">
+            
+            <td class="p-3">
+                <input type="text" name="meta_periodo[]" value="${perioricidade}" ${disabledAttr} placeholder="Mês/Bim" class="${inputClass}">
+                <div>${badge}</div>
             </td>
+            <td class="p-3"><textarea name="meta_objetivo[]" rows="2" ${disabledAttr} placeholder="Objetivos" class="${selClass}">${obj}</textarea></td>
+            <td class="p-3"><textarea name="meta_estrategia[]" rows="2" ${disabledAttr} placeholder="Estratégias" class="${selClass}">${est}</textarea></td>
+            <td class="p-3"><input type="text" name="meta_aval[]" value="${ava}" ${disabledAttr} placeholder="Avaliação" class="${inputClass}"></td>
+            <td class="p-3 text-center">${botaoRemover}</td>
         `;
         corpo.appendChild(novaLinha);
     }
 
     function adicionarLinhaGrade() {
-        carregarLinhaGrade('', '', '', '', '', '');
+        carregarLinhaGrade('', '', '', '', '', '', currentUserId, currentUserName, '');
     }
 
-    function carregarLinhaGrade(componente, conteudo, bncc, metodo, recurso, aval) {
+    function carregarLinhaGrade(componente, conteudo, bncc, metodo, recurso, aval, autorId, autorNome, criadoEm) {
         const corpo = document.getElementById('corpo_grade');
         const novaLinha = document.createElement('tr');
-        novaLinha.className = 'linha-grade-item hover:bg-slate-50/50 transition-colors';
+        
+        const rowAutorId = autorId ? parseInt(autorId) : (defaultPeiAutorId !== null ? defaultPeiAutorId : currentUserId);
+        const rowAutorNome = autorNome || (autorId ? 'Docente' : defaultPeiAutorNome);
+        const rowCriadoEm = criadoEm || new Date().toLocaleDateString('pt-BR');
+        
+        const podeEditar = (rowAutorId === currentUserId) || isAdminUser;
+        
+        novaLinha.className = `linha-grade-item transition-colors ${podeEditar ? 'hover:bg-slate-50/50' : 'bg-amber-50/60 border-l-4 border-l-amber-500'}`;
+        
+        const disabledAttr = podeEditar ? '' : 'disabled readonly';
+        const inputClass = podeEditar 
+            ? 'w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all'
+            : 'w-full bg-slate-200/70 border border-slate-300 p-3 rounded-lg text-slate-700 font-semibold cursor-not-allowed opacity-90';
+
+        const selClass = podeEditar
+            ? 'w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all resize-none'
+            : 'w-full bg-slate-200/70 border border-slate-300 p-3 rounded-lg text-slate-700 font-semibold cursor-not-allowed opacity-90 resize-none';
+
+        const badge = podeEditar
+            ? `<span class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 mt-1">✍️ Seu Registro (${rowCriadoEm})</span>`
+            : `<span class="inline-flex items-center gap-1 text-[9px] font-bold text-slate-800 bg-amber-100 px-2 py-0.5 rounded border border-amber-300 shadow-sm mt-1" title="Registro protegido: criado por ${rowAutorNome}">🔒 ${rowAutorNome} (${rowCriadoEm})</span>`;
+
+        const botaoRemover = podeEditar
+            ? `<button type="button" onclick="removerLinhaTabela(this)" class="text-red-400 hover:text-red-600 font-bold p-2 transition-colors" title="Excluir meu registro">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+               </button>`
+            : `<span title="Registro bloqueado: pertence a outro docente" class="text-slate-400 cursor-not-allowed p-2 inline-block">🔒</span>`;
+
         novaLinha.innerHTML = `
-            <td class="p-3"><input type="text" name="disc_nome[]" value="${componente}" placeholder="Matéria" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
-            <td class="p-3"><input type="text" name="disc_conteudo[]" value="${conteudo}" placeholder="Conteúdo" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
-            <td class="p-3"><input type="text" name="disc_bncc[]" value="${bncc}" placeholder="Código" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg font-mono focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
-            <td class="p-3"><textarea name="disc_metodologia[]" rows="2" placeholder="Estratégias" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all resize-none">${metodo}</textarea></td>
-            <td class="p-3"><input type="text" name="disc_recursos[]" value="${recurso}" placeholder="Recursos" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
-            <td class="p-3"><input type="text" name="disc_avaliacao[]" value="${aval}" placeholder="Avaliação" class="w-full bg-slate-50 border border-slate-200 p-3 rounded-lg focus:bg-white focus:border-gov-blue focus:outline-none transition-all"></td>
-            <td class="p-3 text-center">
-                <button type="button" onclick="removerLinhaTabela(this)" class="text-red-400 hover:text-red-600 font-bold p-2 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+            <input type="hidden" name="disc_autor_id[]" value="${rowAutorId}">
+            <input type="hidden" name="disc_autor_nome[]" value="${rowAutorNome}">
+            <input type="hidden" name="disc_criado_em[]" value="${rowCriadoEm}">
+
+            <td class="p-3">
+                <input type="text" name="disc_nome[]" value="${componente}" ${disabledAttr} placeholder="Matéria" class="${inputClass}">
+                <div>${badge}</div>
             </td>
+            <td class="p-3"><input type="text" name="disc_conteudo[]" value="${conteudo}" ${disabledAttr} placeholder="Conteúdo" class="${inputClass}"></td>
+            <td class="p-3"><input type="text" name="disc_bncc[]" value="${bncc}" ${disabledAttr} placeholder="Código" class="${inputClass} font-mono"></td>
+            <td class="p-3"><textarea name="disc_metodologia[]" rows="2" ${disabledAttr} placeholder="Estratégias" class="${selClass}">${metodo}</textarea></td>
+            <td class="p-3"><input type="text" name="disc_recursos[]" value="${recurso}" ${disabledAttr} placeholder="Recursos" class="${inputClass}"></td>
+            <td class="p-3"><input type="text" name="disc_avaliacao[]" value="${aval}" ${disabledAttr} placeholder="Avaliação" class="${inputClass}"></td>
+            <td class="p-3 text-center">${botaoRemover}</td>
         `;
         corpo.appendChild(novaLinha);
     }

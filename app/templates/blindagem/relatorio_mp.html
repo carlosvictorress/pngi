@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Dossiê Consolidação Educação Especial Inclusiva — Ministério Público</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; background: white; }
+            .page-break { page-break-after: always; }
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen p-4 sm:p-8">
+
+    <!-- BARRA DE AÇÃO FLUTUANTE (NÃO IMPRIMÍVEL) -->
+    <div class="max-w-5xl mx-auto mb-6 flex items-center justify-between no-print bg-slate-900 text-white p-4 rounded-2xl shadow-lg">
+        <div class="flex items-center gap-2">
+            <span class="text-amber-400 font-extrabold text-sm">🛡️ Relatório Timbrado para o Ministério Público</span>
+        </div>
+        <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-5 py-2 rounded-xl text-xs shadow-md transition-all">
+            🖨️ Imprimir / Salvar em PDF
+        </button>
+    </div>
+
+    <!-- DOCUMENTO TIMBRADO OFICIAL -->
+    <div class="max-w-5xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-200 space-y-8">
+        
+        <!-- CABEÇALHO GOVERNAMENTAL -->
+        <div class="border-b-2 border-slate-900 pb-6 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                {% if g.municipio.brasao_url %}
+                <img src="{{ g.municipio.brasao_url }}" alt="Brasão" class="w-16 h-16 object-contain">
+                {% else %}
+                <div class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-extrabold text-xl">
+                    {{ g.municipio.estado }}
+                </div>
+                {% endif %}
+                <div>
+                    <h1 class="text-base font-extrabold text-slate-900 uppercase">Prefeitura Municipal de {{ g.municipio.nome }} — {{ g.municipio.estado }}</h1>
+                    <h2 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Secretaria Municipal de Educação • Coordenação de Educação Especial Inclusiva</h2>
+                    <span class="text-[10px] text-slate-500 block">SISTEMA GESTOOR 360 — PLATAFORMA DE GOVERNANÇA E AUDITORIA PÚBLICA</span>
+                </div>
+            </div>
+
+            <div class="text-right border-l border-slate-200 pl-4">
+                <span class="text-[10px] text-slate-400 font-bold uppercase block">Emissão Oficial</span>
+                <span class="text-xs font-mono font-extrabold text-slate-900 block">{{ data_emissao }}</span>
+                <span class="text-[9px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-extrabold border border-emerald-200 inline-block mt-1">
+                    ✓ Autenticidade Auditada
+                </span>
+            </div>
+        </div>
+
+        <!-- TÍTULO DARESPOSTA AO MP -->
+        <div class="space-y-2 text-center bg-slate-50 p-6 rounded-2xl border border-slate-200">
+            <span class="text-[10px] font-extrabold text-brand-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-md">
+                DOSSIÊ TÉCNICO E CONSOLIDADO DE ATENDIMENTO
+            </span>
+            <h2 class="text-lg font-extrabold text-slate-900 uppercase">Relatório de Atendimento aos Estudantes da Educação Especial Inclusiva</h2>
+            <p class="text-xs text-slate-600 max-w-3xl mx-auto">
+                Documento administrativo expedido para instrução de procedimentos administrativos, notícias de fato e Notificações Recomendatórias junto à Promotoria de Justiça da Infância e Juventude.
+            </p>
+        </div>
+
+        <!-- TABELA DOSSIÊ COMPLETO -->
+        <div class="space-y-4">
+            <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">RELAÇÃO DE ESTUDANTES ATENDIDOS E RECURSOS ALOCADOS (TOTAL: {{ dossie_alunos|length }})</h3>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border border-slate-300">
+                    <thead class="bg-slate-100 text-slate-800 uppercase text-[9px] font-extrabold border-b border-slate-300">
+                        <tr>
+                            <th class="p-2.5 border-r border-slate-300">Estudante / CPF</th>
+                            <th class="p-2.5 border-r border-slate-300">Escola / Turma</th>
+                            <th class="p-2.5 border-r border-slate-300">Diagnóstico / CID</th>
+                            <th class="p-2.5 border-r border-slate-300">Situação PEI</th>
+                            <th class="p-2.5">Ciência Família</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        {% for item in dossie_alunos %}
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-2.5 border-r border-slate-200">
+                                <span class="font-bold block text-slate-900">{{ item.aluno.nome }}</span>
+                                <span class="text-[10px] text-slate-500 font-mono">Matrícula: {{ item.aluno.matricula }}</span>
+                            </td>
+                            <td class="p-2.5 border-r border-slate-200">
+                                <span class="font-semibold block text-slate-800">{{ item.escola_nome }}</span>
+                                <span class="text-[10px] text-slate-500">{{ item.aluno.turma }}</span>
+                            </td>
+                            <td class="p-2.5 border-r border-slate-200">
+                                <span class="font-bold text-slate-900 block">{{ item.aluno.tipo_deficiencia }}</span>
+                                <span class="text-[10px] text-brand-600 font-mono">CID: {{ item.aluno.cid or 'Em Investigação' }}</span>
+                            </td>
+                            <td class="p-2.5 border-r border-slate-200">
+                                {% if item.pei %}
+                                <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                    {{ item.pei.status }}
+                                </span>
+                                {% else %}
+                                <span class="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                    Em Elaboração
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="p-2.5">
+                                {% if item.pei and item.pei.assinado_familia %}
+                                <span class="text-[10px] font-bold text-emerald-700">✓ Assinado em {{ item.pei.assinado_familia_em.strftime('%d/%m/%Y') }}</span>
+                                {% else %}
+                                <span class="text-[10px] text-slate-400">Pendente de Coleta</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- NOTAS LEGAIS DE FECHAMENTO -->
+        <div class="pt-6 border-t border-slate-200 text-xs text-slate-600 space-y-4">
+            <p class="leading-relaxed">
+                Certificamos que as informações constantes neste relatório refletem fielmente os prontuários eletrônicos mantidos no banco de dados municipal da Educação Inclusiva, auditáveis nos termos da Lei nº 13.146/2015 (LBI) e Decreto nº 7.611/2011.
+            </p>
+
+            <div class="pt-12 grid grid-cols-2 gap-8 text-center">
+                <div class="border-t border-slate-400 pt-2 space-y-0.5">
+                    <span class="font-extrabold text-slate-900 block text-xs">Secretaria Municipal de Educação</span>
+                    <span class="text-[10px] text-slate-500 block">Prefeitura de {{ g.municipio.nome }}</span>
+                </div>
+
+                <div class="border-t border-slate-400 pt-2 space-y-0.5">
+                    <span class="font-extrabold text-slate-900 block text-xs">Coordenação de Educação Especial Inclusiva</span>
+                    <span class="text-[10px] text-slate-500 block">Responsável Técnico AEE</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

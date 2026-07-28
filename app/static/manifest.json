@@ -1,0 +1,43 @@
+{
+  "name": "Gestoor 360 - Educação Especial Inclusiva",
+  "short_name": "Gestoor 360",
+  "description": "Plataforma Nacional de Educação Especial & Governança Inclusiva",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#2563EB",
+  "orientation": "portrait-primary",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/static/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Consultar Alunos",
+      "short_name": "Alunos",
+      "description": "Acessar prontuários e lista de alunos",
+      "url": "/alunos/",
+      "icons": [{ "src": "/static/img/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Elaboração de PEI",
+      "short_name": "PEI",
+      "description": "Acessar planos de desenvolvimento individualizado",
+      "url": "/pei/",
+      "icons": [{ "src": "/static/img/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

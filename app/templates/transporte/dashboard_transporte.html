@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+
+{% block title %}Transporte Escolar Adaptado & Inclusivo — Gestoor 360{% endblock %}
+{% block header_title %}Gestão do Transporte Escolar Adaptado & Frota Inclusiva{% endblock %}
+
+{% block content %}
+<div class="space-y-8 pb-12">
+
+    <!-- BANNER SUPERIOR DE TRANSPORTE -->
+    <div class="bg-gradient-to-r from-blue-900 via-slate-900 to-indigo-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden border border-blue-800/40">
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div class="space-y-2 max-w-2xl">
+                <div class="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full border border-blue-400/30 uppercase">
+                    <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+                    LOGÍSTICA & ACESSIBILIDADE VEICULAR (LBI)
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Transporte Escolar Adaptado & Inclusivo</h1>
+                <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                    Gerenciamento completo das rotas de frotas municipais, monitoramento de acompanhantes de rota, carros com elevadores acessíveis e emissão de relatórios de prestação de contas para o <strong>Fundeb</strong>.
+                </p>
+            </div>
+
+            <!-- BOTÕES DE AÇÃO RÁPIDA -->
+            <div class="flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
+                <a href="{{ url_for('transporte.gerenciar_rotas', municipio_slug=g.municipio.slug) }}" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-5 py-3 rounded-2xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 transform hover:scale-[1.02]">
+                    <span>🚍</span> Gerenciar Rotas & Frotas
+                </a>
+                
+                <a href="{{ url_for('transporte.relatorio_fundeb', municipio_slug=g.municipio.slug) }}" target="_blank"
+                   class="bg-white/10 hover:bg-white/20 text-white font-bold px-5 py-3 rounded-2xl text-xs transition-all border border-white/20 flex items-center justify-center gap-2">
+                    <span>📊</span> Relatório Fundeb
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- INDICADORES DA FROTA DE TRANSPORTE -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+        
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">Total Transportados</span>
+            <div class="flex items-center justify-between">
+                <span class="text-3xl font-extrabold text-slate-900 font-mono">{{ total_transportados }}</span>
+                <span class="w-8 h-8 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center font-bold text-sm">🚌</span>
+            </div>
+            <span class="text-[10px] text-slate-500 font-medium block">Estudantes com Apoio Ativo</span>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">Estudantes Cadeirantes</span>
+            <div class="flex items-center justify-between">
+                <span class="text-3xl font-extrabold text-indigo-600 font-mono">{{ total_cadeirantes }}</span>
+                <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm">♿</span>
+            </div>
+            <span class="text-[10px] text-slate-500 font-medium block">Necessitam Veículo Elevatório</span>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">Monitores de Rota</span>
+            <div class="flex items-center justify-between">
+                <span class="text-3xl font-extrabold text-emerald-600 font-mono">{{ total_monitores }}</span>
+                <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">👮</span>
+            </div>
+            <span class="text-[10px] text-slate-500 font-medium block">Acompanhamento no Itinerário</span>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">Veículos Adaptados</span>
+            <div class="flex items-center justify-between">
+                <span class="text-3xl font-extrabold text-purple-600 font-mono">{{ total_veiculos_adaptados }}</span>
+                <span class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">🚐</span>
+            </div>
+            <span class="text-[10px] text-slate-500 font-medium block">Vans/Ônibus Adaptados</span>
+        </div>
+
+        <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">Rotas Mapeadas</span>
+            <div class="flex items-center justify-between">
+                <span class="text-3xl font-extrabold text-amber-600 font-mono">{{ total_rotas }}</span>
+                <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">🗺️</span>
+            </div>
+            <span class="text-[10px] text-slate-500 font-medium block">Itinerários Municipais</span>
+        </div>
+
+    </div>
+
+    <!-- TABELA DE ALUNOS ATENDIDOS PELO TRANSPORTE ADAPTADO -->
+    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+                <h2 class="text-lg font-extrabold text-slate-900">Alunado Cadastrado no Transporte Escolar Adaptado</h2>
+                <p class="text-xs text-slate-500">Mapeamento individual de horários, pontos de coleta e acessibilidade de cada estudante.</p>
+            </div>
+
+            <button onclick="document.getElementById('modal-vincular-aluno').classList.remove('hidden')" 
+                    class="bg-slate-900 hover:bg-black text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm flex items-center gap-2">
+                <span>➕</span> Atribuir Rota a Aluno
+            </button>
+        </div>
+
+        {% if alunos_transportados %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-600 uppercase text-[10px] tracking-wider border-b border-slate-200">
+                    <tr>
+                        <th class="p-3">Estudante / Matrícula</th>
+                        <th class="p-3">Unidade Escolar / Turma</th>
+                        <th class="p-3">Rota Atribuída</th>
+                        <th class="p-3">Ponto de Embarque / Horários</th>
+                        <th class="p-3">Acessibilidade & Apoio</th>
+                        <th class="p-3 text-right">Ações Logísticas</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for item in alunos_transportados %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold text-slate-900">
+                            <span class="block text-sm">{{ item.aluno.nome }}</span>
+                            <span class="text-[10px] text-slate-400 font-mono">MAT: {{ item.aluno.matricula }}</span>
+                        </td>
+                        <td class="p-3 text-slate-700">
+                            <span class="block font-semibold">{{ item.aluno.escola.nome if item.aluno.escola else 'Escola Municipal' }}</span>
+                            <span class="text-[10px] text-slate-500">{{ item.aluno.turma }}</span>
+                        </td>
+                        <td class="p-3">
+                            {% if item.rota %}
+                            <span class="bg-blue-50 text-brand-600 font-extrabold px-2.5 py-1 rounded-lg border border-blue-200 text-[10px] block w-max">
+                                {{ item.rota.codigo_rota }} — {{ item.rota.nome_rota }}
+                            </span>
+                            {% else %}
+                            <span class="text-slate-400 italic">Nenhuma rota atribuída</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3 text-slate-700">
+                            <span class="font-bold block">{{ item.transporte.ponto_embarque if item.transporte and item.transporte.ponto_embarque else 'Residência do Aluno' }}</span>
+                            {% if item.transporte and item.transporte.horario_embarque %}
+                            <span class="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                🕒 Ida: {{ item.transporte.horario_embarque }} | Volta: {{ item.transporte.horario_desembarque or '--:--' }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3">
+                            <div class="flex flex-wrap gap-1">
+                                {% if item.aluno.cadeirante or (item.transporte and item.transporte.cadeirante) %}
+                                <span class="bg-purple-50 text-purple-700 font-bold px-2 py-0.5 rounded text-[9px]">♿ Cadeirante</span>
+                                {% endif %}
+                                {% if item.aluno.possui_monitor_rota or (item.transporte and item.transporte.possui_monitor_rota) %}
+                                <span class="bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded text-[9px]">👮 Monitor Rota</span>
+                                {% endif %}
+                                {% if item.aluno.necessita_transporte_adaptado or (item.transporte and item.transporte.necessita_veiculo_adaptado) %}
+                                <span class="bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded text-[9px]">🚐 Elevador Van</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="p-3 text-right">
+                            <button onclick="abrirModalLogistica('{{ item.aluno.id }}', '{{ item.aluno.nome }}', '{{ item.transporte.rota_id if item.transporte else '' }}', '{{ item.transporte.ponto_embarque if item.transporte else '' }}', '{{ item.transporte.horario_embarque if item.transporte else '' }}', '{{ item.transporte.horario_desembarque if item.transporte else '' }}', '{{ item.transporte.observacoes_logistica if item.transporte else '' }}')" 
+                                    class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold px-3 py-1.5 rounded-lg border border-slate-200 transition-all">
+                                ⚙️ Ajustar Logística
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="py-12 text-center text-slate-400 text-xs space-y-2">
+            <span class="text-3xl block">🚌</span>
+            <p class="font-bold text-slate-700">Nenhum estudante atrelado ao transporte escolar adaptado até o momento.</p>
+            <p>Clique no botão acima para vincular alunos às rotas de frotas municipais.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- MODAL ATRIBUIR / EDITAR LOGÍSTICA DE TRANSPORTE DO ESTUDANTE -->
+<div id="modal-vincular-aluno" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-6 border border-slate-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-base font-extrabold text-slate-900" id="titulo-modal-logistica">Configurar Logística de Transporte</h3>
+            <button onclick="document.getElementById('modal-vincular-aluno').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+        </div>
+
+        <form id="form-logistica-aluno" method="POST" action="" class="space-y-4 text-xs">
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Selecione o Estudante *</label>
+                <select name="aluno_id_select" id="aluno_id_select" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium" onchange="atualizarActionForm(this.value)">
+                    <option value="">-- Selecione o Aluno --</option>
+                    {% for a in todos_alunos %}
+                    <option value="{{ a.id }}">{{ a.nome }} ({{ a.escola.nome if a.escola else 'Escola' }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Rota Municipal *</label>
+                <select name="rota_id" id="input_rota_id" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium">
+                    <option value="none">-- Sem Rota Atribuída --</option>
+                    {% for r in rotas %}
+                    <option value="{{ r.id }}">{{ r.codigo_rota }} — {{ r.nome_rota }} ({{ r.tipo_veiculo }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Ponto / Endereço de Coleta (Embarque)</label>
+                <input type="text" name="ponto_embarque" id="input_ponto_embarque" placeholder="Ex: Rua das Flores, 123 (Povoado Centro)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Horário Embarque Ida</label>
+                    <input type="text" name="horario_embarque" id="input_horario_embarque" placeholder="Ex: 06:45" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Horário Retorno Volta</label>
+                    <input type="text" name="horario_desembarque" id="input_horario_desembarque" placeholder="Ex: 11:45" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+            </div>
+
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+                <span class="block font-bold text-slate-700">Recursos de Acessibilidade Necessários:</span>
+                <div class="grid grid-cols-2 gap-2 text-[11px]">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="cadeirante" id="input_cadeirante" class="rounded text-brand-600"> Cadeirante
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="possui_monitor_rota" id="input_monitor" class="rounded text-brand-600"> Monitor de Rota
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="necessita_veiculo_adaptado" id="input_veiculo" class="rounded text-brand-600"> Van Adaptada
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="necessita_acompanhante" id="input_acompanhante" class="rounded text-brand-600"> Acompanhante
+                    </label>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Observações de Saúde / Recomendações Logísticas</label>
+                <textarea name="observacoes_logistica" id="input_observacoes" rows="2" placeholder="Ex: Epilepsia controlada com medicação. Necessita cinto adaptado." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 font-medium"></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all">
+                Salvar Logística de Transporte
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function atualizarActionForm(alunoId) {
+        if (alunoId) {
+            document.getElementById('form-logistica-aluno').action = `/${ '{{ g.municipio.slug }}' }/transporte/aluno/${alunoId}/vincular`;
+        }
+    }
+
+    function abrirModalLogistica(id, nome, rotaId, ponto, hIda, hVolta, obs) {
+        document.getElementById('aluno_id_select').value = id;
+        atualizarActionForm(id);
+        document.getElementById('titulo-modal-logistica').innerText = `Ajustar Transporte: ${nome}`;
+        document.getElementById('input_rota_id').value = rotaId || 'none';
+        document.getElementById('input_ponto_embarque').value = ponto || '';
+        document.getElementById('input_horario_embarque').value = hIda || '';
+        document.getElementById('input_horario_desembarque').value = hVolta || '';
+        document.getElementById('input_observacoes').value = obs || '';
+        document.getElementById('modal-vincular-aluno').classList.remove('hidden');
+    }
+</script>
+{% endblock %}

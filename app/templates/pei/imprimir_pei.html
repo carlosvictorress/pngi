@@ -366,33 +366,53 @@
                 </div>
             </div>
 
-            <!-- CONTAINER DE ASSINATURAS REESTRUTURADO (ANTI-QUEBRA) -->
-            <div class="assinaturas-container pt-10 avoid-break">
-                <div class="grid-print-3">
-                    <div class="grid-print-3-col text-center">
-                        <div style="border-b: 1px solid #000000; margin: 0 8px; height: 35px; font-family: monospace; font-size: 8px; color: #475569; line-height: 45px;">
-                            ASSINADO ELETRONICAMENTE EM 27/05/2026
+            <!-- CONTAINER DE ASSINATURAS REESTRUTURADO (4 ASSINATURAS COM RESPONSÁVEL FAMILIAR) -->
+            <div class="assinaturas-container pt-8 avoid-break">
+                <div style="display: table; width: 100%; table-layout: fixed; margin-bottom: 20px;">
+                    <div style="display: table-row;">
+                        <!-- ASSINATURA 1: PROFESSOR REGENTE -->
+                        <div style="display: table-cell; width: 50%; padding: 0 15px; text-align: center; vertical-align: bottom;">
+                            <div style="border-bottom: 1px solid #000000; height: 32px; font-family: monospace; font-size: 8px; color: #475569; line-height: 40px;">
+                                ASSINADO ELETRONICAMENTE
+                            </div>
+                            <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 9.5px;">PROFESSOR (A) REGENTE TITULAR</p>
+                            <p style="font-size: 8.5px; color: #64748b;">Unidade de Ensino Regular</p>
                         </div>
-                        <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 10px;">PROFESSOR (A) REGENTE TITULAR</p>
-                        <p style="font-size: 9px; color: #64748b;">Unidade de Ensino Regular</p>
+
+                        <!-- ASSINATURA 2: ESPECIALISTA AEE -->
+                        <div style="display: table-cell; width: 50%; padding: 0 15px; text-align: center; vertical-align: bottom;">
+                            <div style="border-bottom: 1px solid #000000; height: 32px; font-family: monospace; font-size: 8px; color: #475569; line-height: 40px;">
+                                CHANCELADO VIA SYSTEMA GESTOOR 360
+                            </div>
+                            <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 9.5px;">ESPECIALISTA DO AEE / SRM</p>
+                            <p style="font-size: 8.5px; color: #64748b;">Setor de Atendimento Inclusivo</p>
+                        </div>
                     </div>
-                    <div class="grid-print-3-col text-center">
-                        <div style="border-b: 1px solid #000000; margin: 0 8px; height: 35px; font-family: monospace; font-size: 8px; color: #475569; line-height: 45px;">
-                            CHANCELADO VIA SYSTEMA GESTOOR 360
+                </div>
+
+                <div style="display: table; width: 100%; table-layout: fixed; margin-top: 20px;">
+                    <div style="display: table-row;">
+                        <!-- ASSINATURA 3: GESTÃO / COORDENAÇÃO PEDAGÓGICA -->
+                        <div style="display: table-cell; width: 50%; padding: 0 15px; text-align: center; vertical-align: bottom;">
+                            <div style="border-bottom: 1px solid #000000; height: 32px; font-family: monospace; font-size: 8px; color: #475569; line-height: 40px;">
+                                HOMOLOGADO EM BASE MUNICIPAL
+                            </div>
+                            <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 9.5px;">COORDENAÇÃO PEDAGÓGICA / GESTÃO</p>
+                            <p style="font-size: 8.5px; color: #64748b;">Secretaria Municipal de Educação</p>
                         </div>
-                        <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 10px;">ESPECIALISTA DO AEE/SRM</p>
-                        <p style="font-size: 9px; color: #64748b;">Setor de Atendimento Inclusivo</p>
-                    </div>
-                    <div class="grid-print-3-col text-center">
-                        <div style="border-b: 1px solid #000000; margin: 0 8px; height: 35px; font-family: monospace; font-size: 8px; color: #475569; line-height: 45px;">
-                            HOMOLOGADO EM BASE MUNICIPAL
+
+                        <!-- ASSINATURA 4: RESPONSÁVEL FAMILIAR -->
+                        <div style="display: table-cell; width: 50%; padding: 0 15px; text-align: center; vertical-align: bottom;">
+                            <div style="border-bottom: 1px solid #000000; height: 32px; font-family: monospace; font-size: 8px; color: #475569; line-height: 40px;">
+                                {{ aluno.responsavel_nome if aluno and aluno.responsavel_nome else 'CIÊNCIA E ACEITE DA FAMÍLIA' }}
+                            </div>
+                            <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 9.5px;">PAI, MÃE OU RESPONSÁVEL LEGAL</p>
+                            <p style="font-size: 8.5px; color: #64748b;">Representação Familiar — LBI 13.146/2015</p>
                         </div>
-                        <p style="color: #000000; font-weight: 800; text-transform: uppercase; margin-top: 5px; font-size: 10px;">COORDENAÇÃO PEDAGÓGICA / GESTÃO</p>
-                        <p style="font-size: 9px; color: #64748b;">Secretaria Municipal de Educação</p>
                     </div>
                 </div>
                 
-                <div style="text-align: center; font-size: 8.5px; color: #64748b; font-family: monospace; margin-top: 35px; border-top: 1px dashed #000; padding-top: 6px; width: 100%;">
+                <div style="text-align: center; font-size: 8.5px; color: #64748b; font-family: monospace; margin-top: 25px; border-top: 1px dashed #000; padding-top: 6px; width: 100%;">
                     A autenticidade jurídica, rastreabilidade técnica e imutabilidade dos metadados deste parecer técnico são asseguradas via certificação digital criptográfica integrada ao ecossistema Gestoor 360.
                 </div>
             </div>

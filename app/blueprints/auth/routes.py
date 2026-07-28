@@ -52,6 +52,24 @@ def setup_inicial():
     
     return render_template('publico/setup_sucesso.html')
 
+def exigir_superadmin():
+    """
+    Garante permissão de Administrador Geral (SuperAdmin).
+    Se o usuário estiver navegando em Modo Impersonação (impersonator_id em sessão),
+    restaura automaticamente a conta mestre do SuperAdmin para concluir a ação sem HTTP 403.
+    """
+    if current_user.is_authenticated and current_user.perfil == 'superadmin':
+        return True
+
+    superadmin_id = session.get('impersonator_id')
+    if superadmin_id:
+        superadmin_user = Usuario.query.get(superadmin_id)
+        if superadmin_user and superadmin_user.perfil == 'superadmin':
+            login_user(superadmin_user)
+            return True
+
+    abort(403, description="Acesso negado: Ação restrita ao Administrador Geral.")
+
 # -------------------------------------------------------------------------
 # PAINEL DO SUPERADMIN GLOBAL (Central de Comando Mestre)
 # -------------------------------------------------------------------------
@@ -59,16 +77,7 @@ def setup_inicial():
 @login_required
 def superadmin_dashboard():
     """Painel mestre com controle total de todos os tenants e usuários."""
-    if current_user.perfil != 'superadmin':
-        superadmin_id = session.get('impersonator_id')
-        if superadmin_id:
-            superadmin_user = Usuario.query.get(superadmin_id)
-            if superadmin_user and superadmin_user.perfil == 'superadmin':
-                login_user(superadmin_user)
-                session.pop('impersonator_id', None)
-                flash("Você retornou automaticamente à Torre de Controle Mestre do SuperAdmin.", "sucesso")
-                return redirect(url_for('auth.superadmin_dashboard'))
-        abort(403)
+    exigir_superadmin()
         
     if request.method == 'POST':
         action = request.form.get('action')
@@ -191,8 +200,7 @@ def superadmin_dashboard():
 @auth_bp.route('/admin-global/municipio/<int:mun_id>/editar', methods=['POST'])
 @login_required
 def editar_municipio(mun_id):
-    if current_user.perfil != 'superadmin':
-        abort(403)
+    exigir_superadmin()
     municipio = Municipio.query.get_or_404(mun_id)
     
     nome = request.form.get('nome', '').strip()
@@ -218,8 +226,7 @@ def editar_municipio(mun_id):
 @auth_bp.route('/admin-global/municipio/<int:mun_id>/toggle-status')
 @login_required
 def toggle_status_municipio(mun_id):
-    if current_user.perfil != 'superadmin':
-        abort(403)
+    exigir_superadmin()
     municipio = Municipio.query.get_or_404(mun_id)
     municipio.ativo = not municipio.ativo
     db.session.commit()
@@ -230,8 +237,7 @@ def toggle_status_municipio(mun_id):
 @auth_bp.route('/admin-global/municipio/<int:mun_id>/excluir', methods=['POST', 'GET'])
 @login_required
 def excluir_municipio(mun_id):
-    if current_user.perfil != 'superadmin':
-        abort(403)
+    exigir_superadmin()
     municipio = Municipio.query.get_or_404(mun_id)
     nome_mun = municipio.nome
     
@@ -299,8 +305,7 @@ def excluir_municipio(mun_id):
 @auth_bp.route('/admin-global/usuario/<int:user_id>/editar', methods=['POST'])
 @login_required
 def editar_usuario(user_id):
-    if current_user.perfil != 'superadmin':
-        abort(403)
+    exigir_superadmin()
     usuario = Usuario.query.get_or_404(user_id)
     
     nome = request.form.get('nome', '').strip()
@@ -324,8 +329,7 @@ def editar_usuario(user_id):
 @auth_bp.route('/admin-global/usuario/<int:user_id>/resetar-senha', methods=['POST'])
 @login_required
 def resetar_senha_usuario(user_id):
-    if current_user.perfil != 'superadmin':
-        abort(403)
+    exigir_superadmin()
     usuario = Usuario.query.get_or_404(user_id)
     nova_senha = request.form.get('nova_senha', '').strip()
     
@@ -341,8 +345,7 @@ def resetar_senha_usuario(user_id):
 @auth_bp.route('/admin-global/usuario/<int:user_id>/toggle-status')
 @login_required
 def toggle_status_usuario(user_id):
-    if current_user.perfil != 'superadmin':
-        abort(403)
+    exigir_superadmin()
     usuario = Usuario.query.get_or_404(user_id)
     usuario.ativo = not usuario.ativo
     db.session.commit()
@@ -353,8 +356,7 @@ def toggle_status_usuario(user_id):
 @auth_bp.route('/admin-global/excluir-usuario/<int:user_id>')
 @login_required
 def excluir_usuario_global(user_id):
-    if current_user.perfil != 'superadmin':
-        abort(403)
+    exigir_superadmin()
     usuario = Usuario.query.get_or_404(user_id)
     nome_u = usuario.nome
     db.session.delete(usuario)
@@ -369,8 +371,7 @@ def excluir_usuario_global(user_id):
 @login_required
 def impersonar_usuario(user_id):
     """Permite ao SuperAdmin assumir instantaneamente o login de qualquer operador mantendo rastro para retornar."""
-    if current_user.perfil != 'superadmin' and not session.get('impersonator_id'):
-        abort(403)
+    exigir_superadmin()
         
     superadmin_id = session.get('impersonator_id') or current_user.id
     usuario_alvo = Usuario.query.get_or_404(user_id)
@@ -398,17 +399,41 @@ def parar_impersonacao():
 @auth_bp.route('/admin-global/entrar-como/<int:municipio_id>')
 @login_required
 def entrar_como_municipio(municipio_id):
-    """Permite ao SuperAdmin entrar diretamente no ecossistema de qualquer município."""
-    if current_user.perfil != 'superadmin':
-        abort(403)
+    """Permite ao SuperAdmin entrar diretamente no ecossistema de qualquer município com impersonação de operador local."""
+    exigir_superadmin()
+        
     municipio = Municipio.query.get_or_404(municipio_id)
+    
+    # Busca operador 'secretaria' ou qualquer usuário ativo do município
+    usuario_alvo = Usuario.query.filter_by(municipio_id=municipio.id, perfil='secretaria').first()
+    if not usuario_alvo:
+        usuario_alvo = Usuario.query.filter_by(municipio_id=municipio.id).first()
+
+    if not usuario_alvo:
+        # Se o município foi recém-criado sem usuários cadastrados, cria automaticamente a conta de Secretaria
+        email_sec = f"secretaria@{municipio.slug}.gov.br"
+        usuario_alvo = Usuario(
+            nome=f"Secretaria de Educação — {municipio.nome}",
+            email=email_sec,
+            perfil="secretaria",
+            municipio_id=municipio.id,
+            ativo=True
+        )
+        usuario_alvo.set_senha("admin123")
+        db.session.add(usuario_alvo)
+        db.session.commit()
+
+    superadmin_id = session.get('impersonator_id') or current_user.id
+    login_user(usuario_alvo)
+    session['impersonator_id'] = superadmin_id
+    flash(f"🎭 Modo Impersonação Ativo: Você agora está navegando no município de '{municipio.nome}' como '{usuario_alvo.nome}'.", "sucesso")
+    
     return redirect(url_for('core.index', municipio_slug=municipio.slug))
 
 @auth_bp.route('/admin-global/alterar-senha', methods=['POST'])
 @login_required
 def alterar_senha_superadmin():
-    if current_user.perfil != 'superadmin':
-        abort(403)
+    exigir_superadmin()
     senha_atual = request.form.get('senha_atual')
     nova_senha = request.form.get('nova_senha')
     
@@ -475,14 +500,63 @@ def login():
             
             if usuario and usuario.verificar_senha(senha):
                 if not usuario.ativo:
-                    erro = "Esta conta de servidor foi desativada pela coordenação municipal."
+                    erro = "Esta conta de servidor/responsável foi desativada pela coordenação municipal."
                 else:
                     login_user(usuario)
+                    if usuario.perfil == 'familia':
+                        return redirect(url_for('core.familia_dashboard', municipio_slug=municipio_slug))
                     return redirect(url_for('core.index', municipio_slug=municipio_slug))
             else:
                 erro = "Usuário ou senha inválidos para este ambiente municipal."
 
     return render_template('publico/login_municipio.html', municipio=municipio, erro=erro, modal_suspenso=modal_suspenso)
+
+@auth_bp.route('/<municipio_slug>/familia/acesso-rapido', methods=['GET', 'POST'])
+def acesso_rapido_familia():
+    """Acesso simplificado da família via Matrícula e Data de Nascimento do estudante."""
+    municipio_slug = g.municipio_slug
+    municipio = Municipio.query.filter_by(slug=municipio_slug).first_or_404()
+    erro = None
+    
+    if request.method == 'POST':
+        matricula = request.form.get('matricula', '').strip()
+        data_nascimento = request.form.get('data_nascimento', '').strip()
+        
+        aluno = Aluno.query.filter_by(matricula=matricula, municipio_id=municipio.id).first()
+        
+        if not aluno:
+            erro = "Matrícula do estudante não foi localizada no cadastro deste município."
+        elif aluno.data_nascimento and aluno.data_nascimento != data_nascimento:
+            erro = "A data de nascimento informada não confere com o cadastro oficial."
+        else:
+            if aluno.responsavel_id:
+                usuario_familia = Usuario.query.get(aluno.responsavel_id)
+            else:
+                usuario_familia = None
+
+            if not usuario_familia:
+                email_fam = f"familia.{aluno.matricula}@gestoor.local"
+                usuario_familia = Usuario.query.filter_by(email=email_fam).first()
+                if not usuario_familia:
+                    usuario_familia = Usuario(
+                        nome=f"Família de {aluno.nome}",
+                        email=email_fam,
+                        perfil='familia',
+                        municipio_id=municipio.id,
+                        ativo=True
+                    )
+                    usuario_familia.set_senha(aluno.matricula)
+                    db.session.add(usuario_familia)
+                    db.session.commit()
+                
+                aluno.responsavel_id = usuario_familia.id
+                db.session.commit()
+                
+            login_user(usuario_familia)
+            flash(f"Bem-vindo(a) ao Portal da Família de {aluno.nome}!", "sucesso")
+            return redirect(url_for('core.familia_dashboard', municipio_slug=municipio_slug))
+            
+    return render_template('familia/acesso_rapido.html', municipio=municipio, erro=erro)
 
 # -------------------------------------------------------------------------
 # SESSÃO E LANDING

@@ -76,12 +76,20 @@
                        class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
                         🧩 Criar PAEE
                     </a>
+                    <a href="{{ url_for('alunos.remanejar_escola_interna', municipio_slug=g.municipio_slug, id=aluno.id) }}" 
+                       class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
+                        🔄 Remanejar Escola
+                    </a>
                     <button type="button" onclick="document.getElementById('modal_transferir').classList.remove('hidden')" 
                             class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md flex items-center gap-2">
-                        🔄 Transferir Aluno
+                        🌐 Transferir Cidade
                     </button>
                 {% else %}
-                    <span class="bg-slate-800 text-slate-400 px-6 py-3 rounded-xl text-xs font-bold uppercase border border-slate-700">
+                    <a href="{{ url_for('alunos.imprimir_termo_transferencia', municipio_slug=g.municipio_slug, id=aluno.id) }}" target="_blank" 
+                       class="bg-indigo-700 hover:bg-indigo-600 text-white px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md flex items-center gap-2" title="Emitir Termo de Transferência Intermunicipal em PDF">
+                        📄 Termo de Transferência (PDF)
+                    </a>
+                    <span class="bg-slate-800 text-slate-400 px-4 py-3 rounded-xl text-xs font-bold uppercase border border-slate-700">
                         Prontuário Inativo
                     </span>
                 {% endif %}
@@ -223,6 +231,10 @@
                                     <a href="{{ url_for('pei.estudo_caso', municipio_slug=g.municipio_slug, aluno_id=aluno.id) }}" class="w-full inline-flex justify-center items-center gap-1.5 text-[10px] font-bold uppercase bg-purple-900 hover:bg-purple-800 text-white px-3 py-2 rounded-lg transition shadow-sm">
                                         👁️ Visualizar Estudo
                                     </a>
+                                {% elif item.tipo == 'termo_transferencia' %}
+                                    <a href="{{ url_for('alunos.imprimir_termo_transferencia', municipio_slug=g.municipio_slug, id=aluno.id, destino_nome=item.destino_nome, motivo=item.motivo) }}" target="_blank" class="w-full inline-flex justify-center items-center gap-1.5 text-[10px] font-bold uppercase bg-amber-700 hover:bg-amber-600 text-white px-3 py-2 rounded-lg transition shadow-sm">
+                                        📄 Visualizar Via Registrada (PDF)
+                                    </a>
                                 {% else %}
                                     <span class="text-[9px] text-slate-400 italic block text-right">Registro de AEE gravado</span>
                                 {% endif %}
@@ -268,11 +280,50 @@
             }
         });
     }
+
+    function alternarAbaTransferencia(aba) {
+        const btnInt = document.getElementById('tab_btn_integrada');
+        const btnExt = document.getElementById('tab_btn_externa');
+        const formInt = document.getElementById('form_transf_integrada');
+        const formExt = document.getElementById('form_transf_externa');
+
+        if (aba === 'integrada') {
+            btnInt.className = "w-1/2 py-2.5 rounded-lg text-center transition-all bg-white text-slate-900 shadow-sm font-black";
+            btnExt.className = "w-1/2 py-2.5 rounded-lg text-center transition-all text-slate-500 hover:text-slate-900 font-bold";
+            formInt.classList.remove('hidden');
+            formExt.classList.add('hidden');
+        } else {
+            btnExt.className = "w-1/2 py-2.5 rounded-lg text-center transition-all bg-white text-slate-900 shadow-sm font-black";
+            btnInt.className = "w-1/2 py-2.5 rounded-lg text-center transition-all text-slate-500 hover:text-slate-900 font-bold";
+            formExt.classList.remove('hidden');
+            formInt.classList.add('hidden');
+        }
+    }
+
+    function gerarTermoPDF() {
+        const destInput = document.getElementById('ext_municipio_destino_nome');
+        const dest = encodeURIComponent(destInput.value ? destInput.value.trim() : 'Outro Município');
+        const motInput = document.getElementById('ext_motivo');
+        const mot = encodeURIComponent(motInput.value ? motInput.value.trim() : '');
+        const url = "{{ url_for('alunos.imprimir_termo_transferencia', municipio_slug=g.municipio_slug, id=aluno.id) }}?destino_nome=" + dest + "&motivo=" + mot;
+        window.open(url, '_blank');
+    }
+
+    function validarTransfExterna() {
+        const destInput = document.getElementById('ext_municipio_destino_nome');
+        const dest = destInput.value ? destInput.value.trim() : '';
+        if (!dest) {
+            alert('Por favor, preencha o Nome do Município e Estado de Destino.');
+            destInput.focus();
+            return false;
+        }
+        return confirm('Confirmar a transferência de {{ aluno.nome }} para "' + dest + '"? O prontuário ficará inativo e o termo pode ser impresso a qualquer momento.');
+    }
 </script>
 
 <!-- MODAL DE TRANSFERÊNCIA INTERMUNICIPAL -->
 <div id="modal_transferir" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden animate-fade-in">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl space-y-6 relative border border-slate-200">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-8 shadow-2xl space-y-6 relative border border-slate-200">
         <button type="button" onclick="document.getElementById('modal_transferir').classList.add('hidden')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 font-bold text-xl">
             ✕
         </button>
@@ -283,13 +334,26 @@
             </div>
             <h3 class="text-lg font-black uppercase text-slate-900 tracking-tight">Transferência Intermunicipal de Estudante</h3>
             <p class="text-xs text-slate-500 font-normal">
-                Ao transferir <b>{{ aluno.nome }}</b>, o estudante será inativado nesta rede municipal ({{ g.municipio.nome }}). Seu prontuário e histórico de PEIs/PAEEs serão preservados como <b>somente-leitura</b> e estarão imediatamente disponíveis na nova rede municipal selecionada.
+                Transfira <b>{{ aluno.nome }}</b> para outro município integrado ao sistema ou gere o <b>Termo Oficial de Transferência (PDF)</b> para municípios externos.
             </p>
         </div>
 
-        <form action="{{ url_for('alunos.transferir_aluno', municipio_slug=g.municipio_slug, id=aluno.id) }}" method="POST" class="space-y-4">
+        <!-- SELETOR DE MODALIDADE DE TRANSFERÊNCIA (TABS) -->
+        <div class="flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs">
+            <button type="button" id="tab_btn_integrada" onclick="alternarAbaTransferencia('integrada')" class="w-1/2 py-2.5 rounded-lg text-center transition-all bg-white text-slate-900 shadow-sm font-black">
+                🌐 Rede Integrada (PNGI)
+            </button>
+            <button type="button" id="tab_btn_externa" onclick="alternarAbaTransferencia('externa')" class="w-1/2 py-2.5 rounded-lg text-center transition-all text-slate-500 hover:text-slate-900 font-bold">
+                📄 Município Externo (Sem PNGI)
+            </button>
+        </div>
+
+        <!-- FORMULÁRIO 1: REDE INTEGRADA -->
+        <form id="form_transf_integrada" action="{{ url_for('alunos.transferir_aluno', municipio_slug=g.municipio_slug, id=aluno.id) }}" method="POST" class="space-y-4">
+            <input type="hidden" name="tipo_transferencia" value="integrada">
+
             <div class="space-y-2">
-                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500">Município de Destino (Nova Rede)</label>
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500">Município de Destino (Nova Rede Integrada)</label>
                 <select name="municipio_destino_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none">
                     <option value="">-- Selecione o Município Participante --</option>
                     {% for m in municipios_disponiveis %}
@@ -304,7 +368,7 @@
             </div>
 
             <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[10px] text-amber-800 leading-relaxed font-medium">
-                ⚠️ <b>Importante:</b> O município de destino receberá o dossiê completo do estudante com todo o histórico de PEIs, PAEEs e Prontuários emitidos nesta cidade.
+                ⚠️ <b>Rede Integrada:</b> O município de destino receberá o prontuário digital completo com todo o histórico de PEIs, PAEEs e Prontuários em tempo real.
             </div>
 
             <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
@@ -312,10 +376,44 @@
                     Cancelar
                 </button>
                 <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-black uppercase bg-amber-600 hover:bg-amber-500 text-white shadow-md">
-                    Confirmar Transferência
+                    Confirmar Transferência Integrada
                 </button>
             </div>
         </form>
+
+        <!-- FORMULÁRIO 2: MUNICÍPIO EXTERNO (SEM O PNGI) -->
+        <form id="form_transf_externa" action="{{ url_for('alunos.transferir_aluno', municipio_slug=g.municipio_slug, id=aluno.id) }}" method="POST" class="space-y-4 hidden">
+            <input type="hidden" name="tipo_transferencia" value="externa">
+
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500">Nome do Município e Estado de Destino *</label>
+                <input type="text" id="ext_municipio_destino_nome" name="municipio_destino_nome" placeholder="Ex: Teresina - PI / São Paulo - SP" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-bold text-slate-800 focus:border-blue-600 focus:outline-none">
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500">Motivo / Observações de Transferência</label>
+                <textarea id="ext_motivo" name="motivo" rows="3" placeholder="Informe o motivo ou número do processo de transferência escolar para o outro município..." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 text-xs font-medium text-slate-800 focus:border-blue-600 focus:outline-none"></textarea>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-[10px] text-blue-900 leading-relaxed font-medium">
+                📄 <b>Emissão do Termo Oficial:</b> Você pode clicar no botão <b>📄 Gerar Termo de Transferência (PDF)</b> para visualizar e imprimir o documento oficial timbrado imediatamente.
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                <button type="button" onclick="gerarTermoPDF()" class="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-black uppercase bg-indigo-700 hover:bg-indigo-600 text-white shadow-md flex items-center justify-center gap-2">
+                    📄 Gerar Termo de Transferência (PDF)
+                </button>
+                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                    <button type="button" onclick="document.getElementById('modal_transferir').classList.add('hidden')" class="px-4 py-2.5 rounded-xl text-xs font-bold uppercase text-slate-500 hover:bg-slate-100">
+                        Cancelar
+                    </button>
+                    <button type="submit" onclick="return validarTransfExterna()" class="px-5 py-2.5 rounded-xl text-xs font-black uppercase bg-amber-600 hover:bg-amber-500 text-white shadow-md">
+                        Inativar e Transferir
+                    </button>
+                </div>
+            </div>
+        </form>
+
     </div>
 </div>
 

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Guias de Encaminhamento SUS / Saúde & CRAS — Gestoor 360{% endblock %}
+{% block header_title %}Gestão de Encaminhamentos da Educação Inclusiva para a Rede de Saúde & Assistência (SUS/CRAS){% endblock %}
+
+{% block content %}
+<div class="space-y-8 pb-12">
+
+    <!-- BANNER SUPERIOR DE ENCAMINHAMENTOS -->
+    <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden border border-blue-800">
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div class="space-y-2 max-w-2xl">
+                <div class="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full border border-blue-400/30 uppercase">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    INTEGRAÇÃO INTERSETORIAL (EDUCAÇÃO + SAÚDE + ASSISTÊNCIA)
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Encaminhamentos para a Rede de Saúde (SUS/CRAS)</h1>
+                <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                    Emissão de guias timbradas oficiais para avaliação médica especializada (<strong>Neuropediatria, CAPS Infantil, Fonoaudiologia, Terapia Ocupacional e CRAS/CREAS</strong>) com suporte a parecer de contrarreferência.
+                </p>
+            </div>
+
+            <!-- BOTÃO EMISSÃO DE NOVA GUIA -->
+            <button onclick="document.getElementById('modal-novo-encaminhamento').classList.remove('hidden')" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-5 py-3 rounded-2xl text-xs shadow-lg transition-all flex items-center justify-center gap-2 transform hover:scale-[1.02]">
+                <span>📋</span> Emitir Nova Guia de Encaminhamento
+            </button>
+        </div>
+    </div>
+
+    <!-- LISTAGEM DE ENCAMINHAMENTOS EXECUTADOS -->
+    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
+        <h2 class="text-base font-extrabold text-slate-900">Histórico de Encaminhamentos Registrados na Rede Municipal</h2>
+
+        {% if encaminhamentos %}
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-600 uppercase text-[10px] tracking-wider border-b border-slate-200">
+                    <tr>
+                        <th class="p-3">Data Emissão</th>
+                        <th class="p-3">Estudante</th>
+                        <th class="p-3">Destino na Rede (SUS/CRAS)</th>
+                        <th class="p-3">Motivo do Encaminhamento</th>
+                        <th class="p-3">Profissional Emissor</th>
+                        <th class="p-3">Status</th>
+                        <th class="p-3 text-right">Guia Oficial</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for enc in encaminhamentos %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-mono font-bold text-slate-900">{{ enc.data_emissao.strftime('%d/%m/%Y') }}</td>
+                        <td class="p-3 font-bold text-slate-900 flex items-center gap-2">
+                            <span>👤</span> {{ enc.aluno.nome if enc.aluno else 'Estudante' }}
+                        </td>
+                        <td class="p-3">
+                            <span class="bg-blue-50 text-brand-600 font-extrabold px-2.5 py-1 rounded-lg border border-blue-200 text-[10px]">
+                                🏥 {{ enc.destino_rede }}
+                            </span>
+                        </td>
+                        <td class="p-3 text-slate-700 max-w-xs truncate font-medium">
+                            {{ enc.motivo_encaminhamento }}
+                        </td>
+                        <td class="p-3 text-slate-600 font-medium">
+                            {{ enc.profissional.nome if enc.profissional else 'Equipe Multidisciplinar' }}
+                        </td>
+                        <td class="p-3">
+                            <span class="bg-amber-50 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">
+                                {{ enc.status }}
+                            </span>
+                        </td>
+                        <td class="p-3 text-right">
+                            <a href="{{ url_for('aee.imprimir_encaminhamento', municipio_slug=g.municipio.slug, id=enc.id) }}" target="_blank" 
+                               class="text-xs bg-slate-900 hover:bg-black text-white font-bold px-3 py-1.5 rounded-lg transition-all inline-flex items-center gap-1 shadow-sm">
+                                🖨️ Imprimir Guia
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="py-12 text-center text-slate-400 text-xs space-y-2">
+            <span class="text-3xl block">🏥</span>
+            <p class="font-bold text-slate-700">Nenhum encaminhamento registrado para a rede de saúde até o momento.</p>
+            <p>Clique no botão acima para emitir uma Guia Oficial de Encaminhamento para Neuropediatria, CAPS ou CRAS.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- MODAL NOVO ENCAMINHAMENTO -->
+<div id="modal-novo-encaminhamento" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-6 border border-slate-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-base font-extrabold text-slate-900">Emitir Guia de Encaminhamento para a Rede de Saúde</h3>
+            <button onclick="document.getElementById('modal-novo-encaminhamento').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+        </div>
+
+        <form method="POST" class="space-y-4 text-xs">
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Selecione o Estudante *</label>
+                <select name="aluno_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium">
+                    <option value="">-- Selecione o Aluno --</option>
+                    {% for a in alunos %}
+                    <option value="{{ a.id }}">{{ a.nome }} ({{ a.escola.nome if a.escola else 'Escola' }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Destino na Rede (SUS/CRAS) *</label>
+                    <select name="destino_rede" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                        <option value="Neuropediatria / Neurologia">Neuropediatria / Neurologia</option>
+                        <option value="CAPS Infantil">CAPS Infantil</option>
+                        <option value="Psicologia SUS">Psicologia SUS</option>
+                        <option value="Fonoaudiologia SUS">Fonoaudiologia SUS</option>
+                        <option value="Terapia Ocupacional SUS">Terapia Ocupacional SUS</option>
+                        <option value="Pediatria Geral">Pediatria Geral</option>
+                        <option value="CRAS / CREAS (Assistência Social)">CRAS / CREAS (Assistência Social)</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Profissional Emissor</label>
+                    <select name="profissional_id" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                        <option value="">-- Selecione o Emissor --</option>
+                        {% for p in profissionais %}
+                        <option value="{{ p.id }}">{{ p.nome }} ({{ p.cargo }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Motivo / Justificativa do Encaminhamento *</label>
+                <textarea name="motivo_encaminhamento" required rows="3" placeholder="Ex: Necessidade de avaliação neuropediátrica para investigação de TDAH/TEA e emissão de parecer laudado para AEE." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 font-medium"></textarea>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Hipótese / Observações Clínico-Pedagógicas</label>
+                <textarea name="hipotese_observada" rows="2" placeholder="Ex: Criança com atraso na linguagem oral, comportamentos repetitivos e dificuldade na interação social em sala de aula." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 font-medium"></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
+                Gerar Guia de Encaminhamento
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

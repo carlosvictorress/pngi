@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Itinerário de Rota — {{ rota.codigo_rota }} (Prefeitura de {{ g.municipio.nome }})</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; background: white; }
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-4xl mx-auto mb-6 flex items-center justify-between no-print bg-slate-900 text-white p-4 rounded-2xl shadow-lg">
+        <div class="flex items-center gap-2">
+            <a href="{{ url_for('transporte.gerenciar_rotas', municipio_slug=g.municipio.slug) }}" class="text-xs text-blue-300 hover:underline">
+                ← Voltar às Rotas
+            </a>
+            <span class="text-slate-400">|</span>
+            <span class="text-white font-extrabold text-xs">Ficha Operacional da Rota {{ rota.codigo_rota }}</span>
+        </div>
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-5 py-2 rounded-xl text-xs shadow-md transition-all">
+            🖨️ Imprimir Guia de Rota para Motorista/Monitor
+        </button>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-200 space-y-8">
+        
+        <div class="border-b-2 border-slate-900 pb-6 flex items-center justify-between">
+            <div>
+                <span class="bg-blue-50 text-blue-800 font-extrabold px-3 py-1 rounded-md text-xs uppercase border border-blue-200">
+                    {{ rota.codigo_rota }}
+                </span>
+                <h1 class="text-xl font-extrabold text-slate-900 mt-2 uppercase">{{ rota.nome_rota }}</h1>
+                <p class="text-xs text-slate-500">Prefeitura Municipal de {{ g.municipio.nome }} — {{ g.municipio.estado }} • Transporte Escolar Inclusivo</p>
+            </div>
+            <div class="text-right">
+                <span class="text-xs font-bold text-slate-700 block">Veículo: {{ rota.tipo_veiculo }}</span>
+                <span class="text-xs font-mono text-slate-500 block">Placa: {{ rota.placa_veiculo or 'N/A' }}</span>
+                <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded block mt-1">Turno: {{ rota.turno }}</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs">
+            <div>
+                <span class="text-slate-500 font-bold block">Motorista Responsável:</span>
+                <span class="text-slate-900 font-extrabold text-sm block">{{ rota.motorista_nome or 'Não informado' }}</span>
+                <span class="text-slate-500 text-[11px]">{{ rota.motorista_telefone or '' }}</span>
+            </div>
+
+            <div>
+                <span class="text-slate-500 font-bold block">Monitor de Rota Acompanhante:</span>
+                <span class="text-slate-900 font-extrabold text-sm block">{{ rota.monitor_nome or 'Não informado' }}</span>
+                <span class="text-slate-500 text-[11px]">{{ rota.monitor_telefone or '' }}</span>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+            <h2 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">
+                ITINERÁRIO E RELAÇÃO DE ESTUDANTES TRANSPORTADOS (TOTAL: {{ alunos_vinculados|length }})
+            </h2>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs border border-slate-300">
+                    <thead class="bg-slate-100 text-slate-800 uppercase text-[9px] font-extrabold border-b border-slate-300">
+                        <tr>
+                            <th class="p-2.5 border-r border-slate-300">Estudante</th>
+                            <th class="p-2.5 border-r border-slate-300">Escola / Turma</th>
+                            <th class="p-2.5 border-r border-slate-300">Ponto de Embarque</th>
+                            <th class="p-2.5 border-r border-slate-300">Horários (Ida/Volta)</th>
+                            <th class="p-2.5 border-r border-slate-300">Acessibilidade</th>
+                            <th class="p-2.5">Contato de Urgência</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200 text-[11px]">
+                        {% for t in alunos_vinculados %}
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-2.5 border-r border-slate-200 font-bold text-slate-900">
+                                {{ t.aluno.nome }}
+                            </td>
+                            <td class="p-2.5 border-r border-slate-200 text-slate-700">
+                                <span class="block font-semibold">{{ t.aluno.escola.nome if t.aluno.escola else 'Escola Municipal' }}</span>
+                                <span class="text-[10px] text-slate-500">{{ t.aluno.turma }}</span>
+                            </td>
+                            <td class="p-2.5 border-r border-slate-200 font-bold text-slate-900">
+                                {{ t.ponto_embarque or 'Endereço de Residência' }}
+                            </td>
+                            <td class="p-2.5 border-r border-slate-200 font-mono text-slate-700">
+                                Ida: {{ t.horario_embarque or '--:--' }}<br>
+                                Volta: {{ t.horario_desembarque or '--:--' }}
+                            </td>
+                            <td class="p-2.5 border-r border-slate-200">
+                                {% if t.cadeirante %}<span class="inline-block bg-purple-50 text-purple-700 px-1 rounded font-bold text-[9px]">Cadeirante</span>{% endif %}
+                                {% if t.necessita_veiculo_adaptado %}<span class="inline-block bg-blue-50 text-blue-700 px-1 rounded font-bold text-[9px]">Elevador</span>{% endif %}
+                                {% if t.possui_monitor_rota %}<span class="inline-block bg-emerald-50 text-emerald-700 px-1 rounded font-bold text-[9px]">Monitor</span>{% endif %}
+                            </td>
+                            <td class="p-2.5 font-bold text-slate-900">
+                                {{ t.aluno.contato_urgencia }}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="p-6 text-center text-slate-400">Nenhum estudante vinculado a esta rota até o momento.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="pt-8 border-t border-slate-200 text-center text-[10px] text-slate-400">
+            Plataforma de Gestão de Educação Especial Inclusiva Gestoor 360 • Documento impresso em {{ rota.criado_em.strftime('%d/%m/%Y') }}
+        </div>
+
+    </div>
+
+</body>
+</html>

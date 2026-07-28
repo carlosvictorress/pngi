@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestão de Rotas & Frotas — Gestoor 360{% endblock %}
+{% block header_title %}Cadastro e Gestão de Rotas de Transporte Escolar Adaptado{% endblock %}
+
+{% block content %}
+<div class="space-y-8 pb-12">
+
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h1 class="text-xl font-extrabold text-slate-900">Rotas e Veículos de Transporte Inclusivo</h1>
+            <p class="text-xs text-slate-500">Mapeamento de frotas, motoristas, monitores de rota e capacidade de acessibilidade.</p>
+        </div>
+
+        <button onclick="document.getElementById('modal-nova-rota').classList.remove('hidden')" 
+                class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-5 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2">
+            <span>➕</span> Cadastrar Nova Rota
+        </button>
+    </div>
+
+    <!-- LISTAGEM DAS ROTAS DA PREFEITURA -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for r in rotas %}
+        <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4 relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <span class="bg-blue-50 text-brand-600 font-extrabold text-xs px-3 py-1 rounded-xl border border-blue-200">
+                    {{ r.codigo_rota }}
+                </span>
+                <span class="text-[10px] text-slate-500 font-bold uppercase bg-slate-100 px-2.5 py-0.5 rounded">
+                    Turno: {{ r.turno }}
+                </span>
+            </div>
+
+            <div class="space-y-1">
+                <h2 class="text-base font-extrabold text-slate-900">{{ r.nome_rota }}</h2>
+                <span class="text-xs text-slate-500 font-medium block">Veículo: <strong>{{ r.tipo_veiculo }}</strong> (Placa: {{ r.placa_veiculo or 'Não informada' }})</span>
+            </div>
+
+            <div class="bg-slate-50 p-4 rounded-2xl space-y-2 text-xs text-slate-700 border border-slate-200/80">
+                <div class="flex items-center justify-between">
+                    <span><strong>Motorista:</strong> {{ r.motorista_nome or 'Não informado' }}</span>
+                    <span class="text-[10px] text-slate-500">{{ r.motorista_telefone or '' }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span><strong>Monitor:</strong> {{ r.monitor_nome or 'Não informado' }}</span>
+                    <span class="text-[10px] text-slate-500">{{ r.monitor_telefone or '' }}</span>
+                </div>
+                <div class="pt-1 border-t border-slate-200 flex items-center justify-between font-bold text-slate-900">
+                    <span>Estudantes Atribuidos:</span>
+                    <span class="text-brand-600">{{ r.alunos_vinculados|length }} Alunos</span>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+                <a href="{{ url_for('transporte.detalhes_rota', municipio_slug=g.municipio.slug, rota_id=r.id) }}" 
+                   class="text-xs font-extrabold text-brand-600 hover:underline flex items-center gap-1">
+                    <span>📋</span> Ver Itinerário Completo &rarr;
+                </a>
+
+                <a href="{{ url_for('transporte.excluir_rota', municipio_slug=g.municipio.slug, rota_id=r.id) }}" 
+                   onclick="return confirm('Confirma a desativação desta rota?')"
+                   class="text-[10px] text-red-500 hover:text-red-700 font-bold">
+                    Desativar Rota
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400 text-xs space-y-2">
+            <span class="text-3xl block">🗺️</span>
+            <p class="font-bold text-slate-700">Nenhuma rota de transporte cadastrada nesta prefeitura.</p>
+            <p>Clique no botão acima para cadastrar a primeira rota de transporte escolar inclusivo.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<!-- MODAL CADASTRAR NOVA ROTA -->
+<div id="modal-nova-rota" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-6 border border-slate-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-base font-extrabold text-slate-900">Cadastrar Nova Rota de Transporte</h3>
+            <button onclick="document.getElementById('modal-nova-rota').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+        </div>
+
+        <form method="POST" class="space-y-4 text-xs">
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Código da Rota *</label>
+                    <input type="text" name="codigo_rota" required placeholder="Ex: ROTA-01" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Turno de Atendimento *</label>
+                    <select name="turno" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                        <option value="Manhã e Tarde">Manhã e Tarde</option>
+                        <option value="Manhã">Manhã</option>
+                        <option value="Tarde">Tarde</option>
+                        <option value="Integral">Integral</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Nome / Itinerário Principal da Rota *</label>
+                <input type="text" name="nome_rota" required placeholder="Ex: Itinerário Zona Rural — Povoado Centro à Escola Polo" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Nome do Motorista</label>
+                    <input type="text" name="motorista_nome" placeholder="Ex: João da Silva" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Telefone do Motorista</label>
+                    <input type="text" name="motorista_telefone" placeholder="Ex: (86) 99999-0000" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Nome do Monitor de Rota</label>
+                    <input type="text" name="monitor_nome" placeholder="Ex: Maria de Fátima" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Telefone do Monitor</label>
+                    <input type="text" name="monitor_telefone" placeholder="Ex: (86) 98888-1111" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Tipo do Veículo</label>
+                    <select name="tipo_veiculo" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                        <option value="Van Adaptada">Van Adaptada</option>
+                        <option value="Micro-ônibus Elevatório">Micro-ônibus Elevatório</option>
+                        <option value="Ônibus Acessível">Ônibus Acessível</option>
+                        <option value="Carro de Apoio">Carro de Apoio</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Placa Veículo</label>
+                    <input type="text" name="placa_veiculo" placeholder="Ex: ABC-1234" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium uppercase">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Vagas Cadeirantes</label>
+                    <input type="number" name="capacidade_cadeirantes" value="2" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
+                Salvar Cadastro de Rota
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

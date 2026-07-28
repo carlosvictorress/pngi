@@ -1,245 +1,264 @@
 {% extends 'base.html' %}
 
-{% block header_title %}Módulo 3 — Central de Recursos Humanos e Equipe Técnica do AEE{% endblock %}
+{% block title %}Equipe Multidisciplinar & Gestão do AEE — Gestoor 360{% endblock %}
+{% block header_title %}Painel de Gestão da Equipe Multidisciplinar do AEE{% endblock %}
 
 {% block content %}
-<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-gov-dark space-y-6">
+<div class="space-y-8 pb-12">
 
-    <div class="bg-white border border-slate-200 rounded-xl p-2 shadow-sm flex flex-wrap gap-1 text-xs font-black uppercase tracking-wider text-slate-500">
-        <a href="/{{ g.municipio.slug }}/aee/" class="px-4 py-2.5 bg-gov-blue text-white rounded-lg shadow-sm">Equipe Técnica</a>
-        <a href="/{{ g.municipio.slug }}/aee/planos" class="px-4 py-2.5 hover:bg-slate-100 hover:text-gov-blue rounded-lg transition-colors">Planos Pedagógicos (PAEE/PDI)</a>
-        <a href="/{{ g.municipio.slug }}/aee/agenda" class="px-4 py-2.5 hover:bg-slate-100 hover:text-gov-blue rounded-lg transition-colors">Grade de Horários / Salas</a>
-        <a href="/{{ g.municipio.slug }}/aee/evolucoes" class="px-4 py-2.5 hover:bg-slate-100 hover:text-gov-blue rounded-lg transition-colors">Prontuário de Evoluções</a>
-        <a href="/{{ g.municipio.slug }}/aee/documentos" class="px-4 py-2.5 hover:bg-slate-100 hover:text-gov-blue rounded-lg transition-colors">Laudos e Pareceres</a>
-    </div>
+    <!-- BANNER SUPERIOR DO AEE -->
+    <div class="bg-gradient-to-r from-teal-900 via-slate-900 to-emerald-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden border border-emerald-800/40">
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div class="space-y-2 max-w-2xl">
+                <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-3 py-1 rounded-full border border-emerald-400/30 uppercase">
+                    <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+                    EQUIPE DE APOIO ESPECIALIZADO DA REDE MUNICIPAL
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Equipe Multidisciplinar do AEE</h1>
+                <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                    Organização limpa e categorizada de todos os especialistas da rede: <strong>Professores de AEE (SRM)</strong>, <strong>Psicólogos/Psicopedagogos</strong>, <strong>Profissionais de Apoio Escolar</strong> e <strong>Intérpretes de Libras</strong>.
+                </p>
+            </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-md flex items-center justify-between">
-            <div>
-                <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">Corpo Técnico Homologado</span>
-                <div class="text-3xl font-black mt-1 text-gov-blue">{{ total_geral }} <span class="text-xs font-bold text-slate-400 uppercase">Ativos</span></div>
-            </div>
-            <span class="text-2xl bg-slate-100 p-3 rounded-xl border border-slate-200">👥</span>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-md flex items-center justify-between">
-            <div>
-                <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">Docentes de Atendimento Especializado</span>
-                <div class="text-3xl font-black mt-1 text-blue-600">{{ total_professores }} <span class="text-xs font-bold text-slate-400 uppercase">Cadeiras</span></div>
-            </div>
-            <span class="text-2xl bg-blue-50 text-blue-600 p-3 rounded-xl border border-blue-100">🎓</span>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-md flex items-center justify-between">
-            <div>
-                <span class="text-[10px] uppercase font-black text-slate-400 tracking-wider">Profissionais de Apoio Técnico</span>
-                <div class="text-3xl font-black mt-1 text-gov-green">{{ total_apoio }} <span class="text-xs font-bold text-slate-400 uppercase">Mediadores</span></div>
-            </div>
-            <span class="text-2xl bg-emerald-50 text-gov-green p-3 rounded-xl border border-emerald-100">🛡️</span>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        <div class="lg:col-span-4 bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden sticky top-24">
-            <div class="bg-slate-900 p-4 text-white flex items-center justify-between">
-                <div>
-                    <h2 class="text-xs uppercase font-black tracking-widest text-emerald-400">REGISTRO DE QUADRO</h2>
-                    <h3 class="text-base font-bold">Nomeação de Especialista</h3>
-                </div>
-                <span class="text-[10px] bg-white/10 text-slate-300 px-2 py-1 rounded border border-white/20 font-mono">Mod. AEE-RH</span>
-            </div>
-            
-            <form method="POST" class="p-6 space-y-4 text-xs">
-                <div>
-                    <label class="font-bold text-slate-700 block mb-1">Nome Completo do Servidor *</label>
-                    <input type="text" name="nome" placeholder="Ex: Nome do profissional de inclusão" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none">
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">CPF Regulamentar *</label>
-                        <input type="text" name="cpf" placeholder="000.000.000-00" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">Cargo / Função Pública *</label>
-                        <select name="cargo" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
-                            <option value="Professor AEE">Professor AEE</option>
-                            <option value="Cuidador">Cuidador de Alunos</option>
-                            <option value="Intérprete de Libras">Intérprete de Libras</option>
-                            <option value="Psicopedagogo">Psicopedagogo</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="font-bold text-slate-700 block mb-1">Unidade de Lotação / Escola Polo *</label>
-                    <input type="text" name="escola_polo" placeholder="Ex: Unidade Escolar Sede Municipal" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none">
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">Contato Telefônico</label>
-                        <input type="text" name="telefone" placeholder="(89) 99999-0000" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="font-bold text-slate-700 block mb-1">E-mail Institucional</label>
-                        <input type="email" name="email" placeholder="servidor@municipio.pi.gov.br" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-medium focus:bg-white focus:border-gov-blue focus:outline-none">
-                    </div>
-                </div>
-                
-                <button type="submit" class="w-full bg-gov-blue hover:bg-slate-800 text-white font-bold py-3.5 rounded-lg text-xs uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2">
-                    🛡️ Portariar e Efetivar Alocação
+            <!-- BOTÕES DE AÇÃO E NAVEGAÇÃO INTERNA DO AEE -->
+            <div class="flex flex-wrap gap-2 shrink-0">
+                <button onclick="document.getElementById('modal-novo-profissional').classList.remove('hidden')" 
+                        class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 transform hover:scale-[1.02]">
+                    <span>👤</span> Novo Especialista
                 </button>
+                
+                <a href="{{ url_for('aee.encaminhamentos_aee', municipio_slug=g.municipio.slug) }}" 
+                   class="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all border border-white/20 flex items-center gap-2">
+                    <span>🏥</span> Guias SUS / Saúde
+                </a>
+
+                <a href="{{ url_for('aee.agenda_aee', municipio_slug=g.municipio.slug) }}" 
+                   class="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all border border-white/20 flex items-center gap-2">
+                    <span>🗓️</span> Agenda SRM
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MENSAGENS FLASH DA APLICAÇÃO -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="p-4 rounded-2xl text-xs font-bold shadow-sm flex items-center gap-3 {% if category == 'sucesso' or category == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% else %}bg-amber-50 text-amber-800 border border-amber-200{% endif %}">
+                <span>{% if category == 'sucesso' or category == 'success' %}✅{% else %}⚠️{% endif %}</span>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- CONTROLES DE BUSCA E ABAS CATEGORIZADAS DAS EQUIPES -->
+    <div class="space-y-4">
+        
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <!-- NAVEGAÇÃO DE ABAS POR CATEGORIA DE ESPECIALISTA -->
+            <div class="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto w-full sm:w-auto">
+                <button onclick="alternarAbaProfissional('todos')" id="btn-aba-todos" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-900 text-white shadow-sm flex items-center gap-2 shrink-0">
+                    <span>👥</span> Todos ({{ total_geral }})
+                </button>
+                <button onclick="alternarAbaProfissional('professores')" id="btn-aba-professores" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 border border-slate-200">
+                    <span>🎓</span> Professores AEE ({{ professores_aee|length }})
+                </button>
+                <button onclick="alternarAbaProfissional('multidisciplinar')" id="btn-aba-multidisciplinar" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 border border-slate-200">
+                    <span>🧠</span> Saúde & Psicopedagogia ({{ equipe_multidisciplinar|length }})
+                </button>
+                <button onclick="alternarAbaProfissional('apoio')" id="btn-aba-apoio" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 border border-slate-200">
+                    <span>🤝</span> Profissionais de Apoio ({{ profissionais_apoio|length }})
+                </button>
+                <button onclick="alternarAbaProfissional('libras')" id="btn-aba-libras" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 border border-slate-200">
+                    <span>🤟</span> Intérpretes Libras ({{ interpretes_libras|length }})
+                </button>
+            </div>
+
+            <!-- BUSCA RÁPIDA -->
+            <form method="GET" class="w-full sm:w-auto">
+                <input type="text" name="busca" value="{{ busca }}" placeholder="🔍 Buscar por nome, CPF ou escola polo..." class="w-full sm:w-64 bg-white border border-slate-300 rounded-xl px-4 py-2 text-xs text-slate-900 focus:outline-none focus:border-brand-500 shadow-sm">
             </form>
         </div>
 
-        <div class="lg:col-span-8 space-y-4">
-            
-            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-md space-y-4">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-2">
-                    <h3 class="text-xs font-black uppercase tracking-wider text-gov-blue flex items-center gap-1.5">
-                        🔍 Painel de Busca Avançada de Recursos Humanos
-                    </h3>
-                    <span class="text-[11px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
-                        Filtrados: <b id="contador_servidores" class="text-gov-blue">{{ profissionais|length }}</b> de {{ profissionais|length }}
-                    </span>
+        <!-- CONTEÚDO DAS ABAS CATEGORIZADAS -->
+        <div class="space-y-6">
+
+            <!-- MACRO MACRO FUNCTION RENDER CARD PROFISSIONAL -->
+            {% macro render_card_profissional(p) %}
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-all space-y-4 relative overflow-hidden flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <span class="bg-blue-50 text-brand-600 font-extrabold text-[10px] px-2.5 py-1 rounded-lg border border-blue-200 uppercase">
+                            {{ p.cargo }}
+                        </span>
+                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
+                            ✓ {{ p.status or 'Ativo' }}
+                        </span>
+                    </div>
+
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900">{{ p.nome }}</h3>
+                        <span class="text-xs text-slate-500 font-medium block">Escola Polo: <strong>{{ p.escola_polo }}</strong></span>
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-2xl space-y-1 text-xs text-slate-600 border border-slate-200/80">
+                        <p><strong>CPF:</strong> <span class="font-mono">{{ p.cpf }}</span></p>
+                        <p><strong>Telefone:</strong> {{ p.telefone or 'Não informado' }}</p>
+                        <p><strong>E-mail:</strong> {{ p.email or 'Não informado' }}</p>
+                    </div>
                 </div>
-                
-                <input type="text" 
-                       id="filtro_servidores" 
-                       placeholder="Buscar servidor instantaneamente por Nome Completo, Número de CPF ou Unidade Polo de Lotação..." 
-                       autocomplete="off"
-                       class="w-full bg-slate-50 border border-slate-300 rounded-lg p-3 text-xs font-semibold text-slate-700 focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none shadow-inner placeholder:text-slate-400">
-                
-                <div class="flex flex-wrap gap-1.5 pt-1">
-                    <button onclick="filtrarCargo('TODOS')" class="btn-filtro-cargo px-3 py-1.5 bg-slate-800 text-white font-bold text-[10px] rounded-md uppercase tracking-wide transition-all shadow-sm">Todos os Servidores</button>
-                    <button onclick="filtrarCargo('PROFESSOR AEE')" class="btn-filtro-cargo px-3 py-1.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 font-bold text-[10px] rounded-md uppercase tracking-wide transition-all">Professores AEE</button>
-                    <button onclick="filtrarCargo('CUIDADOR')" class="btn-filtro-cargo px-3 py-1.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 font-bold text-[10px] rounded-md uppercase tracking-wide transition-all">Cuidadores</button>
-                    <button onclick="filtrarCargo('LIBRAS')" class="btn-filtro-cargo px-3 py-1.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 font-bold text-[10px] rounded-md uppercase tracking-wide transition-all">Intérpretes</button>
-                    <button onclick="filtrarCargo('PSICOPEDAGOGO')" class="btn-filtro-cargo px-3 py-1.5 bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 font-bold text-[10px] rounded-md uppercase tracking-wide transition-all">Psicopedagogos</button>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <a href="{{ url_for('aee.perfil_profissional', municipio_slug=g.municipio.slug, id=p.id) }}" 
+                       class="text-xs font-extrabold text-brand-600 hover:underline flex items-center gap-1">
+                        <span>👤</span> Abrir Ficha 360º &rarr;
+                    </a>
+
+                    <a href="{{ url_for('aee.excluir_profissional', municipio_slug=g.municipio.slug, id=p.id) }}" 
+                       onclick="return confirm('Confirma o afastamento/remoção deste profissional?')"
+                       class="text-[10px] text-red-500 hover:text-red-700 font-bold">
+                        Afastar
+                    </a>
                 </div>
             </div>
+            {% endmacro %}
 
-            <div class="bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden">
-                <table class="w-full text-left border-collapse text-xs" id="tabela_corpo_tecnico">
-                    <thead>
-                        <tr class="bg-slate-900 text-white border-b border-slate-200 text-[10px] font-black uppercase tracking-wider">
-                            <th class="p-4 pl-5">Identificação do Especialista</th>
-                            <th class="p-4">Cargo Regulamentar</th>
-                            <th class="p-4">Lotação Administrativa</th>
-                            <th class="p-4 text-center">Ações de Gestão</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-200 text-gov-dark font-medium">
-                        {% for p in profissionais %}
-                        <tr class="hover:bg-slate-50 transition-colors item-servidor-linha">
-                            <td class="p-4 pl-5">
-                                <span class="font-black text-base text-slate-900 tracking-tight block uppercase target-servidor-nome">{{ p.nome }}</span>
-                                <span class="text-slate-500 font-mono text-[10px] font-bold">
-                                    CPF: <span class="target-servidor-cpf">{{ p.cpf }}</span> 
-                                    {% if p.telefone %} • Tel: {{ p.telefone }} {% endif %}
-                                </span>
-                            </td>
-                            <td class="p-4">
-                                <span class="px-2.5 py-1 rounded border font-bold text-[9px] uppercase tracking-wider target-servidor-cargo
-                                    {% if p.cargo == 'Professor AEE' %} bg-blue-50 text-blue-700 border-blue-200
-                                    {% elif p.cargo == 'Cuidador' %} bg-emerald-50 text-gov-green border-emerald-200
-                                    {% else %} bg-purple-50 text-purple-700 border-purple-200 {% endif %}">
-                                    {{ p.cargo }}
-                                </span>
-                            </td>
-                            <td class="p-4 text-slate-600 font-bold text-sm">🏫 <span class="target-servidor-lotação">{{ p.escola_polo }}</span></td>
-                            <td class="p-4 text-center">
-                                <a href="/{{ g.municipio.slug }}/aee/excluir/{{ p.id }}" 
-                                   onclick="return confirm('ATENÇÃO: Confirma o desligamento deste profissional da folha de alocação da educação inclusiva municipal?')" 
-                                   class="text-red-600 hover:text-red-800 font-bold border border-red-200 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-all text-[11px] uppercase tracking-wider shadow-sm">
-                                    Dispensar
-                                </a>
-                            </td>
-                        </tr>
-                        {% else %}
-                        <tr id="linha_vazia_original">
-                            <td colspan="4" class="p-16 text-center text-slate-400 italic font-medium bg-slate-50/50">
-                                ⚠️ Nenhum especialista ou mediador da educação inclusiva foi lotado nesta rede municipal até o presente momento.
-                            </td>
-                        </tr>
-                        {% endfor %}
-
-                        <tr id="linha_busca_vazia" class="hidden">
-                            <td colspan="4" class="p-16 text-center text-slate-400 italic font-semibold bg-slate-50/50">
-                                ❌ Nenhum especialista ou profissional ativo corresponde aos critérios informados.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- PAINEL 1: TODOS OS PROFISSIONAIS -->
+            <div id="painel-prof-todos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for p in profissionais %}
+                    {{ render_card_profissional(p) }}
+                {% else %}
+                <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400 text-xs space-y-2">
+                    <span class="text-3xl block">👥</span>
+                    <p class="font-bold text-slate-700">Nenhum profissional multidisciplinar cadastrado.</p>
+                </div>
+                {% endfor %}
             </div>
+
+            <!-- PAINEL 2: PROFESSORES DE AEE (SRM) -->
+            <div id="painel-prof-professores" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for p in professores_aee %}
+                    {{ render_card_profissional(p) }}
+                {% else %}
+                <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400 text-xs">
+                    Nenhum Professor de AEE cadastrado.
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- PAINEL 3: EQUIPE MULTIDISCIPLINAR DE SAÚDE -->
+            <div id="painel-prof-multidisciplinar" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for p in equipe_multidisciplinar %}
+                    {{ render_card_profissional(p) }}
+                {% else %}
+                <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400 text-xs">
+                    Nenhum especialista de Saúde/Psicopedagogia cadastrado.
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- PAINEL 4: PROFISSIONAIS DE APOIO -->
+            <div id="painel-prof-apoio" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for p in profissionais_apoio %}
+                    {{ render_card_profissional(p) }}
+                {% else %}
+                <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400 text-xs">
+                    Nenhum Profissional de Apoio Escolar / Cuidador cadastrado.
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- PAINEL 5: INTÉRPRETES DE LIBRAS -->
+            <div id="painel-prof-libras" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for p in interpretes_libras %}
+                    {{ render_card_profissional(p) }}
+                {% else %}
+                <div class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-200 text-slate-400 text-xs">
+                    Nenhum Tradutor/Intérprete de Libras cadastrado.
+                </div>
+                {% endfor %}
+            </div>
+
         </div>
 
+    </div>
+
+</div>
+
+<!-- MODAL CADASTRAR NOVO PROFISSIONAL DO AEE -->
+<div id="modal-novo-profissional" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-6 border border-slate-200">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-base font-extrabold text-slate-900">Cadastrar Especialista do AEE</h3>
+            <button onclick="document.getElementById('modal-novo-profissional').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+        </div>
+
+        <form method="POST" class="space-y-4 text-xs">
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Nome Completo do Profissional *</label>
+                <input type="text" name="nome" required placeholder="Ex: Dra. Juliana Medeiros" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">CPF *</label>
+                    <input type="text" name="cpf" required placeholder="000.000.000-00" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Cargo / Função *</label>
+                    <select name="cargo" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                        <option value="Professor AEE">Professor AEE (SRM)</option>
+                        <option value="Psicopedagogo">Psicopedagogo</option>
+                        <option value="Psicólogo Escolar">Psicólogo Escolar</option>
+                        <option value="Fonoaudiólogo">Fonoaudiólogo</option>
+                        <option value="Terapeuta Ocupacional">Terapeuta Ocupacional</option>
+                        <option value="Profissional de Apoio Escolar">Profissional de Apoio Escolar (Cuidador)</option>
+                        <option value="Tradutor e Intérprete de Libras">Tradutor e Intérprete de Libras</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block font-bold text-slate-700">Unidade Escolar Polo de Atuação *</label>
+                <select name="escola_polo" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium">
+                    <option value="">-- Selecione a Escola Polo (Infraestrutura) --</option>
+                    {% for esc in escolas %}
+                    <option value="{{ esc.nome }}">{{ esc.nome }}</option>
+                    {% endfor %}
+                    <option value="Secretaria Municipal de Educação (Sede)">Secretaria Municipal de Educação (Sede)</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">Telefone / WhatsApp</label>
+                    <input type="text" name="telefone" placeholder="(86) 99999-0000" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+                <div class="space-y-1">
+                    <label class="block font-bold text-slate-700">E-mail Institucional</label>
+                    <input type="email" name="email" placeholder="especialista@municipio.gov.br" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 font-medium">
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
+                Salvar Cadastro do Especialista
+            </button>
+        </form>
     </div>
 </div>
 
 <script>
-    let cargoSelecionado = 'TODOS';
-
-    const inputFiltro = document.getElementById('filtro_servidores');
-    inputFiltro.addEventListener('input', executarFiltragemGeral);
-
-    function executarFiltragemGeral() {
-        const termo = inputFiltro.value.toLowerCase().trim();
-        const linhas = document.querySelectorAll('.item-servidor-linha');
-        const avisoBusca = document.getElementById('linha_busca_vazia');
-        const contador = document.getElementById('contador_servidores');
-        let encontrados = 0;
-
-        linhas.forEach(function(linha) {
-            const nome = linha.querySelector('.target-servidor-nome').textContent.toLowerCase();
-            const cpf = linha.querySelector('.target-servidor-cpf').textContent.toLowerCase();
-            const lotacao = linha.querySelector('.target-servidor-lotação').textContent.toLowerCase();
-            const cargo = linha.querySelector('.target-servidor-cargo').textContent.toLowerCase();
-
-            const atendeTexto = nome.includes(termo) || cpf.includes(termo) || lotacao.includes(termo);
-            
-            // Especialização lógica para abranger o atalho de botão do termo LIBRAS
-            let atendeCargo = false;
-            if (cargoSelecionado === 'TODOS') {
-                atendeCargo = true;
-            } else if (cargoSelecionado === 'LIBRAS') {
-                atendeCargo = cargo.includes('libras');
-            } else {
-                atendeCargo = cargo.includes(cargoSelecionado.toLowerCase());
-            }
-
-            if (atendeTexto && atendeCargo) {
-                linha.classList.remove('hidden');
-                encontrados++;
-            } else {
-                linha.classList.add('hidden');
-            }
+    function alternarAbaProfissional(aba) {
+        ['todos', 'professores', 'multidisciplinar', 'apoio', 'libras'].forEach(a => {
+            document.getElementById('painel-prof-' + a).classList.add('hidden');
+            const btn = document.getElementById('btn-aba-' + a);
+            btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 border border-slate-200";
         });
 
-        contador.textContent = encontrados;
-
-        if (encontrados === 0 && (termo !== '' || cargoSelecionado !== 'TODOS')) {
-            avisoBusca.classList.remove('hidden');
-        } else {
-            avisoBusca.classList.add('hidden');
-        }
-    }
-
-    function filtrarCargo(cargo) {
-        cargoSelecionado = cargo;
-        
-        const botoes = document.querySelectorAll('.btn-filtro-cargo');
-        botoes.forEach(btn => {
-            if (btn.textContent.toUpperCase().includes(cargo)) {
-                btn.classList.remove('bg-white', 'text-slate-500', 'border', 'border-slate-200', 'hover:bg-slate-50');
-                btn.classList.add('bg-slate-800', 'text-white');
-            } else {
-                btn.classList.remove('bg-slate-800', 'text-white');
-                btn.classList.add('bg-white', 'text-slate-500', 'border', 'border-slate-200', 'hover:bg-slate-50');
-            }
-        });
-
-        executarFiltragemGeral();
+        document.getElementById('painel-prof-' + aba).classList.remove('hidden');
+        const btnAtivo = document.getElementById('btn-aba-' + aba);
+        btnAtivo.className = "px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-900 text-white shadow-sm flex items-center gap-2 shrink-0";
     }
 </script>
 {% endblock %}

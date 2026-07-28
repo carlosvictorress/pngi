@@ -25,7 +25,7 @@ def unauthorized():
         
     # Se tentou acessar uma rota interna, pega o primeiro pedaço da URL (o slug) e redireciona
     path_parts = request.path.strip('/').split('/')
-    if path_parts and path_parts[0] not in ['auth', 'static', '']:
+    if path_parts and path_parts[0] not in ['auth', 'static', 'manifest.json', 'sw.js', '']:
         slug = path_parts[0]
         return redirect(url_for('auth.login', municipio_slug=slug))
         
@@ -65,12 +65,12 @@ def create_app():
     from app.blueprints.aee.routes import aee_bp
     from app.blueprints.escolas.routes import escolas_bp
 
+    app.register_blueprint(publico_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(core_bp, url_prefix='/<municipio_slug>')
     app.register_blueprint(alunos_bp, url_prefix='/<municipio_slug>/alunos')
     app.register_blueprint(transporte_bp, url_prefix='/<municipio_slug>/transporte')
     app.register_blueprint(pei_bp, url_prefix='/<municipio_slug>/pei')
-    app.register_blueprint(publico_bp)
     app.register_blueprint(aee_bp, url_prefix='/<municipio_slug>/aee')
     app.register_blueprint(escolas_bp, url_prefix='/<municipio_slug>/escolas')
 

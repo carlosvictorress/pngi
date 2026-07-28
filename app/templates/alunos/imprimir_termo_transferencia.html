@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TERMO DE TRANSFERÊNCIA INTERMUNICIPAL — {{ aluno.nome }} — {{ g.municipio.nome|upper }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 font-sans text-slate-900 p-4 md:p-8 antialiased">
+
+    <!-- BARRA FLUTUANTE DE IMPRESSÃO (VISÍVEL APENAS NA TELA) -->
+    <div class="no-print max-w-4xl mx-auto mb-6 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">📄</span>
+            <div>
+                <h3 class="text-sm font-bold">Termo Oficial de Transferência Intermunicipal</h3>
+                <p class="text-[10px] text-slate-300">Documento pronto para impressão em papel timbrado A4 ou exportação em PDF.</p>
+            </div>
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="window.print()" class="bg-amber-600 hover:bg-amber-500 text-white font-black text-xs uppercase px-5 py-2.5 rounded-xl shadow-lg transition-transform active:scale-95 flex items-center gap-2">
+                🖨️ Imprimir / Salvar PDF
+            </button>
+            <button onclick="window.close()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold uppercase px-4 py-2.5 rounded-xl border border-slate-700">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <!-- DOCUMENTO A4 OFICIAL -->
+    <div class="max-w-[210mm] mx-auto bg-white border border-slate-300 shadow-2xl p-8 md:p-10 space-y-6">
+
+        <!-- CABEÇALHO GOVERNAMENTAL COM BRASÃO -->
+        <header class="border-b-2 border-slate-900 pb-5 flex justify-between items-center gap-6">
+            <div class="flex items-center gap-5">
+                {% if g.municipio and g.municipio.brasao_url %}
+                    <img src="{{ g.municipio.brasao_url }}" alt="Brasão {{ g.municipio.nome }}" class="w-20 h-20 object-contain">
+                {% else %}
+                    <div class="w-16 h-16 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-2xl">
+                        🏛️
+                    </div>
+                {% endif %}
+
+                <div class="space-y-1">
+                    <span class="block text-[10px] font-black uppercase tracking-widest text-slate-500">ESTADO DO {{ g.municipio.estado|upper if g.municipio else 'PI' }} — PODER EXECUTIVO MUNICIPAL</span>
+                    <h1 class="text-lg font-black uppercase text-slate-900 tracking-tight">PREFEITURA MUNICIPAL DE {{ g.municipio.nome|upper if g.municipio else 'MUNICÍPIO' }}</h1>
+                    <h2 class="text-xs font-bold text-blue-900 uppercase tracking-wider">SECRETARIA MUNICIPAL DE EDUCAÇÃO & DEPARTAMENTO DE EDUCAÇÃO INCLUSIVA</h2>
+                    <p class="text-[9px] text-slate-600 font-mono pt-0.5">
+                        <b>DOCUMENTO REGULAMENTAR:</b> TERMO DE TRANSFERÊNCIA DE ESTUDANTE & HISTÓRICO DE AEE
+                    </p>
+                </div>
+            </div>
+
+            <!-- FOTO OU ÍCONE DO ALUNO -->
+            <div class="text-center">
+                {% if aluno.foto_url %}
+                    <img src="{{ url_for('static', filename=aluno.foto_url) }}" alt="{{ aluno.nome }}" class="w-20 h-24 object-cover rounded-xl border border-slate-400 shadow-sm mx-auto">
+                {% else %}
+                    <div class="w-20 h-24 bg-slate-100 border border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400 text-xs text-center p-2 mx-auto">
+                        <span class="text-xl">👤</span>
+                        <span class="text-[8px] uppercase font-bold mt-1">Estudante</span>
+                    </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- TIMESTAMP E CHAVE DE RASTREABILIDADE DINÂMICA -->
+        <div class="bg-slate-50 border border-slate-300 rounded-xl p-3 flex flex-wrap justify-between items-center text-[10px] font-mono gap-2">
+            <div>
+                <span class="font-bold text-slate-700 block">🕒 DATA DE EMISSÃO:</span>
+                <span class="bg-white border border-slate-300 px-3 py-0.5 rounded font-black text-amber-900 block mt-0.5">{{ timestamp_emissao }}</span>
+            </div>
+            <div>
+                <span class="font-bold text-amber-900 block">🛡️ CÓDIGO ÚNICO DE RASTREABILIDADE:</span>
+                <span class="bg-amber-100 border border-amber-300 px-3 py-0.5 rounded font-black text-amber-950 block mt-0.5 tracking-wider">{{ chave_autenticidade }}</span>
+            </div>
+        </div>
+
+        <!-- TÍTULO PRINCIPAL -->
+        <div class="text-center py-2 bg-slate-900 text-white rounded-xl uppercase font-black tracking-wider text-xs shadow-sm">
+            TERMO OFICIAL DE TRANSFERÊNCIA INTERMUNICIPAL DO ESTUDANTE
+        </div>
+
+        <!-- IDENTIFICAÇÃO COMPLETA DO ESTUDANTE -->
+        <section class="border border-slate-900 rounded-xl p-5 space-y-3">
+            <div class="border-b border-slate-200 pb-2">
+                <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 block">NOME COMPLETO DO ESTUDANTE:</span>
+                <h2 class="text-lg font-black uppercase text-slate-900">{{ aluno.nome }}</h2>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 text-[10px] font-medium text-slate-800">
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span class="font-black text-slate-500 uppercase block text-[8px]">MATRÍCULA / INEP:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.matricula or 'Não Informado' }}</span>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span class="font-black text-slate-500 uppercase block text-[8px]">CPF:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.cpf or 'Não Cadastrado' }}</span>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span class="font-black text-slate-500 uppercase block text-[8px]">DATA DE NASCIMENTO:</span>
+                    <span class="font-bold text-slate-900">{{ data_nascimento_str }}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-[10px] font-medium text-slate-800">
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span class="font-black text-slate-500 uppercase block text-[8px]">NOME DA MÃE / RESPONSÁVEL:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.nome_mae or 'Não Registrado' }}</span>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span class="font-black text-slate-500 uppercase block text-[8px]">NOME DO PAI:</span>
+                    <span class="font-bold text-slate-900">{{ aluno.nome_pai or 'Não Registrado' }}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3 text-[10px] font-medium text-slate-800">
+                <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                    <span class="font-black text-amber-800 uppercase block text-[8px]">DEFICIÊNCIA / DIAGNÓSTICO:</span>
+                    <span class="font-black text-amber-900 uppercase">{{ aluno.tipo_deficiencia or 'Não Especificada' }}</span>
+                </div>
+                <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                    <span class="font-black text-amber-800 uppercase block text-[8px]">CÓDIGO CID-10 / CID-11:</span>
+                    <span class="font-mono font-bold text-amber-900">{{ aluno.cid or 'Não Informado' }}</span>
+                </div>
+                <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                    <span class="font-black text-amber-800 uppercase block text-[8px]">LOCAL DO ATENDIMENTO AEE:</span>
+                    <span class="font-bold text-amber-900 uppercase">{{ aluno.local_aee or 'SRM Escola Polo' }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- DADOS DA TRANSFERÊNCIA INTERMUNICIPAL -->
+        <section class="border border-slate-300 rounded-xl p-4 bg-slate-50 space-y-3">
+            <h3 class="text-xs font-black uppercase text-slate-900 border-b border-slate-300 pb-1.5 flex items-center gap-2">
+                <span>🔄</span> DADOS LOGÍSTICOS DA TRANSFERÊNCIA
+            </h3>
+            <div class="grid grid-cols-2 gap-4 text-[10px]">
+                <div>
+                    <span class="font-bold text-slate-500 block uppercase">MUNICÍPIO / ESCOLA DE ORIGEM:</span>
+                    <span class="font-black text-slate-900 uppercase">{{ g.municipio.nome }} — {{ g.municipio.estado }}</span>
+                    <span class="block text-slate-600">{{ aluno.escola.nome if aluno.escola else 'Escola Municipal de Origem' }} ({{ aluno.turma or 'Turma Regular' }})</span>
+                </div>
+                <div>
+                    <span class="font-bold text-slate-500 block uppercase">MUNICÍPIO / REDE DE DESTINO:</span>
+                    <span class="font-black text-blue-900 uppercase text-xs block">{{ municipio_destino_nome }}</span>
+                </div>
+            </div>
+
+            {% if motivo %}
+            <div class="pt-2 border-t border-slate-200 text-[10px]">
+                <span class="font-bold text-slate-500 uppercase block">MOTIVO / JUSTIFICATIVA REGISTRADA:</span>
+                <p class="text-slate-800 italic font-medium pt-0.5">"{{ motivo }}"</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- RESUMO TÉCNICO DOS APOIOS E HISTÓRICO DE PEI/PAEE -->
+        <section class="border border-slate-300 rounded-xl p-4 space-y-3">
+            <h3 class="text-xs font-black uppercase text-slate-900 border-b border-slate-200 pb-1.5 flex items-center gap-2">
+                <span>📋</span> SÍNTESE DE RECURSOS E PLANOS EMITIDOS NA REDE MUNICIPAL
+            </h3>
+            
+            <div class="grid grid-cols-4 gap-2 text-center text-[9.5px]">
+                <div class="p-2 rounded-lg bg-slate-100 border border-slate-200">
+                    <span class="block font-bold text-slate-500 uppercase text-[8px]">PLANOS PEI:</span>
+                    <span class="font-black text-slate-900 text-xs">{{ peis_count }} Emitido(s)</span>
+                </div>
+                <div class="p-2 rounded-lg bg-slate-100 border border-slate-200">
+                    <span class="block font-bold text-slate-500 uppercase text-[8px]">PLANOS PAEE:</span>
+                    <span class="font-black text-slate-900 text-xs">{{ paee_count }} Emitido(s)</span>
+                </div>
+                <div class="p-2 rounded-lg bg-slate-100 border border-slate-200">
+                    <span class="block font-bold text-slate-500 uppercase text-[8px]">TRANSPORTE ADAPTADO:</span>
+                    <span class="font-black text-slate-900 text-xs">{{ 'SIM' if aluno.necessita_transporte_adaptado or aluno.cadeirante else 'NÃO' }}</span>
+                </div>
+                <div class="p-2 rounded-lg bg-slate-100 border border-slate-200">
+                    <span class="block font-bold text-slate-500 uppercase text-[8px]">MONITORIA / APOIO:</span>
+                    <span class="font-black text-slate-900 text-xs">{{ 'SIM' if aluno.necessita_apoio or aluno.possui_monitor_rota else 'NÃO' }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- CLÁUSULA FORMAL DE TRANSFERÊNCIA -->
+        <section class="bg-slate-50 border border-slate-300 rounded-xl p-4 text-[10.5px] leading-relaxed text-slate-800 text-justify font-medium space-y-2">
+            <p>
+                <b>DECLARAÇÃO INSTITUCIONAL:</b> Certificamos para os devidos fins de direito e comprovação junto ao órgão competente da rede de ensino de destino que o(a) estudante acima qualificado(a) encontra-se oficial e formalmente transferido(a) desta rede pública municipal de ensino de <b>{{ g.municipio.nome }} — {{ g.municipio.estado }}</b>.
+            </p>
+            <p>
+                Ressaltamos que todo o acervo técnico, incluindo histórico de avaliações pedagógicas, Planos de Ensino Individualizados (PEI), Planos de AEE (PAEE) e laudos de acompanhamento multidisciplinar permanecem preservados em nosso sistema e acervo municipal para consulta e validação auditável.
+            </p>
+        </section>
+
+        <!-- CAMPOS PARA ASSINATURA -->
+        <section class="pt-10 grid grid-cols-2 gap-8 text-center text-[10px]">
+            <div class="space-y-1">
+                <div class="border-b border-slate-900 mx-6"></div>
+                <span class="font-black uppercase text-slate-900 block pt-1">SECRETARIA MUNICIPAL DE EDUCAÇÃO</span>
+                <span class="text-slate-500 text-[8px]">Prefeitura Municipal de {{ g.municipio.nome }}</span>
+            </div>
+            <div class="space-y-1">
+                <div class="border-b border-slate-900 mx-6"></div>
+                <span class="font-black uppercase text-slate-900 block pt-1">ESPECIALISTA RESPONSÁVEL DO AEE</span>
+                <span class="text-slate-500 text-[8px]">Equipe Multidisciplinar de Educação Inclusiva</span>
+            </div>
+        </section>
+
+        <!-- RODAPÉ PROPAGANDA PLATAFORMA (SUBTIL E ELEGANTE) -->
+        <footer class="mt-8 pt-4 border-t-2 border-slate-300 text-center space-y-1 font-sans">
+            <div class="flex items-center justify-center gap-2 font-bold text-slate-800 text-[10px]">
+                <span>🌐 Documento Gerado pela Plataforma PNGI — Sistema de Gestão da Educação Inclusiva</span>
+            </div>
+            <p class="text-[8.5px] text-slate-600 leading-tight max-w-2xl mx-auto">
+                Sua rede municipal ainda não utiliza o PNGI? Otimize a gestão do AEE, elabore PEIs alinhados à BNCC e conecte o histórico escolar de alunos transferidos em tempo real entre municípios parceiros.
+                <br>
+                <span class="font-bold text-blue-900">Conheça a plataforma e solicite uma demonstração para seu município:</span> 
+                <a href="https://inclusao.gestoor.com.br" target="_blank" class="underline font-bold text-blue-800">inclusao.gestoor.com.br</a> | <span class="font-bold text-slate-800">contato@gestoor.com.br</span>
+            </p>
+        </footer>
+
+    </div>
+
+</body>
+</html>

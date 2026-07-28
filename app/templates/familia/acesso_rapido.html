@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR" id="html-root" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso do Responsável — Prefeitura de {{ municipio.nome }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { 
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif']
+                    },
+                    colors: {
+                        brand: { 
+                            50: '#F0F5FF',
+                            500: '#2563EB',
+                            600: '#1D4ED8',
+                            navy: '#0B132B',
+                            teal: '#00F5D4'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col justify-between font-sans antialiased">
+
+    <!-- TOPBAR -->
+    <header class="bg-white border-b border-slate-200 py-3.5 px-6 shadow-sm">
+        <div class="max-w-5xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/auth/{{ municipio.slug }}/login" class="text-xs font-semibold text-brand-600 hover:underline flex items-center gap-1">
+                    ← Voltar ao Login da Prefeitura
+                </a>
+            </div>
+            <div class="text-right">
+                <span class="block text-xs font-extrabold text-slate-900 uppercase">Portal da Família</span>
+                <span class="block text-[10px] text-slate-500">Prefeitura de {{ municipio.nome }} — {{ municipio.estado }}</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center px-4 py-12">
+        <div class="max-w-[450px] w-full space-y-6">
+            
+            {% if erro %}
+            <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-bold flex items-center gap-3 shadow-sm">
+                <span>⚠️</span>
+                <span>{{ erro }}</span>
+            </div>
+            {% endif %}
+
+            <div class="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 space-y-6">
+                
+                <div class="text-center space-y-2">
+                    <div class="w-16 h-16 bg-blue-50 text-brand-600 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-inner">
+                        👨‍👩‍👧
+                    </div>
+                    <h1 class="text-xl font-extrabold text-slate-900">Acesso da Família</h1>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Informe o número da <strong>Matrícula Escolar</strong> e a <strong>Data de Nascimento</strong> do estudante para acompanhar o desenvolvimento pedagógico e o AEE.
+                    </p>
+                </div>
+
+                <form method="POST" class="space-y-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700">Matrícula Escolar do Estudante *</label>
+                        <input type="text" name="matricula" required placeholder="Ex: MAT-2026-001" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-medium">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-bold text-slate-700">Data de Nascimento do Estudante *</label>
+                        <input type="date" name="data_nascimento" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-medium">
+                    </div>
+
+                    <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-md">
+                        Acessar Prontuário & PEI do Estudante
+                    </button>
+                </form>
+
+                <p class="text-[10px] text-slate-400 text-center leading-relaxed border-t border-slate-100 pt-4">
+                    🔒 Espaço reservado e protegido para pais e responsáveis legais, conforme o Art. 28 da Lei Brasileira de Inclusão.
+                </p>
+
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="border-t border-slate-200 py-6 text-center text-[11px] text-slate-500 bg-white">
+        Plataforma de Educação Inclusiva — {{ municipio.nome }} © 2026
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel de Blindagem Jurídica & Ministério Público — Gestoor 360{% endblock %}
+{% block header_title %}Painel de Blindagem Jurídica & Governança Municipal{% endblock %}
+
+{% block content %}
+<div class="space-y-8 pb-12">
+
+    <!-- BANNER SUPERIOR DE COMPLIANCE JURÍDICO -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden border border-slate-700">
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div class="space-y-2 max-w-2xl">
+                <div class="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-500/30 uppercase">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    MONITORAMENTO DE AUDITORIA & PROMOTORIA
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tight">Centro de Blindagem Jurídica & Censo INEP</h1>
+                <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                    Gerador oficial de relatórios consolidados em 1 clique para responder a Notificações do <strong>Ministério Público (Promotoria da Infância e Juventude)</strong>, dimensionamento de <strong>Profissionais de Apoio Escolar (Art. 3º da LBI)</strong> e auditoria para a folha do <strong>Fundeb</strong>.
+                </p>
+            </div>
+
+            <!-- BOTÕES DE EMISSÃO RÁPIDA -->
+            <div class="flex flex-col sm:flex-row gap-3 shrink-0 w-full md:w-auto">
+                <a href="{{ url_for('core.relatorio_mp', municipio_slug=g.municipio.slug) }}" target="_blank" 
+                   class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-extrabold px-5 py-3 rounded-2xl text-xs transition-all shadow-lg flex items-center justify-center gap-2 transform hover:scale-[1.02]">
+                    <span>📄</span> Relatório para o Ministério Público
+                </a>
+                
+                <a href="{{ url_for('core.relatorio_profissionais_apoio', municipio_slug=g.municipio.slug) }}" target="_blank" 
+                   class="bg-white/10 hover:bg-white/20 text-white font-bold px-5 py-3 rounded-2xl text-xs transition-all border border-white/20 flex items-center justify-center gap-2">
+                    <span>👥</span> Matriz de Profissionais de Apoio
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARDS DE CONFORMIDADE LEGAL E AUDITORIA -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- CARD 1: TAXA PEI HOMOLOGADO -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Conformidade LBI / PEI</span>
+                <span class="w-8 h-8 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center font-bold text-sm">🧠</span>
+            </div>
+            <div class="space-y-1">
+                <span class="text-3xl font-extrabold text-slate-900 font-mono">{{ taxa_conformidade_pei }}%</span>
+                <span class="text-xs text-slate-500 font-medium block">{{ peis_homologados }} de {{ total_alunos }} PEIs Homologados</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div class="bg-brand-600 h-full rounded-full" style="width: {{ taxa_conformidade_pei }}%;"></div>
+            </div>
+        </div>
+
+        <!-- CARD 2: CIÊNCIA DA FAMÍLIA (ART 28 LBI) -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Ciência da Família</span>
+                <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">👨‍👩‍👧</span>
+            </div>
+            <div class="space-y-1">
+                <span class="text-3xl font-extrabold text-emerald-600 font-mono">{{ taxa_ciencia_familia }}%</span>
+                <span class="text-xs text-slate-500 font-medium block">{{ peis_com_ciencia_familia }} Assinaturas de Responsáveis</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                <div class="bg-emerald-500 h-full rounded-full" style="width: {{ taxa_ciencia_familia }}%;"></div>
+            </div>
+        </div>
+
+        <!-- CARD 3: DEMANDA DE PROFISSIONAL DE APOIO -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Demanda Prof. Apoio</span>
+                <span class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm">🤝</span>
+            </div>
+            <div class="space-y-1">
+                <span class="text-3xl font-extrabold text-purple-700 font-mono">{{ alunos_demanda_apoio }}</span>
+                <span class="text-xs text-slate-500 font-medium block">Alunos com Necessidade de Cuidados</span>
+            </div>
+            <span class="text-[10px] text-purple-600 bg-purple-50 px-2 py-0.5 rounded font-bold inline-block">Art. 3º, XIII da LBI</span>
+        </div>
+
+        <!-- CARD 4: LAUDOS MÉDICOS CADASTRADOS -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Laudos Anexados</span>
+                <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">🩺</span>
+            </div>
+            <div class="space-y-1">
+                <span class="text-3xl font-extrabold text-slate-900 font-mono">{{ alunos_com_laudo }}</span>
+                <span class="text-xs text-slate-500 font-medium block">Com CID ou Laudo em Prontuário</span>
+            </div>
+            <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold inline-block">✓ Documentação Válida</span>
+        </div>
+
+    </div>
+
+    <!-- SEÇÃO RECURSOS SAEB & EXPORTAÇÃO INEP -->
+    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+                <h2 class="text-lg font-extrabold text-slate-900">Dimensionamento para Provas Oficiais (SAEB) & INEP</h2>
+                <p class="text-xs text-slate-500">Recursos de acessibilidade solicitados para as avaliações nacionais de desempenho escolar.</p>
+            </div>
+
+            <a href="{{ url_for('core.exportar_censo_inep', municipio_slug=g.municipio.slug) }}" target="_blank"
+               class="bg-slate-900 hover:bg-black text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all shadow-sm flex items-center gap-2">
+                <span>📊</span> Exportador Espelho INEP / Fundeb
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1">
+                <span class="text-2xl font-extrabold text-slate-900 font-mono">{{ recursos_saeb_ledor }}</span>
+                <span class="text-xs font-bold text-slate-600 block uppercase">Recurso Ledor</span>
+            </div>
+
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1">
+                <span class="text-2xl font-extrabold text-slate-900 font-mono">{{ recursos_saeb_transcritor }}</span>
+                <span class="text-xs font-bold text-slate-600 block uppercase">Transcritor</span>
+            </div>
+
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1">
+                <span class="text-2xl font-extrabold text-slate-900 font-mono">{{ recursos_saeb_libras }}</span>
+                <span class="text-xs font-bold text-slate-600 block uppercase">Intérprete Libras</span>
+            </div>
+
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center space-y-1">
+                <span class="text-2xl font-extrabold text-slate-900 font-mono">{{ recursos_saeb_ampliado }}</span>
+                <span class="text-xs font-bold text-slate-600 block uppercase">Prova Ampliada</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- LISTA DE ALUNOS COM ATALHO DE IMPRESSÃO INDIVIDUAL -->
+    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-4">
+        <h2 class="text-base font-extrabold text-slate-900">Auditoria Individual dos Estudantes Atendidos</h2>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-600 uppercase text-[10px] tracking-wider border-b border-slate-200">
+                    <tr>
+                        <th class="p-3">Estudante</th>
+                        <th class="p-3">Matrícula</th>
+                        <th class="p-3">Unidade Escolar</th>
+                        <th class="p-3">Status PEI</th>
+                        <th class="p-3">Ciência Família</th>
+                        <th class="p-3 text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for a in alunos %}
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold text-slate-900 flex items-center gap-2">
+                            <span>👤</span> {{ a.nome }}
+                        </td>
+                        <td class="p-3 font-mono text-slate-500">{{ a.matricula }}</td>
+                        <td class="p-3 text-slate-700">{{ a.escola.nome if a.escola else 'Não informada' }}</td>
+                        <td class="p-3">
+                            <span class="bg-blue-50 text-brand-600 font-bold px-2 py-0.5 rounded text-[10px]">
+                                Configurado
+                            </span>
+                        </td>
+                        <td class="p-3">
+                            <span class="bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded text-[10px]">
+                                Registrada
+                            </span>
+                        </td>
+                        <td class="p-3 text-right">
+                            <a href="{{ url_for('alunos.perfil_aluno', municipio_slug=g.municipio.slug, aluno_id=a.id) }}" class="text-brand-600 hover:underline font-bold">
+                                Abrir Dossiê &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="p-6 text-center text-slate-400">Nenhum aluno cadastrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

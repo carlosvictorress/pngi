@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Matriz de Dimensionamento de Profissionais de Apoio — LBI Art. 3º</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; background: white; }
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-900 min-h-screen p-4 sm:p-8">
+
+    <div class="max-w-5xl mx-auto mb-6 flex items-center justify-between no-print bg-slate-900 text-white p-4 rounded-2xl shadow-lg">
+        <div class="flex items-center gap-2">
+            <span class="text-purple-400 font-extrabold text-sm">🤝 Matriz de Dimensionamento de Profissionais de Apoio Escolar</span>
+        </div>
+        <button onclick="window.print()" class="bg-purple-500 hover:bg-purple-600 text-white font-extrabold px-5 py-2 rounded-xl text-xs shadow-md transition-all">
+            🖨️ Imprimir / Salvar em PDF
+        </button>
+    </div>
+
+    <div class="max-w-5xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-200 space-y-8">
+        
+        <div class="border-b-2 border-slate-900 pb-6 flex items-center justify-between">
+            <div>
+                <h1 class="text-base font-extrabold text-slate-900 uppercase">Prefeitura Municipal de {{ g.municipio.nome }} — {{ g.municipio.estado }}</h1>
+                <h2 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Dimensionamento da Demanda de Cuidados Pessoais (Lei 13.146/2015, Art. 3º, XIII)</h2>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] text-slate-400 font-bold uppercase block">Emissão Oficial</span>
+                <span class="text-xs font-mono font-extrabold text-slate-900 block">{{ data_emissao }}</span>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            {% for item in relatorio_escolas %}
+            <div class="border border-slate-300 rounded-2xl p-5 space-y-4 bg-white">
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-3">
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900 uppercase">{{ item.escola.nome }}</h3>
+                        <span class="text-[10px] text-slate-500 font-mono">Código INEP: {{ item.escola.codigo_inep }}</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="bg-slate-100 text-slate-700 font-bold text-xs px-3 py-1 rounded-lg">
+                            Total Alunos PCD: {{ item.total_pcd }}
+                        </span>
+                        <span class="bg-purple-50 text-purple-700 font-extrabold text-xs px-3 py-1 rounded-lg border border-purple-200">
+                            Demandam Profissional de Apoio: {{ item.total_apoio }}
+                        </span>
+                    </div>
+                </div>
+
+                {% if item.alunos_apoio %}
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border border-slate-200">
+                        <thead class="bg-slate-50 text-slate-700 uppercase text-[9px] font-bold border-b border-slate-200">
+                            <tr>
+                                <th class="p-2">Estudante</th>
+                                <th class="p-2">Turma</th>
+                                <th class="p-2">Necessidade Específica (Higiene, Alimentação, Locomoção)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for a in item.alunos_apoio %}
+                            <tr>
+                                <td class="p-2 font-bold text-slate-900">{{ a.aluno.nome }}</td>
+                                <td class="p-2 text-slate-600">{{ a.aluno.turma }}</td>
+                                <td class="p-2 text-slate-700">{{ a.especificacao }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-xs text-slate-400 italic">Nenhum estudante nesta escola necessita de apoio intensivo para locomoção, higiene ou alimentação no momento.</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+
+</body>
+</html>

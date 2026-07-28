@@ -1,6 +1,6 @@
 import json
 from flask import Blueprint, render_template, request, redirect, url_for, g, abort, flash
-from app.models import Aluno, Pei, Usuario, EstudoCaso, Paee
+from app.models import Aluno, Pei, Usuario, EstudoCaso, Paee, ProfissionalAEE, Municipio
 from app import db
 from flask_login import login_required, current_user
 from datetime import datetime
@@ -51,40 +51,62 @@ def criar_pei(aluno_id):
     estudo_previo = EstudoCaso.query.filter_by(aluno_id=aluno.id, status='Homologado').first()
     
     if request.method == 'POST':
-        # 1. Processamento Dinâmico da Matriz de Disciplinas / BNCC
+        now_str = datetime.now().strftime('%d/%m/%Y às %H:%M')
+        
+        # 1. Processamento Dinâmico da Matriz de Disciplinas / BNCC com Autoria
         disciplinas = request.form.getlist('disc_nome[]')
         conteudos = request.form.getlist('disc_conteudo[]')
         bnccs = request.form.getlist('disc_bncc[]')
         metodologias = request.form.getlist('disc_metodologia[]')
         recursos = request.form.getlist('disc_recursos[]')
         avaliacoes = request.form.getlist('disc_avaliacao[]')
+        disc_autor_ids = request.form.getlist('disc_autor_id[]')
+        disc_autor_nomes = request.form.getlist('disc_autor_nome[]')
+        disc_criado_ems = request.form.getlist('disc_criado_em[]')
         
         lista_disciplinas = []
         for i in range(len(disciplinas)):
             if disciplinas[i].strip():
+                a_id = int(disc_autor_ids[i]) if (i < len(disc_autor_ids) and disc_autor_ids[i].strip().isdigit()) else current_user.id
+                a_nome = disc_autor_nomes[i] if (i < len(disc_autor_nomes) and disc_autor_nomes[i].strip()) else current_user.nome
+                c_em = disc_criado_ems[i] if (i < len(disc_criado_ems) and disc_criado_ems[i].strip()) else now_str
+                
                 lista_disciplinas.append({
                     'disciplina': disciplinas[i],
                     'conteudo': conteudos[i],
                     'bncc': bnccs[i],
                     'metodologia': metodologias[i],
                     'recursos': recursos[i],
-                    'avaliacao': avaliacoes[i]
+                    'avaliacao': avaliacoes[i],
+                    'autor_id': a_id,
+                    'autor_nome': a_nome,
+                    'criado_em': c_em
                 })
 
-        # 2. Processamento Dinâmico das Metas Pedagogicas por Periodização
+        # 2. Processamento Dinâmico das Metas Pedagogicas por Periodização com Autoria
         meta_periodos = request.form.getlist('meta_periodo[]')
         meta_objetivos = request.form.getlist('meta_objetivo[]')
         meta_estrategias = request.form.getlist('meta_estrategia[]')
         meta_avaliacoes = request.form.getlist('meta_aval[]')
+        meta_autor_ids = request.form.getlist('meta_autor_id[]')
+        meta_autor_nomes = request.form.getlist('meta_autor_nome[]')
+        meta_criado_ems = request.form.getlist('meta_criado_em[]')
         
         lista_metas = []
         for i in range(len(meta_periodos)):
             if meta_periodos[i].strip():
+                a_id = int(meta_autor_ids[i]) if (i < len(meta_autor_ids) and meta_autor_ids[i].strip().isdigit()) else current_user.id
+                a_nome = meta_autor_nomes[i] if (i < len(meta_autor_nomes) and meta_autor_nomes[i].strip()) else current_user.nome
+                c_em = meta_criado_ems[i] if (i < len(meta_criado_ems) and meta_criado_ems[i].strip()) else now_str
+                
                 lista_metas.append({
                     'periodo': meta_periodos[i],
                     'objetivo': meta_objetivos[i],
                     'estrategia': meta_estrategias[i],
-                    'avaliacao': meta_avaliacoes[i]
+                    'avaliacao': meta_avaliacoes[i],
+                    'autor_id': a_id,
+                    'autor_nome': a_nome,
+                    'criado_em': c_em
                 })
 
         novo_pei = Pei(
@@ -196,7 +218,8 @@ def criar_pei(aluno_id):
             char_aspectos_comunicacionais=estudo_previo.obs_comunicacao
         )
 
-    return render_template('pei/formulario_pei.html', aluno=aluno, pei=pei_herdados)
+    profissionais_aee = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
+    return render_template('pei/formulario_pei.html', aluno=aluno, pei=pei_herdados, profissionais_aee=profissionais_aee)
 
 @pei_bp.route('/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -204,6 +227,39 @@ def editar_pei(id):
     pei = Pei.query.join(Aluno).filter(Pei.id == id, Aluno.municipio_id == g.municipio.id).first_or_404()
     
     if request.method == 'POST':
+        now_str = datetime.now().strftime('%d/%m/%Y às %H:%M')
+        is_admin = (current_user.perfil == 'superadmin')
+
+        # Carrega os JSONs legados/existentes para proteção de autoria
+        metas_existentes = json.loads(pei.metas_pedagogicas_json) if pei.metas_pedagogicas_json else []
+        grade_existente = json.loads(pei.disciplinas_bncc_json) if pei.disciplinas_bncc_json else []
+        
+        def get_row_autor_id(item):
+            if item.get('autor_id') is not None:
+                try:
+                    return int(item.get('autor_id'))
+                except (ValueError, TypeError):
+                    pass
+            return pei.professor_id if pei.professor_id else None
+
+        def get_row_autor_nome(item):
+            if item.get('autor_nome'):
+                return item.get('autor_nome')
+            if pei.professor and pei.professor.nome:
+                return pei.professor.nome
+            return "Docente Responsável"
+
+        # Preserva obrigatoriamente as linhas criadas por OUTROS professores
+        metas_protegidas = [
+            m for m in metas_existentes 
+            if (get_row_autor_id(m) and get_row_autor_id(m) != current_user.id and not is_admin)
+        ]
+        
+        grade_protegida = [
+            g_item for g_item in grade_existente 
+            if (get_row_autor_id(g_item) and get_row_autor_id(g_item) != current_user.id and not is_admin)
+        ]
+
         # 1. Processamento Dinâmico da Matriz de Disciplinas / BNCC
         disciplinas = request.form.getlist('disc_nome[]')
         conteudos = request.form.getlist('disc_conteudo[]')
@@ -211,17 +267,33 @@ def editar_pei(id):
         metodologias = request.form.getlist('disc_metodologia[]')
         recursos = request.form.getlist('disc_recursos[]')
         avaliacoes = request.form.getlist('disc_avaliacao[]')
+        disc_autor_ids = request.form.getlist('disc_autor_id[]')
+        disc_autor_nomes = request.form.getlist('disc_autor_nome[]')
+        disc_criado_ems = request.form.getlist('disc_criado_em[]')
         
-        lista_disciplinas = []
+        lista_disciplinas = list(grade_protegida)
         for i in range(len(disciplinas)):
             if disciplinas[i].strip():
+                raw_a_id = disc_autor_ids[i] if (i < len(disc_autor_ids) and disc_autor_ids[i].strip().isdigit()) else None
+                a_id = int(raw_a_id) if raw_a_id is not None else current_user.id
+                
+                # Se for de outro autor e não for superadmin, pula pois já está preservada em grade_protegida
+                if a_id != current_user.id and not is_admin:
+                    continue
+
+                a_nome = disc_autor_nomes[i] if (i < len(disc_autor_nomes) and disc_autor_nomes[i].strip()) else current_user.nome
+                c_em = disc_criado_ems[i] if (i < len(disc_criado_ems) and disc_criado_ems[i].strip()) else now_str
+
                 lista_disciplinas.append({
                     'disciplina': disciplinas[i],
                     'conteudo': conteudos[i],
                     'bncc': bnccs[i],
                     'metodologia': metodologias[i],
                     'recursos': recursos[i],
-                    'avaliacao': avaliacoes[i]
+                    'avaliacao': avaliacoes[i],
+                    'autor_id': a_id,
+                    'autor_nome': a_nome,
+                    'criado_em': c_em
                 })
 
         # 2. Processamento Dinâmico das Metas Pedagogicas por Periodização
@@ -229,15 +301,31 @@ def editar_pei(id):
         meta_objetivos = request.form.getlist('meta_objetivo[]')
         meta_estrategias = request.form.getlist('meta_estrategia[]')
         meta_avaliacoes = request.form.getlist('meta_aval[]')
+        meta_autor_ids = request.form.getlist('meta_autor_id[]')
+        meta_autor_nomes = request.form.getlist('meta_autor_nome[]')
+        meta_criado_ems = request.form.getlist('meta_criado_em[]')
         
-        lista_metas = []
+        lista_metas = list(metas_protegidas)
         for i in range(len(meta_periodos)):
             if meta_periodos[i].strip():
+                raw_a_id = meta_autor_ids[i] if (i < len(meta_autor_ids) and meta_autor_ids[i].strip().isdigit()) else None
+                a_id = int(raw_a_id) if raw_a_id is not None else current_user.id
+                
+                # Se for de outro autor e não for superadmin, pula pois já está preservada em metas_protegidas
+                if a_id != current_user.id and not is_admin:
+                    continue
+
+                a_nome = meta_autor_nomes[i] if (i < len(meta_autor_nomes) and meta_autor_nomes[i].strip()) else current_user.nome
+                c_em = meta_criado_ems[i] if (i < len(meta_criado_ems) and meta_criado_ems[i].strip()) else now_str
+
                 lista_metas.append({
                     'periodo': meta_periodos[i],
                     'objetivo': meta_objetivos[i],
                     'estrategia': meta_estrategias[i],
-                    'avaliacao': meta_avaliacoes[i]
+                    'avaliacao': meta_avaliacoes[i],
+                    'autor_id': a_id,
+                    'autor_nome': a_nome,
+                    'criado_em': c_em
                 })
 
         pei.periodo_trimestre = int(request.form.get('periodo_trimestre', 1))
@@ -308,7 +396,8 @@ def editar_pei(id):
         flash(f"Plano PEI de {pei.aluno.nome} atualizado com absoluto sucesso!", "success")
         return redirect(url_for('pei.listar_alunos_pei', municipio_slug=g.municipio.slug))
 
-    return render_template('pei/formulario_pei.html', aluno=pei.aluno, pei=pei)
+    profissionais_aee = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
+    return render_template('pei/formulario_pei.html', aluno=pei.aluno, pei=pei, profissionais_aee=profissionais_aee)
 
 @pei_bp.route('/excluir/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -442,7 +531,8 @@ def estudo_caso(aluno_id):
         db.session.commit()
         return redirect(url_for('pei.listar_alunos_pei', municipio_slug=g.municipio.slug))
 
-    return render_template('pei/estudo_caso.html', aluno=aluno, caso=caso)
+    profissionais_aee = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
+    return render_template('pei/estudo_caso.html', aluno=aluno, caso=caso, profissionais_aee=profissionais_aee)
 
 @pei_bp.route('/aluno/<int:aluno_id>/novo-paee', methods=['GET', 'POST'])
 @login_required
@@ -508,7 +598,8 @@ def criar_paee(aluno_id):
         objetivo_geral="Promover condições de acessibilidade e participação do estudante no ambiente escolar..."
     )
 
-    return render_template('pei/formulario_paee.html', aluno=aluno, paee=paee_herdados)
+    profissionais_aee = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
+    return render_template('pei/formulario_paee.html', aluno=aluno, paee=paee_herdados, profissionais_aee=profissionais_aee)
 
 @pei_bp.route('/aluno/<int:aluno_id>/imprimir-paee', methods=['GET'])
 @login_required

@@ -56,7 +56,7 @@ class Usuario(db.Model, UserMixin):
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relacionamentos
-    peis_criados = db.relationship('Pei', backref='professor_criador', lazy=True)
+    peis_criados = db.relationship('Pei', backref=db.backref('professor_criador', overlaps="peis_elaborados,professor"), lazy=True, overlaps="peis_elaborados,professor")
     alunos_responsaveis = db.relationship('Aluno', backref='responsavel_usuario', lazy=True)
 
     def set_senha(self, senha):
@@ -126,6 +126,8 @@ class Aluno(db.Model):
     possui_monitor_rota = db.Column(db.Boolean, default=False, nullable=True)
 
     # Controle Operacional, Segurança Familiar & Histórico de Transferências Intermunicipais
+    ano_letivo = db.Column(db.String(10), default='2026', nullable=False)
+    status_matricula = db.Column(db.String(30), default='Ativo', nullable=False) # 'Ativo', 'Transferido', 'Egresso', 'Concluído'
     responsavel_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
     contato_urgencia = db.Column(db.String(50), nullable=False)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
@@ -240,6 +242,10 @@ class Pei(db.Model):
     homologado_secretaria = db.Column(db.Boolean, default=False)
     homologado_secretaria_em = db.Column(db.DateTime, nullable=True)
     
+    # Assinatura / Ciência do Responsável (Art. 28 LBI)
+    assinado_familia = db.Column(db.Boolean, default=False)
+    assinado_familia_em = db.Column(db.DateTime, nullable=True)
+    
     atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -268,6 +274,34 @@ class AtendimentoAee(db.Model):
     registrado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
 
+class RotaTransporte(db.Model):
+    """
+    Módulo 4: Gestão de Rotas e Frota do Transporte Escolar Adaptado.
+    """
+    __tablename__ = 'rotas_transporte'
+
+    id = db.Column(db.Integer, primary_key=True)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
+    
+    codigo_rota = db.Column(db.String(50), nullable=False)  # Ex: ROTA-01 ZONA RURAL
+    nome_rota = db.Column(db.String(150), nullable=False)   # Ex: Itinerário Povoado Centro
+    
+    motorista_nome = db.Column(db.String(100), nullable=True)
+    motorista_telefone = db.Column(db.String(20), nullable=True)
+    monitor_nome = db.Column(db.String(100), nullable=True)
+    monitor_telefone = db.Column(db.String(20), nullable=True)
+    
+    placa_veiculo = db.Column(db.String(10), nullable=True)
+    tipo_veiculo = db.Column(db.String(50), default='Van Adaptada') # Van Adaptada, Micro-ônibus Elevatório, Ônibus Acessível
+    capacidade_cadeirantes = db.Column(db.Integer, default=2)
+    turno = db.Column(db.String(30), default='Manhã e Tarde')
+    
+    ativo = db.Column(db.Boolean, default=True, nullable=False)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    municipio = db.relationship('Municipio', backref=db.backref('rotas_transporte', lazy=True, cascade='all, delete-orphan'))
+
+
 class TransporteAlunado(db.Model):
     """
     Módulo 4: Logística e Acessibilidade no Transporte Escolar.
@@ -276,6 +310,7 @@ class TransporteAlunado(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), unique=True, nullable=False)
+    rota_id = db.Column(db.Integer, db.ForeignKey('rotas_transporte.id'), nullable=True)
     
     necessita_veiculo_adaptado = db.Column(db.Boolean, default=False, nullable=False)
     cadeirante = db.Column(db.Boolean, default=False, nullable=False)
@@ -284,9 +319,13 @@ class TransporteAlunado(db.Model):
     
     rota_codigo = db.Column(db.String(50), nullable=True)
     ponto_embarque = db.Column(db.String(150), nullable=True)
+    horario_embarque = db.Column(db.String(10), nullable=True)   # Ex: 06:45
+    horario_desembarque = db.Column(db.String(10), nullable=True) # Ex: 11:45
     observacoes_logistica = db.Column(db.Text, nullable=True)
     
     atualizado_em = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    rota = db.relationship('RotaTransporte', backref=db.backref('alunos_vinculados', lazy=True))
 
 
 class ProfissionalAEE(db.Model):
@@ -330,6 +369,56 @@ class PlanoAEE(db.Model):
     # Relacionamentos
     aluno = db.relationship('Aluno', backref=db.backref('planos', lazy=True))
     profissional = db.relationship('ProfissionalAEE', backref=db.backref('planos_criados', lazy=True))
+
+
+class EncaminhamentoAEE(db.Model):
+    """
+    Módulo AEE: Guias de Encaminhamento para a Rede de Saúde (SUS/CAPS/CRAS).
+    """
+    __tablename__ = 'encaminhamentos_aee'
+
+    id = db.Column(db.Integer, primary_key=True)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False, index=True)
+    profissional_id = db.Column(db.Integer, db.ForeignKey('profissionais_aee.id'), nullable=True)
+
+    destino_rede = db.Column(db.String(80), nullable=False) # 'Neuropediatria', 'CAPS Infantil', 'Psicologia SUS', 'Fonoaudiologia', 'Terapia Ocupacional', 'CRAS/CREAS'
+    motivo_encaminhamento = db.Column(db.Text, nullable=False)
+    hipotese_observada = db.Column(db.Text, nullable=True)
+    contrarreferencia_resposta = db.Column(db.Text, nullable=True)
+    
+    status = db.Column(db.String(30), default='Pendente') # 'Pendente', 'Em Atendimento', 'Concluído'
+    data_emissao = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    aluno = db.relationship('Aluno', backref=db.backref('encaminhamentos', lazy=True, order_by='EncaminhamentoAEE.id.desc()'))
+    profissional = db.relationship('ProfissionalAEE', backref=db.backref('encaminhamentos_emitidos', lazy=True))
+
+
+class HistoricoTransferenciaAluno(db.Model):
+    """
+    Rastreabilidade e Histórico de Transferências/Remanejamentos Internos de Estudantes PCD.
+    """
+    __tablename__ = 'historico_transferencias_alunos'
+
+    id = db.Column(db.Integer, primary_key=True)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False, index=True)
+    
+    escola_origem_id = db.Column(db.Integer, db.ForeignKey('escolas.id'), nullable=True)
+    escola_destino_id = db.Column(db.Integer, db.ForeignKey('escolas.id'), nullable=True)
+    
+    turma_origem = db.Column(db.String(50), nullable=True)
+    turma_destino = db.Column(db.String(50), nullable=True)
+    
+    ano_letivo = db.Column(db.String(10), default='2026')
+    motivo_transferencia = db.Column(db.Text, nullable=True)
+    data_transferencia = db.Column(db.DateTime, default=datetime.utcnow)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+
+    aluno = db.relationship('Aluno', backref=db.backref('historico_remanejamentos_internos', lazy=True, order_by='HistoricoTransferenciaAluno.id.desc()'))
+    escola_origem = db.relationship('Escola', foreign_keys=[escola_origem_id])
+    escola_destino = db.relationship('Escola', foreign_keys=[escola_destino_id])
 
 # =========================================================================
 # 4. AGENDA DE ATENDIMENTOS & AGENDAMENTOS
@@ -382,6 +471,7 @@ class EvolucaoAEE(db.Model):
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
     aluno = db.relationship('Aluno', backref=db.backref('evolucoes', lazy=True))
+    profissional = db.relationship('ProfissionalAEE', backref=db.backref('evolucoes_realizadas', lazy=True))
 
 # =========================================================================
 # 7. CONTROLE DOCUMENTAL DIGITAL
@@ -427,6 +517,13 @@ class ComunicacaoAEE(db.Model):
     data_registro = db.Column(db.Date, nullable=False)
     relato_descritivo = db.Column(db.Text, nullable=False)
     compartilhado_com_familia = db.Column(db.Boolean, default=False)
+    
+    # Ciência & Feedback do Responsável (Portal da Família)
+    ciencia_familia = db.Column(db.Boolean, default=False)
+    ciencia_data = db.Column(db.DateTime, nullable=True)
+    observacoes_familia = db.Column(db.Text, nullable=True)
+
+    aluno = db.relationship('Aluno', backref=db.backref('comunicacoes', lazy=True, order_by='ComunicacaoAEE.id.desc()'))
     
 class Escola(db.Model):
     """
@@ -621,7 +718,7 @@ class TransferenciaAluno(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False)
     municipio_origem_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False)
-    municipio_destino_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False)
+    municipio_destino_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=True)
     data_transferencia = db.Column(db.DateTime, default=datetime.utcnow)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
     motivo = db.Column(db.Text, nullable=True)

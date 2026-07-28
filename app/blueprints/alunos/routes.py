@@ -1,3 +1,4 @@
+from datetime import datetime, date
 from flask import Blueprint, render_template, redirect, url_for, request, flash, g, abort, jsonify
 from flask_login import login_required, current_user
 from app import db
@@ -15,9 +16,39 @@ def pull_slug(endpoint, values):
 def listar():
     if not g.municipio:
         abort(404)
-    # Lista apenas os alunos ativos
-    alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
-    return render_template('alunos/listar.html', alunos=alunos)
+    
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 15, type=int)
+    ano_letivo = request.args.get('ano_letivo', '2026')
+    escola_id = request.args.get('escola_id', type=int)
+    status_matricula = request.args.get('status_matricula', 'Ativo')
+    busca = request.args.get('busca', '').strip()
+
+    query = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True)
+    
+    if ano_letivo and ano_letivo != 'todos':
+        query = query.filter(Aluno.ano_letivo == ano_letivo)
+    if escola_id:
+        query = query.filter(Aluno.escola_id == escola_id)
+    if status_matricula and status_matricula != 'todos':
+        query = query.filter(Aluno.status_matricula == status_matricula)
+    if busca:
+        query = query.filter((Aluno.nome.ilike(f"%{busca}%")) | (Aluno.matricula.ilike(f"%{busca}%")) | (Aluno.cpf.ilike(f"%{busca}%")))
+
+    pagination = query.order_by(Aluno.nome).paginate(page=page, per_page=per_page, error_out=False)
+    alunos = pagination.items
+    escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
+
+    return render_template(
+        'alunos/listar.html',
+        alunos=alunos,
+        pagination=pagination,
+        escolas=escolas,
+        ano_letivo_filtro=ano_letivo,
+        escola_id_filtro=escola_id,
+        status_filtro=status_matricula,
+        busca=busca
+    )
 
 @alunos_bp.route('/api/buscar_cpf', methods=['GET'])
 @login_required
@@ -301,8 +332,53 @@ def perfil_aluno(aluno_id):
             'historico_outro_municipio': False
         })
 
+    # Busca Termos de Transferência emitidos para rastreabilidade auditável
+    from app.models import DocumentoAEE
+    import json
+    documentos_termo = DocumentoAEE.query.filter_by(
+        aluno_id=aluno.id, 
+        tipo_documento='Termo de Transferência Intermunicipal'
+    ).order_by(DocumentoAEE.data_upload.desc()).all()
+
+    for doc in documentos_termo:
+        dados_doc = {}
+        if doc.conteudo:
+            try:
+                dados_doc = json.loads(doc.conteudo)
+            except Exception:
+                pass
+        dest_nome = dados_doc.get('municipio_destino_nome', 'Rede Externa')
+        
+        linha_tempo.append({
+            'tipo': 'termo_transferencia',
+            'categoria': 'Termo de Transferência',
+            'icone': '📜',
+            'cor': 'amber',
+            'data': doc.data_upload,
+            'titulo': f"Termo de Transferência ({dest_nome})",
+            'subtitulo': f"Chave Rastreável: {doc.chave_autenticidade or 'TR-AUDIT'}",
+            'responsavel': dados_doc.get('usuario_nome', 'Secretaria / AEE'),
+            'status': 'Emitido & Registrado',
+            'sintese': doc.descricao or f"Termo oficial de transferência registrado para {dest_nome}.",
+            'obj': doc,
+            'chave': doc.chave_autenticidade,
+            'destino_nome': dest_nome,
+            'motivo': dados_doc.get('motivo', ''),
+            'historico_outro_municipio': False
+        })
+
+    def parse_sort_date(val):
+        if not val:
+            return datetime.min
+        if isinstance(val, datetime):
+            return val
+        from datetime import date as dt_date
+        if isinstance(val, dt_date):
+            return datetime.combine(val, datetime.min.time())
+        return datetime.min
+
     # Ordena do evento mais recente para o mais antigo
-    linha_tempo.sort(key=lambda x: x['data'] if x['data'] else datetime.min, reverse=True)
+    linha_tempo.sort(key=lambda x: parse_sort_date(x['data']), reverse=True)
 
     return render_template(
         'alunos/perfil.html', 
@@ -339,6 +415,50 @@ def reativar_aluno(id):
     db.session.commit()
     flash(f"Aluno {aluno.nome} reativado com sucesso!", "success")
     return redirect(url_for('alunos.listar_desativados', municipio_slug=g.municipio_slug))
+
+@alunos_bp.route('/<int:id>/remanejar', methods=['GET', 'POST'])
+@login_required
+def remanejar_escola_interna(id):
+    """
+    Remaneja o aluno para outra escola/turma do mesmo município com histórico registrado.
+    """
+    from app.models import HistoricoTransferenciaAluno
+    if current_user.perfil not in ['secretaria', 'superadmin', 'diretor']:
+        abort(403)
+        
+    aluno = Aluno.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
+    escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
+
+    if request.method == 'POST':
+        escola_destino_id = request.form.get('escola_destino_id', type=int)
+        nova_turma = request.form.get('nova_turma', '').strip()
+        motivo = request.form.get('motivo_transferencia', '').strip()
+
+        if not escola_destino_id or not nova_turma:
+            flash("Selecione a escola de destino e a nova turma!", "erro")
+        else:
+            reg_historico = HistoricoTransferenciaAluno(
+                municipio_id=g.municipio.id,
+                aluno_id=aluno.id,
+                escola_origem_id=aluno.escola_id,
+                escola_destino_id=escola_destino_id,
+                turma_origem=aluno.turma,
+                turma_destino=nova_turma,
+                ano_letivo=aluno.ano_letivo or '2026',
+                motivo_transferencia=motivo,
+                usuario_id=current_user.id
+            )
+            db.session.add(reg_historico)
+
+            aluno.escola_id = escola_destino_id
+            aluno.turma = nova_turma
+            db.session.commit()
+
+            flash(f"Estudante '{aluno.nome}' remanejado com sucesso para a nova unidade escolar!", "sucesso")
+            return redirect(url_for('alunos.perfil_aluno', aluno_id=aluno.id, municipio_slug=g.municipio_slug))
+
+    return render_template('alunos/transferir.html', aluno=aluno, escolas=escolas)
+
 
 @alunos_bp.route('/<int:id>/upload-foto', methods=['POST'])
 @login_required
@@ -426,6 +546,94 @@ def imprimir_prontuario(id):
         timestamp_emissao=timestamp_emissao
     )
 
+@alunos_bp.route('/<int:id>/imprimir-termo-transferencia', methods=['GET', 'POST'])
+@login_required
+def imprimir_termo_transferencia(id):
+    """Gera o Termo Oficial de Transferência Intermunicipal em PDF/Impressão timbrada."""
+    from datetime import datetime
+    from app.models import Pei, PlanoAEE, TransferenciaAluno
+
+    aluno = Aluno.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
+    
+    # Captura dados de destino e motivo enviados via GET/POST
+    municipio_destino_nome = request.values.get('municipio_destino_nome', request.values.get('destino_nome', '')).strip()
+    motivo = request.values.get('motivo', '').strip()
+
+    if not municipio_destino_nome:
+        # Tenta buscar a última transferência registrada no banco
+        ultima_transf = TransferenciaAluno.query.filter_by(aluno_id=aluno.id).order_by(TransferenciaAluno.id.desc()).first()
+        if ultima_transf:
+            if ultima_transf.municipio_destino:
+                municipio_destino_nome = f"{ultima_transf.municipio_destino.nome} — {ultima_transf.municipio_destino.estado} (Rede Integrada PNGI)"
+            else:
+                municipio_destino_nome = "Rede Municipal / Estadual de Destino"
+            if not motivo and ultima_transf.motivo:
+                motivo = ultima_transf.motivo
+        else:
+            municipio_destino_nome = "Rede Municipal / Estadual de Destino (Não Integrada ao PNGI)"
+
+    if not motivo:
+        motivo = "Transferência intermunicipal de escolaridade e histórico do AEE."
+
+    # Contadores de histórico
+    peis_count = Pei.query.filter_by(aluno_id=aluno.id).count()
+    paee_count = PlanoAEE.query.filter_by(aluno_id=aluno.id).count()
+    timestamp_emissao = datetime.now().strftime('%d/%m/%Y às %H:%M:%S')
+
+    def format_data(val):
+        if not val:
+            return 'Não Informada'
+        if hasattr(val, 'strftime'):
+            return val.strftime('%d/%m/%Y')
+        if isinstance(val, str):
+            val_s = val.strip()
+            if not val_s:
+                return 'Não Informada'
+            if '-' in val_s:
+                parts = val_s.split('T')[0].split('-')
+                if len(parts) == 3:
+                    return f"{parts[2]}/{parts[1]}/{parts[0]}"
+            return val_s
+        return str(val)
+
+    data_nascimento_str = format_data(aluno.data_nascimento)
+
+    # Registra no Controle Documental Digital (DocumentoAEE) para Rastreabilidade Integral
+    import uuid, json
+    from app.models import DocumentoAEE
+    
+    chave_autenticidade = f"TR-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+    
+    doc_termo = DocumentoAEE(
+        municipio_id=g.municipio.id,
+        aluno_id=aluno.id,
+        tipo_documento='Termo de Transferência Intermunicipal',
+        descricao=f'Termo de Transferência Intermunicipal emitido para {municipio_destino_nome}',
+        conteudo=json.dumps({
+            'municipio_destino_nome': municipio_destino_nome,
+            'motivo': motivo,
+            'chave': chave_autenticidade,
+            'usuario_nome': current_user.nome,
+            'usuario_cargo': current_user.perfil
+        }, ensure_ascii=False),
+        chave_autenticidade=chave_autenticidade,
+        data_upload=datetime.utcnow()
+    )
+    db.session.add(doc_termo)
+    db.session.commit()
+
+    return render_template(
+        'alunos/imprimir_termo_transferencia.html',
+        aluno=aluno,
+        data_nascimento_str=data_nascimento_str,
+        municipio_destino_nome=municipio_destino_nome,
+        motivo=motivo,
+        peis_count=peis_count,
+        paee_count=paee_count,
+        timestamp_emissao=timestamp_emissao,
+        chave_autenticidade=chave_autenticidade
+    )
+
 @alunos_bp.route('/<int:id>/transferir', methods=['POST'])
 @login_required
 def transferir_aluno(id):
@@ -433,9 +641,39 @@ def transferir_aluno(id):
     from app.models import TransferenciaAluno
     
     aluno_origem = Aluno.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
-    municipio_destino_id = request.form.get('municipio_destino_id', type=int)
-    motivo = request.form.get('motivo', 'Transferência intermunicipal solicitada pela família/escola.')
+    tipo_transferencia = request.form.get('tipo_transferencia', 'integrada')
+    motivo = request.form.get('motivo', 'Transferência intermunicipal solicitada pela família/escola.').strip()
     
+    # -------------------------------------------------------------------------
+    # CASO A: Transferência Externa (Município que NÃO utiliza a Plataforma PNGI)
+    # -------------------------------------------------------------------------
+    if tipo_transferencia == 'externa':
+        municipio_destino_nome = request.form.get('municipio_destino_nome', 'Outro Município / Estado').strip()
+        if not municipio_destino_nome:
+            flash("Informe o nome do município/estado de destino para emissão da transferência.", "warning")
+            return redirect(url_for('alunos.perfil_aluno', municipio_slug=g.municipio_slug, aluno_id=aluno_origem.id))
+
+        aluno_origem.ativo = False
+        aluno_origem.status_transferencia = f'Transferido Externa ({municipio_destino_nome})'
+        aluno_origem.data_transferencia = datetime.utcnow()
+
+        transferencia = TransferenciaAluno(
+            aluno_id=aluno_origem.id,
+            municipio_origem_id=g.municipio.id,
+            municipio_destino_id=g.municipio.id,
+            usuario_id=current_user.id,
+            motivo=f"[Destino Externa: {municipio_destino_nome}] {motivo}"
+        )
+        db.session.add(transferencia)
+        db.session.commit()
+
+        flash(f"✅ Estudante {aluno_origem.nome} transferido externamente para '{municipio_destino_nome}'. Termo oficial gerado e histórico arquivado em {g.municipio.nome}.", "success")
+        return redirect(url_for('alunos.perfil_aluno', municipio_slug=g.municipio_slug, aluno_id=aluno_origem.id))
+
+    # -------------------------------------------------------------------------
+    # CASO B: Transferência Integrada (Município Parceiro com Plataforma PNGI)
+    # -------------------------------------------------------------------------
+    municipio_destino_id = request.form.get('municipio_destino_id', type=int)
     if not municipio_destino_id:
         flash("Selecione um município de destino válido.", "danger")
         return redirect(url_for('alunos.perfil_aluno', municipio_slug=g.municipio_slug, aluno_id=aluno_origem.id))
