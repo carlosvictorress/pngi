@@ -723,7 +723,51 @@
             document.getElementById('modal-etapa-formulario').classList.add('hidden');
             document.getElementById('modal-etapa-sucesso').classList.remove('hidden');
         }
+
+        // 7. BOTÃO FLUTUANTE VOLTAR AO TOPO
+        function voltarAoTopo() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        window.addEventListener('scroll', function() {
+            const btnTopo = document.getElementById('btn-voltar-topo');
+            if (!btnTopo) return;
+            
+            const scrollPosition = window.scrollY + window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            
+            // Exibe o botão quando o usuário rola até a parte inferior ou após rolar mais de 600px
+            if (scrollPosition >= documentHeight - 300 || window.scrollY > 600) {
+                btnTopo.classList.remove('hidden');
+                setTimeout(() => {
+                    btnTopo.classList.remove('opacity-0', 'translate-y-4');
+                    btnTopo.classList.add('opacity-100', 'translate-y-0');
+                }, 10);
+            } else {
+                btnTopo.classList.remove('opacity-100', 'translate-y-0');
+                btnTopo.classList.add('opacity-0', 'translate-y-4');
+                setTimeout(() => {
+                    if (window.scrollY <= 600 && (window.scrollY + window.innerHeight) < (documentHeight - 300)) {
+                        btnTopo.classList.add('hidden');
+                    }
+                }, 300);
+            }
+        });
     </script>
+
+    <!-- BOTÃO FLUTUANTE VOLTAR AO TOPO -->
+    <button id="btn-voltar-topo" 
+            onclick="voltarAoTopo()" 
+            aria-label="Voltar ao topo da página"
+            class="fixed bottom-6 right-6 z-[90] hidden opacity-0 translate-y-4 transition-all duration-300 ease-in-out bg-orbi-blue hover:bg-orbi-blue-hover text-white p-3.5 sm:px-4 rounded-2xl shadow-xl shadow-orbi-blue/30 border border-white/20 hover:scale-110 active:scale-95 group cursor-pointer flex items-center gap-2">
+        <svg class="w-5 h-5 transition-transform group-hover:-translate-y-1 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+        </svg>
+        <span class="text-xs font-black uppercase tracking-wider hidden sm:inline-block pr-0.5">Topo</span>
+    </button>
 
     <!-- HTML DO MODAL DE SOLICITAÇÃO DE IMPLANTAÇÃO -->
     <div id="modal-implantacao" class="fixed inset-0 z-[999] hidden flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
