@@ -56,10 +56,11 @@ def create_app():
     # 🚀 GESTOOR 360: Registro do Filtro Global do Jinja2 para decodificação de matrizes JSON
     app.jinja_env.filters['from_json'] = json.loads
 
-    # IMPORTANTE: Força o Flask a carregar as classes do models para o banco conhecê-las
+    # IMPORTANTE: Força o Flask a carregar as classes do models e garante a criação de todas as tabelas
     with app.app_context():
         from app import models
         from app.models import Escola
+        db.create_all()
 
     # Registro de Blueprints - Nova Arquitetura SaaS Blindada
     from app.blueprints.auth.routes import auth_bp
