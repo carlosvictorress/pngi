@@ -15,7 +15,7 @@ down_revision = '15d6c42e6a4b'
 branch_labels = None
 depends_on = None
 
-
+def upgrade():
     bind = op.get_bind()
     inspector = sa.inspect(bind)
     tables = inspector.get_table_names()
