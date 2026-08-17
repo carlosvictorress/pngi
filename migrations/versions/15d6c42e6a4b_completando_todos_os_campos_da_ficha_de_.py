@@ -17,29 +17,37 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table('alunos', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('data_nascimento', sa.String(length=10), nullable=True))
-        batch_op.add_column(sa.Column('sexo', sa.String(length=20), nullable=True))
-        batch_op.add_column(sa.Column('raca_cor', sa.String(length=30), nullable=True))
-        batch_op.add_column(sa.Column('naturalidade', sa.String(length=100), nullable=True))
-        batch_op.add_column(sa.Column('nome_mae', sa.String(length=100), nullable=True))
-        batch_op.add_column(sa.Column('nome_pai', sa.String(length=100), nullable=True))
-        
-        # 🔍 ALTERE ESSAS LINHAS ABAIXO DE False PARA True:
-        batch_op.add_column(sa.Column('recebe_bpc', sa.Boolean(), nullable=True))
-        batch_op.add_column(sa.Column('codigo_inep', sa.String(length=30), nullable=True))
-        batch_op.add_column(sa.Column('modalidade', sa.String(length=50), nullable=True))
-        batch_op.add_column(sa.Column('etapa_ensino', sa.String(length=50), nullable=True))
-        batch_op.add_column(sa.Column('recurso_ledor', sa.Boolean(), nullable=True))
-        batch_op.add_column(sa.Column('recurso_transcritor', sa.Boolean(), nullable=True))
-        batch_op.add_column(sa.Column('recurso_libras', sa.Boolean(), nullable=True))
-        batch_op.add_column(sa.Column('recurso_ampliado', sa.Boolean(), nullable=True))
-        batch_op.add_column(sa.Column('local_aee', sa.String(length=100), nullable=True))
-        batch_op.add_column(sa.Column('necessita_apoio', sa.String(length=100), nullable=True))
-        batch_op.add_column(sa.Column('necessita_transporte_adaptado', sa.Boolean(), nullable=True))
-        batch_op.add_column(sa.Column('cadeirante', sa.Boolean(), nullable=True))
-        batch_op.add_column(sa.Column('necessita_acompanhante', sa.Boolean(), nullable=True))
-        batch_op.add_column(sa.Column('possui_monitor_rota', sa.Boolean(), nullable=True))
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    tables = inspector.get_table_names()
+    if 'alunos' in tables:
+        cols = [c['name'] for c in inspector.get_columns('alunos')]
+        with op.batch_alter_table('alunos', schema=None) as batch_op:
+            novas_colunas = [
+                ('data_nascimento', sa.String(length=10)),
+                ('sexo', sa.String(length=20)),
+                ('raca_cor', sa.String(length=30)),
+                ('naturalidade', sa.String(length=100)),
+                ('nome_mae', sa.String(length=100)),
+                ('nome_pai', sa.String(length=100)),
+                ('recebe_bpc', sa.Boolean()),
+                ('codigo_inep', sa.String(length=30)),
+                ('modalidade', sa.String(length=50)),
+                ('etapa_ensino', sa.String(length=50)),
+                ('recurso_ledor', sa.Boolean()),
+                ('recurso_transcritor', sa.Boolean()),
+                ('recurso_libras', sa.Boolean()),
+                ('recurso_ampliado', sa.Boolean()),
+                ('local_aee', sa.String(length=100)),
+                ('necessita_apoio', sa.String(length=100)),
+                ('necessita_transporte_adaptado', sa.Boolean()),
+                ('cadeirante', sa.Boolean()),
+                ('necessita_acompanhante', sa.Boolean()),
+                ('possui_monitor_rota', sa.Boolean()),
+            ]
+            for col_nome, col_tipo in novas_colunas:
+                if col_nome not in cols:
+                    batch_op.add_column(sa.Column(col_nome, col_tipo, nullable=True))
     # ### end Alembic commands ###
 
 

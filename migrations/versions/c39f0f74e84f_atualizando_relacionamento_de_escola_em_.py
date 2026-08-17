@@ -17,12 +17,18 @@ depends_on = None
 
 
 def upgrade():
-    # Altere de False para True temporariamente para permitir a criação da coluna
-    with op.batch_alter_table('alunos', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('escola_id', sa.Integer(), nullable=True))
-        batch_op.create_index(batch_op.f('ix_alunos_escola_id'), ['escola_id'], unique=False)
-        batch_op.create_foreign_key(None, 'escolas', ['escola_id'], ['id'])
-        batch_op.drop_column('escola')
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    tables = inspector.get_table_names()
+    if 'alunos' in tables:
+        cols = [c['name'] for c in inspector.get_columns('alunos')]
+        with op.batch_alter_table('alunos', schema=None) as batch_op:
+            if 'escola_id' not in cols:
+                batch_op.add_column(sa.Column('escola_id', sa.Integer(), nullable=True))
+                batch_op.create_index(batch_op.f('ix_alunos_escola_id'), ['escola_id'], unique=False)
+                batch_op.create_foreign_key(None, 'escolas', ['escola_id'], ['id'])
+            if 'escola' in cols:
+                batch_op.drop_column('escola')
 
     # ### end Alembic commands ###
 
