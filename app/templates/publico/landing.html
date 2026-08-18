@@ -152,7 +152,7 @@
         <div class="max-w-[1400px] mx-auto flex items-center justify-between">
             
             <!-- LOGO OFICIAL ORBI -->
-            <a href="/" class="flex items-center gap-3 group">
+            <a href="/" class="flex items-center gap-3 group shrink-0">
                 <div class="h-11 w-auto flex items-center justify-center p-1 rounded-xl bg-white shadow-sm border border-slate-200 group-hover:border-orbi-blue/40 transition-all">
                     <img src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="ORBI Logo" class="h-full w-auto object-contain rounded-lg">
                 </div>
@@ -163,7 +163,7 @@
             </a>
 
             <!-- NAV LINKS GOVTECH -->
-            <nav class="hidden lg:flex items-center gap-7 text-xs font-bold text-slate-600 tracking-wide">
+            <nav class="hidden lg:flex items-center gap-2.5 xl:gap-4 2xl:gap-6 text-[11px] xl:text-xs font-bold text-slate-600 tracking-wide whitespace-nowrap">
                 <a href="#problema" class="hover:text-orbi-blue transition-colors">O Problema</a>
                 <a href="#ecossistema" class="hover:text-orbi-blue transition-colors">Ecossistema</a>
                 <a href="#veja-a-orbi" class="hover:text-orbi-blue transition-colors">A Plataforma</a>
@@ -176,11 +176,11 @@
             </nav>
 
             <!-- AÇÕES DIREITAS -->
-            <div class="flex items-center gap-3">
-                <button onclick="abrirModalImplantacao()" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md shadow-orbi-blue/20 hover:shadow-lg hover:shadow-orbi-blue/30 cursor-pointer uppercase tracking-wider">
+            <div class="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                <button onclick="abrirModalImplantacao()" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-extrabold text-[11px] sm:text-xs px-4 sm:px-5 py-2.5 rounded-xl transition-all shadow-md shadow-orbi-blue/20 hover:shadow-lg hover:shadow-orbi-blue/30 cursor-pointer uppercase tracking-wider whitespace-nowrap">
                     QUERO CONHECER A ORBI
                 </button>
-                <a href="/auth/login-admin-global" class="text-xs font-bold text-orbi-navy hover:text-orbi-blue bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3.5 py-2.5 rounded-xl transition-all">
+                <a href="/auth/login-admin-global" class="text-[11px] sm:text-xs font-bold text-orbi-navy hover:text-orbi-blue bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3 sm:px-3.5 py-2.5 rounded-xl transition-all whitespace-nowrap">
                     Painel Mestre
                 </a>
             </div>
