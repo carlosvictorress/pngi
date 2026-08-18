@@ -3,7 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ORBI — Conectar. Incluir. Transformar. | Plataforma de Educação Especial Inclusiva</title>
+    <title>ORBI | Gestão da Educação Especial para Municípios</title>
+    <meta name="description" content="Plataforma de gestão da Educação Especial que conecta Secretaria, escolas, profissionais, AEE, PEI e alunos em um único ambiente.">
+    
+    <!-- OPEN GRAPH / SOCIAL MEDIA -->
+    <meta property="og:title" content="ORBI | Gestão da Educação Especial para Municípios">
+    <meta property="og:description" content="Uma plataforma para organizar, conectar e acompanhar toda a Educação Especial do seu município. Tudo conectado em torno do aluno.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pngi-production.up.railway.app/">
+    <meta property="og:image" content="/static/img/logo.jpeg">
+
     <!-- PWA METADATA & MANIFEST -->
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#0A2540">
@@ -13,10 +22,13 @@
     <meta name="apple-mobile-web-app-title" content="ORBI Gestoor 360">
     <link rel="apple-touch-icon" href="/static/img/logo.jpeg">
     <link rel="icon" type="image/jpeg" href="/static/img/logo.jpeg">
+    
+    <!-- TAILWIND CSS & FONTS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    
     <script>
         tailwind.config = {
             theme: {
@@ -31,6 +43,7 @@
                             'navy-dark': '#061729',
                             blue: '#0084CE',
                             'blue-hover': '#0072B3',
+                            'blue-light': '#E0F0FE',
                             orange: '#F28E13',
                             green: '#3FA83F',
                             purple: '#6B3FA0',
@@ -42,16 +55,6 @@
                             700: '#0A2540',
                             800: '#071B30',
                             900: '#04101D'
-                        },
-                        brand: { 
-                            50: '#F0F7FF',
-                            100: '#E0F0FE',
-                            500: '#0084CE',
-                            600: '#0070B0',
-                            700: '#0A2540',
-                            800: '#071B30',
-                            900: '#0A2540',
-                            navy: '#0A2540'
                         }
                     }
                 }
@@ -70,21 +73,20 @@
             border-color: #FFFF00 !important;
         }
 
-        .bg-hero-light {
+        .bg-hero-pattern {
             background-color: #F8FAFC;
             background-image: 
-                radial-gradient(at 50% 0%, rgba(0, 132, 206, 0.10) 0px, transparent 65%),
-                radial-gradient(at 85% 85%, rgba(63, 168, 63, 0.07) 0px, transparent 55%),
-                radial-gradient(at 15% 75%, rgba(242, 142, 19, 0.07) 0px, transparent 55%),
-                radial-gradient(at 85% 15%, rgba(107, 63, 160, 0.07) 0px, transparent 55%),
+                radial-gradient(at 50% 0%, rgba(0, 132, 206, 0.12) 0px, transparent 60%),
+                radial-gradient(at 90% 90%, rgba(63, 168, 63, 0.08) 0px, transparent 50%),
+                radial-gradient(at 10% 80%, rgba(242, 142, 19, 0.08) 0px, transparent 50%),
                 radial-gradient(circle, #CBD5E1 1px, transparent 1px);
-            background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 32px 32px;
+            background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px;
         }
 
-        .card-gov-light {
+        .card-gov {
             background: #FFFFFF;
             border: 1px solid #E2E8F0;
-            box-shadow: 0 20px 50px -12px rgba(10, 37, 64, 0.09), 0 4px 16px -4px rgba(0, 132, 206, 0.08);
+            box-shadow: 0 20px 40px -15px rgba(10, 37, 64, 0.07);
         }
 
         /* Custom Scrollbar */
@@ -106,17 +108,17 @@
 </head>
 <body class="bg-white text-slate-900 min-h-screen flex flex-col font-sans selection:bg-orbi-blue selection:text-white transition-colors duration-300">
 
-    <!-- 1. TOP BAR DE ATENDIMENTO E ACESSIBILIDADE -->
+    <!-- 1. TOP BAR DE ATENDIMENTO E ACESSIBILIDADE (WCAG 2.1) -->
     <div class="bg-orbi-navy text-slate-300 py-2 px-4 md:px-8 text-[11px] font-medium border-b border-[#143557] relative z-50">
         <div class="max-w-[1400px] mx-auto flex flex-wrap justify-between items-center gap-3">
             <div class="flex items-center gap-4">
                 <span class="inline-flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full bg-orbi-green"></span>
-                    <span>Tel. (88) 9999-9999</span>
+                    <span class="w-2 h-2 rounded-full bg-orbi-green animate-pulse"></span>
+                    <span>Suporte Governamental: <strong class="text-white font-mono">(89) 99997-42096</strong></span>
                 </span>
                 <span class="hidden sm:inline text-slate-600">|</span>
                 <span class="hidden sm:inline-flex items-center gap-1.5">
-                    <span>✉️</span> E-mail: contato@gestoor.com.br
+                    <span>✉️</span> E-mail: <span class="text-white font-mono">carlosvictor.pessoal@gmail.com</span>
                 </span>
             </div>
 
@@ -136,260 +138,908 @@
         </div>
     </div>
 
-    <!-- 2. CABEÇALHO DA LANDING PAGE -->
+    <!-- 2. NAVBAR REESTRUTURADA -->
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 py-3 px-4 md:px-8 transition-all shadow-sm">
         <div class="max-w-[1400px] mx-auto flex items-center justify-between">
             
             <!-- LOGO OFICIAL ORBI -->
             <a href="/" class="flex items-center gap-3 group">
-                <div class="h-12 w-auto flex items-center justify-center p-1 rounded-xl bg-white shadow-sm border border-slate-200/80 group-hover:border-orbi-blue/40 transition-all">
+                <div class="h-11 w-auto flex items-center justify-center p-1 rounded-xl bg-white shadow-sm border border-slate-200 group-hover:border-orbi-blue/40 transition-all">
                     <img src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="ORBI Logo" class="h-full w-auto object-contain rounded-lg">
                 </div>
                 <div class="flex flex-col">
                     <span class="font-black text-orbi-navy text-xl tracking-tight group-hover:text-orbi-blue transition-colors leading-none">ORBI</span>
-                    <span class="text-[9px] text-slate-500 font-bold tracking-wider uppercase mt-0.5">CONECTAR • INCLUIR • TRANSFORMAR</span>
+                    <span class="text-[9px] text-orbi-blue font-bold tracking-widest uppercase mt-0.5">CONECTAR • INCLUIR • TRANSFORMAR</span>
                 </div>
             </a>
 
-            <!-- NAV LINKS -->
-            <nav class="hidden lg:flex items-center gap-8 text-xs font-semibold text-slate-600 tracking-wide">
-                <a href="#diferenciais" class="hover:text-orbi-blue transition-colors">Diferenciais</a>
-                <a href="#recursos" class="hover:text-orbi-blue transition-colors">Recursos</a>
-                <a href="#resultados" class="hover:text-orbi-blue transition-colors">Resultados</a>
-                <a href="#rede-federada" class="hover:text-orbi-blue transition-colors">Prefeituras Integradas</a>
+            <!-- NAV LINKS GOVTECH -->
+            <nav class="hidden lg:flex items-center gap-7 text-xs font-bold text-slate-600 tracking-wide">
+                <a href="#problema" class="hover:text-orbi-blue transition-colors">O Problema</a>
+                <a href="#ecossistema" class="hover:text-orbi-blue transition-colors">Ecossistema</a>
+                <a href="#veja-a-orbi" class="hover:text-orbi-blue transition-colors">A Plataforma</a>
+                <a href="#modulos" class="hover:text-orbi-blue transition-colors">Módulos</a>
+                <a href="#antes-depois" class="hover:text-orbi-blue transition-colors">Transformação</a>
+                <a href="#indicadores" class="hover:text-orbi-blue transition-colors">Indicadores</a>
+                <a href="#implantação" class="hover:text-orbi-blue transition-colors">Implantação</a>
                 <a href="#faq" class="hover:text-orbi-blue transition-colors">FAQ</a>
             </nav>
 
             <!-- AÇÕES DIREITAS -->
             <div class="flex items-center gap-3">
-                <button onclick="abrirModalImplantacao()" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-extrabold text-xs px-4.5 py-2.5 rounded-xl transition-all shadow-md shadow-orbi-blue/20 hover:shadow-lg hover:shadow-orbi-blue/30 cursor-pointer">
-                    Solicitar Implantação
+                <button onclick="abrirModalImplantacao()" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-extrabold text-xs px-5 py-2.5 rounded-xl transition-all shadow-md shadow-orbi-blue/20 hover:shadow-lg hover:shadow-orbi-blue/30 cursor-pointer uppercase tracking-wider">
+                    QUERO CONHECER A ORBI
                 </button>
-                <a href="/auth/login-admin-global" class="text-xs font-bold text-orbi-navy hover:text-orbi-blue bg-slate-100 hover:bg-slate-200/80 border border-slate-200 px-3.5 py-2.5 rounded-xl transition-all">
+                <a href="/auth/login-admin-global" class="text-xs font-bold text-orbi-navy hover:text-orbi-blue bg-slate-100 hover:bg-slate-200 border border-slate-200 px-3.5 py-2.5 rounded-xl transition-all">
                     Painel Mestre
                 </a>
             </div>
         </div>
     </header>
 
-    <!-- 3. BANNER DE TÍTULO DA PÁGINA -->
-    <section class="bg-orbi-navy text-white py-3.5 px-4 text-center border-b border-[#143557]">
+    <!-- 3. BANNER CONCEITUAM DE POSICIONAMENTO -->
+    <section class="bg-orbi-navy text-white py-3 px-4 text-center border-b border-[#143557]">
         <div class="max-w-[1400px] mx-auto">
-            <span class="text-xs font-black uppercase tracking-widest text-orbi-blue">
-                PLATAFORMA NACIONAL DE EDUCAÇÃO ESPECIAL & GOVERNANÇA INCLUSIVA
+            <span class="text-xs font-black uppercase tracking-widest text-orbi-blue flex items-center justify-center gap-2">
+                <span>🏛️</span> GOVTECH MUNICIPAL DE EDUCAÇÃO ESPECIAL INCLUSIVA
             </span>
         </div>
     </section>
 
-    <!-- 4. HERO SECTION 100% CENTRALIZADA & MINIMALISTA COM GRADIENTE VIBRANTE -->
-    <section class="relative bg-hero-light pt-14 md:pt-20 pb-20 md:pb-28 px-4 md:px-8 border-b border-slate-200/60 overflow-hidden text-center">
-        <canvas id="hero-canvas" class="absolute inset-0 pointer-events-none z-0 opacity-40"></canvas>
+    <!-- 4. NOVO HERO SECTION IMPACTANTE -->
+    <section class="relative bg-hero-pattern pt-12 md:pt-16 pb-20 md:pb-28 px-4 md:px-8 border-b border-slate-200/80 overflow-hidden">
+        <canvas id="hero-canvas" class="absolute inset-0 pointer-events-none z-0 opacity-30"></canvas>
 
-        <div class="max-w-[1000px] mx-auto relative z-10 space-y-8">
+        <div class="max-w-[1250px] mx-auto relative z-10 space-y-10">
             
-            <!-- BADGE INSTITUCIONAL -->
-            <div class="inline-flex items-center gap-2 bg-orbi-50 text-orbi-navy text-xs font-extrabold px-4 py-1.5 rounded-full border border-orbi-200 shadow-sm mx-auto">
-                <span class="w-2.5 h-2.5 rounded-full bg-orbi-blue animate-pulse"></span>
-                <span class="uppercase tracking-wider text-[10px]">PLATAFORMA SAAS GOVERNAMENTAL DE EDUCAÇÃO ESPECIAL</span>
-            </div>
+            <!-- ALINHAMENTO SUPERIOR COM BADGE DA DOR E SOLUÇÃO -->
+            <div class="max-w-4xl mx-auto text-center space-y-6">
+                
+                <div class="inline-flex items-center gap-2 bg-orbi-50 text-orbi-navy text-xs font-extrabold px-4 py-1.5 rounded-full border border-orbi-200 shadow-xs mx-auto">
+                    <span class="w-2.5 h-2.5 rounded-full bg-orbi-orange animate-pulse"></span>
+                    <span class="uppercase tracking-wider text-[10px]">TUDO CONECTADO EM TORNO DO ALUNO</span>
+                </div>
 
-            <!-- TÍTULO CENTRALIZADO COM GRADIENTE DE CORES VIBRANTES NAS LETRAS DA MARCA -->
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-orbi-navy leading-[1.12] tracking-tight max-w-4xl mx-auto">
-                Conectando <span class="bg-gradient-to-r from-orbi-blue via-orbi-purple to-orbi-green bg-clip-text text-transparent">Escolas, Profissionais e Famílias</span> para a Educação Especial Inclusiva
-            </h1>
+                <!-- TÍTULO DE IMPACTO PARA SECRETÁRIOS DE EDUCAÇÃO -->
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-orbi-navy leading-[1.12] tracking-tight">
+                    Sua Secretaria sabe exatamente como está a <span class="bg-gradient-to-r from-orbi-blue via-orbi-purple to-orbi-green bg-clip-text text-transparent">inclusão da sua rede?</span>
+                </h1>
 
-            <!-- SUBTÍTULO DESPOLUÍDO E CENTRALIZADO -->
-            <p class="text-sm sm:text-base text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto">
-                Plataforma governamental para acompanhamento contínuo dos estudantes do AEE, homologação de <strong>PEI, PAEE e Estudo de Caso</strong> com texto manual e <strong>Prontuário Rastreável</strong> em conformidade com a LBI.
-            </p>
+                <!-- SUBTÍTULO E TEXTO COMPLEMENTAR DA ESTRATÉGIA -->
+                <p class="text-base sm:text-lg text-slate-700 font-semibold leading-relaxed max-w-3xl mx-auto">
+                    A ORBI conecta alunos, escolas, profissionais, AEE, PEI, famílias e gestão em uma única plataforma de Educação Especial.
+                </p>
 
-            <!-- BUSCADOR DE INSTÂNCIA MUNICIPAL CENTRALIZADO -->
-            <div class="max-w-xl mx-auto">
-                <div class="card-gov-light rounded-2xl p-3 sm:p-4 shadow-xl border border-slate-200/90">
-                    <div class="flex flex-col sm:flex-row gap-2.5">
-                        <div class="relative flex-grow">
-                            <input type="text" 
-                                   id="busca_municipio" 
-                                   list="lista_municipios" 
-                                   placeholder="Digite a sua cidade (ex: Valença do Piauí...)" 
-                                   autocomplete="off"
-                                   class="w-full bg-slate-50 text-slate-900 placeholder:text-slate-400 font-semibold text-xs sm:text-sm rounded-xl py-3 px-4 border border-slate-300 focus:ring-2 focus:ring-orbi-blue focus:bg-white focus:outline-none transition-all text-center sm:text-left">
+                <p class="text-xs sm:text-sm text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto">
+                    Da identificação do aluno ao acompanhamento do seu desenvolvimento, organize informações, processos e indicadores em um único ambiente.
+                </p>
+
+                <!-- BOTÕES DE AÇÃO E CONVERSÃO -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+                    <button onclick="abrirModalImplantacao()" class="w-full sm:w-auto bg-orbi-blue hover:bg-orbi-blue-hover text-white font-black text-xs sm:text-sm px-8 py-4 rounded-xl shadow-lg shadow-orbi-blue/25 transition-all transform hover:scale-105 uppercase tracking-wider flex items-center justify-center gap-2.5 cursor-pointer">
+                        <span>QUERO CONHECER A ORBI</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+
+                    <a href="#veja-a-orbi" class="w-full sm:w-auto bg-white hover:bg-slate-50 text-orbi-navy font-extrabold text-xs sm:text-sm px-7 py-4 rounded-xl border border-slate-300 shadow-sm transition-all text-center uppercase tracking-wider">
+                        VER COMO FUNCIONA
+                    </a>
+                </div>
+
+                <!-- BUSCADOR DE INSTÂNCIA MUNICIPAL INTEGRADO -->
+                <div class="max-w-xl mx-auto pt-4">
+                    <div class="bg-white rounded-2xl p-3 shadow-lg border border-slate-200">
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <div class="relative flex-grow">
+                                <input type="text" 
+                                       id="busca_municipio" 
+                                       list="lista_municipios" 
+                                       placeholder="Digite o nome da sua prefeitura para acessar..." 
+                                       autocomplete="off"
+                                       class="w-full bg-slate-50 text-slate-900 placeholder:text-slate-400 font-semibold text-xs rounded-xl py-3 px-4 border border-slate-300 focus:ring-2 focus:ring-orbi-blue focus:bg-white focus:outline-none transition-all text-center sm:text-left">
+                                
+                                <datalist id="lista_municipios">
+                                    {% for m in municipios %}
+                                    <option data-slug="{{ m.slug }}" value="{{ m.nome }} — {{ m.estado }}"></option>
+                                    {% endfor %}
+                                </datalist>
+                            </div>
                             
-                            <datalist id="lista_municipios">
-                                {% for m in municipios %}
-                                <option data-slug="{{ m.slug }}" value="{{ m.nome }} — {{ m.estado }}"></option>
-                                {% endfor %}
-                            </datalist>
+                            <button onclick="irParaLoginHero()" class="bg-orbi-navy hover:bg-orbi-navy-dark text-white font-extrabold text-xs px-5 py-3 rounded-xl transition-all shrink-0 flex items-center justify-center gap-1.5 cursor-pointer">
+                                <span>Entrar na Rede</span>
+                            </button>
                         </div>
-                        
-                        <button onclick="irParaLoginHero()" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-extrabold text-xs sm:text-sm px-6 py-3 rounded-xl transition-all shadow-md shadow-orbi-blue/20 shrink-0 flex items-center justify-center gap-2">
-                            <span>Entrar na Instância</span>
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                        </button>
                     </div>
-                </div>
-            </div>
-
-            <!-- PILLS DE GARANTIA E CONFORMIDADE -->
-            <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs text-slate-600 font-semibold pt-2">
-                <span class="inline-flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-                    <span class="text-orbi-blue">🛡️</span> Lei 13.146/2015 (LBI)
-                </span>
-                <span class="inline-flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-                    <span class="text-orbi-green">📋</span> PEI & PAEE Multidocente
-                </span>
-                <span class="inline-flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-                    <span class="text-orbi-purple">📄</span> Prontuário Único PDF
-                </span>
-                <span class="inline-flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm">
-                    <span class="text-orbi-orange">⭐</span> Conectar. Incluir. Transformar.
-                </span>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- 5. SEÇÃO DE RECURSOS EM 3 COLUNAS GRID -->
-    <section id="recursos" class="py-16 md:py-24 px-4 md:px-8 bg-white border-b border-slate-200">
-        <div class="max-w-[1350px] mx-auto space-y-12">
-            
-            <div class="text-center space-y-3 max-w-3xl mx-auto">
-                <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
-                    FACILIDADE E ACESSIBILIDADE INTEGRAL
-                </span>
-                <h2 class="text-3xl font-black text-orbi-navy tracking-tight">
-                    Disponibilize todas as informações da Educação Especial em um só lugar
-                </h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                
-                <!-- CARD 1 -->
-                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-4 shadow-sm hover:shadow-md hover:border-orbi-blue/40 transition-all">
-                    <div class="w-12 h-12 bg-orbi-blue text-white rounded-2xl flex items-center justify-center text-xl font-black shadow-md shadow-orbi-blue/20">
-                        ✍️
-                    </div>
-                    <h3 class="font-black text-orbi-navy text-lg">Formulários Acessíveis com Opção "Outros"</h3>
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                        Total autonomia pedagógica para professores e especialistas inserirem descrições personalizadas em todos os campos do PEI, PAEE e Estudo de Caso.
-                    </p>
-                </div>
-
-                <!-- CARD 2 -->
-                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-4 shadow-sm hover:shadow-md hover:border-orbi-green/40 transition-all">
-                    <div class="w-12 h-12 bg-orbi-green text-white rounded-2xl flex items-center justify-center text-xl font-black shadow-md shadow-orbi-green/20">
-                        📑
-                    </div>
-                    <h3 class="font-black text-orbi-navy text-lg">Dossiê Único & Prontuário Rastreável</h3>
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                        Histórico completo do estudante com foto oficial, timbre do município e emissão imediata de certificados de transferência em PDF.
-                    </p>
-                </div>
-
-                <!-- CARD 3 -->
-                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-4 shadow-sm hover:shadow-md hover:border-orbi-orange/40 transition-all">
-                    <div class="w-12 h-12 bg-orbi-orange text-white rounded-2xl flex items-center justify-center text-xl font-black shadow-md shadow-orbi-orange/20">
-                        🛡️
-                    </div>
-                    <h3 class="font-black text-orbi-navy text-lg">Conformidade Legal LBI & Auditoria MEC</h3>
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                        Garantia de inviolabilidade de autoria entre docentes, registro de chancela digital e salvaguarda contra notificações de órgãos de controle.
-                    </p>
                 </div>
 
             </div>
 
-        </div>
-    </section>
-
-    <!-- 6. SEÇÃO DE RESULTADOS & PILARES (MATRIZ 2X2) -->
-    <section id="resultados" class="py-16 md:py-24 px-4 md:px-8 bg-slate-50 border-b border-slate-200">
-        <div class="max-w-[1350px] mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-                
-                <!-- ESQUERDA -->
-                <div class="lg:col-span-5 space-y-4">
-                    <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
-                        RESULTADOS MENSURÁVEIS
-                    </span>
-                    <h2 class="text-3xl font-black text-orbi-navy tracking-tight leading-tight">
-                        Ajudamos sua Secretaria de Educação a alcançar resultados concretos!
-                    </h2>
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                        Secretarias municipais em todo o Brasil contam com a Plataforma ORBI Gestoor 360 para organizar a rede de atendimento especial, simplificar rotinas de AEE e conectar informações em tempo real.
-                    </p>
-                </div>
-
-                <!-- DIREITA (GRADE 2X2) -->
-                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- MOCKUP VISUAL REAL DA PLATAFORMA (INTERATIVO) -->
+            <div class="relative max-w-5xl mx-auto pt-4">
+                <div class="bg-slate-900 rounded-3xl p-3 sm:p-4 shadow-2xl border border-slate-800 relative overflow-hidden">
                     
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-sm hover:border-orbi-blue/40 transition-all">
-                        <span class="text-3xl block">🏛️</span>
-                        <h4 class="font-black text-orbi-navy text-sm">Parceiro Governamental</h4>
-                        <p class="text-xs text-slate-500">Desenvolvido sob medida para a legislação pública e especificidades dos municípios brasileiros.</p>
+                    <!-- TOP BAR DO MOCKUP -->
+                    <div class="flex items-center justify-between px-4 py-2 border-b border-slate-800 text-slate-400 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500/80 inline-block"></span>
+                            <span class="ml-2 font-mono text-[11px] text-slate-300">orbi.gestoor.gov.br/secretaria-educacao</span>
+                        </div>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                            ● AMBIENTE MUNICIPAL SEGURO (LGPD)
+                        </span>
                     </div>
 
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-sm hover:border-orbi-orange/40 transition-all">
-                        <span class="text-3xl block">🎯</span>
-                        <h4 class="font-black text-orbi-navy text-sm">Foco em Resultados</h4>
-                        <p class="text-xs text-slate-500">Acompanhamento do desenvolvimento do aluno com metas e avaliações diagnósticas estruturadas.</p>
+                    <!-- CORPO DO DASHBOARD MOCKUP -->
+                    <div class="bg-slate-950 p-4 sm:p-6 rounded-2xl text-left space-y-6">
+                        
+                        <!-- HEADER MOCKUP -->
+                        <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                            <div>
+                                <span class="text-[10px] uppercase font-bold tracking-widest text-orbi-blue">Secretaria Municipal de Educação</span>
+                                <h3 class="text-lg font-black text-white">Painel Geral da Educação Especial Inclusiva</h3>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="bg-orbi-blue/20 text-orbi-blue border border-orbi-blue/30 text-xs font-bold px-3 py-1 rounded-lg">
+                                    Rede Municipal Conectada
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- METRICS GRID INSIDE HERO MOCKUP -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">Alunos AEE Ativos</span>
+                                <div class="text-2xl font-black text-white">248 <span class="text-xs text-emerald-400 font-bold">+12%</span></div>
+                                <span class="text-[10px] text-slate-400 block">Prontuário único cadastrado</span>
+                            </div>
+
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">PEIs Homologados</span>
+                                <div class="text-2xl font-black text-orbi-blue">194 <span class="text-xs text-orbi-blue font-bold">78%</span></div>
+                                <span class="text-[10px] text-slate-400 block">Em conformidade com a LBI</span>
+                            </div>
+
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">Atendimentos no AEE</span>
+                                <div class="text-2xl font-black text-emerald-400">1.420</div>
+                                <span class="text-[10px] text-slate-400 block">Registrados em SRM</span>
+                            </div>
+
+                            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-1">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase">Transporte Adaptado</span>
+                                <div class="text-2xl font-black text-amber-400">62</div>
+                                <span class="text-[10px] text-slate-400 block">Estudantes com monitor</span>
+                            </div>
+                        </div>
+
+                        <!-- STATUS DE PROCESSOS INSIDE HERO MOCKUP -->
+                        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 space-y-3">
+                            <div class="flex items-center justify-between text-xs font-bold text-slate-300">
+                                <span>Fluxo de Documentos & Homologações Ativas</span>
+                                <span class="text-orbi-blue">Atualizado em Tempo Real</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+                                    <div>
+                                        <span class="font-bold text-white block text-xs">Estudos de Caso</span>
+                                        <span class="text-[10px] text-slate-400">42 em análise pela SEMEC</span>
+                                    </div>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                                </div>
+                                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+                                    <div>
+                                        <span class="font-bold text-white block text-xs">Planos de AEE</span>
+                                        <span class="text-[10px] text-slate-400">188 ativos nas escolas</span>
+                                    </div>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                                </div>
+                                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex items-center justify-between">
+                                    <div>
+                                        <span class="font-bold text-white block text-xs">PAEE Mecanizado</span>
+                                        <span class="text-[10px] text-slate-400">Checklist MEC 100% ok</span>
+                                    </div>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-orbi-blue"></span>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-sm hover:border-orbi-green/40 transition-all">
-                        <span class="text-3xl block">🧠</span>
-                        <h4 class="font-black text-orbi-navy text-sm">Especialistas em AEE</h4>
-                        <p class="text-xs text-slate-500">Apoio contínuo à equipe multidisciplinar, professores regentes e especialistas da Sala de Recursos.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 5. SEÇÃO "O PROBLEMA" -->
+    <section id="problema" class="py-16 md:py-24 px-4 md:px-8 bg-white border-b border-slate-200">
+        <div class="max-w-[1300px] mx-auto space-y-12">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto">
+                <span class="text-xs font-black text-orbi-orange uppercase tracking-widest bg-amber-50 px-3.5 py-1.5 rounded-full border border-amber-200">
+                    DIAGNÓSTICO DA REDE MUNICIPAL
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-orbi-navy tracking-tight">
+                    A inclusão exige mais do que atendimento. Exige gestão.
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    A rotina das Secretarias Municipais de Educação é sobrecarregada por dados dispersos, processos em papel e falta de visibilidade sobre a trajetória dos estudantes.
+                </p>
+            </div>
+
+            <!-- CARDS DE PROBLEMAS REAIS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-3 hover:border-orbi-orange/50 transition-all shadow-xs">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">📁</div>
+                    <h3 class="font-black text-orbi-navy text-sm">Informações Espalhadas</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Dados dos alunos armazenados em fichas físicas, planilhas avulsas e arquivos locais sujeitos a extravios.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-3 hover:border-orbi-orange/50 transition-all shadow-xs">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">📄</div>
+                    <h3 class="font-black text-orbi-navy text-sm">PEIs Descentralizados</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Falta de padronização nos relatórios de PEI e PAEE entre diferentes escolas e docentes da rede.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-3 hover:border-orbi-orange/50 transition-all shadow-xs">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">⏳</div>
+                    <h3 class="font-black text-orbi-navy text-sm">Histórico Fragmentado</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Perda do acompanhamento evolutivo do estudante na mudança de ano letivo ou de unidade escolar.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-3 hover:border-orbi-orange/50 transition-all shadow-xs">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">📊</div>
+                    <h3 class="font-black text-orbi-navy text-sm">Ausência de Indicadores</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Dificuldade do secretário em saber quantos PEIs foram homologados ou atendimentos realizados em tempo real.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-3 hover:border-orbi-orange/50 transition-all shadow-xs">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">💬</div>
+                    <h3 class="font-black text-orbi-navy text-sm">Comunicação Fragmentada</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Ruído de comunicação entre professores regentes, equipe do AEE e especialistas multiprofissionais.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-3 hover:border-orbi-orange/50 transition-all shadow-xs">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">🏫</div>
+                    <h3 class="font-black text-orbi-navy text-sm">Monitoramento do AEE</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Ausência de controle centralizado da frequência e rotina das Salas de Recursos Multifuncionais (SRM).
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-3 hover:border-orbi-orange/50 transition-all shadow-xs">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">📝</div>
+                    <h3 class="font-black text-orbi-navy text-sm">Relatórios Manuais</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Equipe técnica gasta horas produzindo relatórios operacionais manualmente sob demanda de conselhos.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 space-y-3 hover:border-orbi-orange/50 transition-all shadow-xs">
+                    <div class="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center font-bold text-lg">🌐</div>
+                    <h3 class="font-black text-orbi-navy text-sm">Falta de Visão da Rede</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Dificuldade de gerir acessibilidade, vagas, salas de recursos e transporte escolar adaptado.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 6. SEÇÃO "A ORBI / ECOSSISTEMA CONECTADO" -->
+    <section id="ecossistema" class="py-16 md:py-24 px-4 md:px-8 bg-slate-900 text-white border-b border-slate-800 relative overflow-hidden">
+        <div class="max-w-[1300px] mx-auto space-y-12 relative z-10">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto">
+                <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-blue/20 px-3.5 py-1.5 rounded-full border border-orbi-blue/30">
+                    CONCEITO CENTRAL DA MARCA
+                </span>
+                <h2 class="text-3xl sm:text-5xl font-black text-white tracking-tight">
+                    Tudo conectado em torno do aluno.
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed">
+                    Na inclusão, ninguém deve estar isolado. A ORBI conecta cada elo da rede municipal em torno de quem realmente importa: o estudante.
+                </p>
+            </div>
+
+            <!-- DIAGRAMA DO ECOSSISTEMA GOVTECH (ESTÉTICA MODERNA) -->
+            <div class="bg-slate-950 border border-slate-800 rounded-3xl p-6 sm:p-10 relative overflow-hidden shadow-2xl">
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
+                    
+                    <!-- COLUNA 1: GOVERNANÇA E UNIDADES ESCOLARES -->
+                    <div class="space-y-4">
+                        <div class="bg-slate-900/90 border border-orbi-blue/40 p-5 rounded-2xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-orbi-blue uppercase">01. Governança Central</span>
+                                <span class="text-lg">🏛️</span>
+                            </div>
+                            <h4 class="font-black text-white text-sm">SECRETARIA MUNICIPAL DE EDUCAÇÃO</h4>
+                            <p class="text-[11px] text-slate-400 leading-relaxed">
+                                Visão panorâmica da rede, emissão de relatórios gerenciais e controle de diretrizes.
+                            </p>
+                        </div>
+
+                        <div class="bg-slate-900/90 border border-slate-800 p-5 rounded-2xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-400 uppercase">02. Unidades Escolares</span>
+                                <span class="text-lg">🏫</span>
+                            </div>
+                            <h4 class="font-black text-white text-sm">ESCOLA & DIREÇÃO</h4>
+                            <p class="text-[11px] text-slate-400 leading-relaxed">
+                                Gestão de salas de recursos, vagas, acessibilidade predial e matrículas.
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-sm hover:border-orbi-purple/40 transition-all">
-                        <span class="text-3xl block">🤝</span>
-                        <h4 class="font-black text-orbi-navy text-sm">Gestão Humanizada</h4>
-                        <p class="text-xs text-slate-500">Treinamento e acompanhamento direto das equipes durante todo o processo de implantação.</p>
+                    <!-- COLUNA 2: CENTRO DO ECOSSISTEMA (O ALUNO) -->
+                    <div class="flex flex-col justify-center items-center text-center p-6 bg-gradient-to-b from-orbi-navy via-slate-900 to-orbi-navy-dark border-2 border-orbi-blue/60 rounded-3xl space-y-4 shadow-xl">
+                        <div class="w-16 h-16 bg-orbi-blue text-white rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg shadow-orbi-blue/30 animate-pulse">
+                            🎓
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-black text-orbi-orange uppercase tracking-widest block mb-1">O CENTRO DE TUDO</span>
+                            <h3 class="text-xl font-black text-white">ESTUDANTE DA EDUCAÇÃO ESPECIAL</h3>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                                Prontuário Único Rastreável com foto, CID-10, histórico evolutivo e termo de transferência com chancela digital.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap justify-center gap-2 pt-2 text-[10px] font-bold text-slate-300">
+                            <span class="bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">PEI Homologado</span>
+                            <span class="bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">AEE em SRM</span>
+                            <span class="bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700">Matriz LBI</span>
+                        </div>
+                    </div>
+
+                    <!-- COLUNA 3: EQUIPE PEDAGÓGICA E SUPORTES -->
+                    <div class="space-y-4">
+                        <div class="bg-slate-900/90 border border-orbi-green/40 p-5 rounded-2xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-orbi-green uppercase">03. Atendimento e Sala de Recursos</span>
+                                <span class="text-lg">🧠</span>
+                            </div>
+                            <h4 class="font-black text-white text-sm">PROFESSORES REGENTES, AEE & MULTIDISCIPLINAR</h4>
+                            <p class="text-[11px] text-slate-400 leading-relaxed">
+                                Elaboração participativa de PEI/PAEE, estudo de caso e registros de sessões evolutivas.
+                            </p>
+                        </div>
+
+                        <div class="bg-slate-900/90 border border-orbi-purple/40 p-5 rounded-2xl space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-orbi-purple uppercase">04. Família & Transporte</span>
+                                <span class="text-lg">🤝</span>
+                            </div>
+                            <h4 class="font-black text-white text-sm">PORTAL DA FAMÍLIA & LOGÍSTICA ADAPTADA</h4>
+                            <p class="text-[11px] text-slate-400 leading-relaxed">
+                                Acompanhamento transparente para os pais e controle de rotas adaptadas com monitor.
+                            </p>
+                        </div>
                     </div>
 
                 </div>
 
             </div>
+
         </div>
     </section>
 
-    <!-- 7. BANNER DE CHAMADA PARA AÇÃO (FULL-WIDTH ORBI GRADIENT) -->
-    <section class="bg-gradient-to-r from-orbi-navy via-[#0A2540] to-orbi-navy-dark text-white py-16 px-4 text-center relative overflow-hidden">
-        <div class="h-1.5 w-full bg-gradient-to-r from-orbi-orange via-orbi-blue via-orbi-green to-orbi-purple absolute top-0 left-0"></div>
-        <div class="max-w-[900px] mx-auto space-y-6 relative z-10">
-            <h2 class="text-2xl sm:text-4xl font-black tracking-tight leading-tight">
-                Aumente a transparência da Educação Especial na sua rede municipal
-            </h2>
-            <p class="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto font-normal">
-                Agende uma apresentação técnica sem compromisso com nossa equipe de especialistas em governança inclusiva.
-            </p>
-            <div>
-                <button onclick="abrirModalImplantacao()" class="inline-block bg-orbi-blue hover:bg-orbi-blue-hover text-white font-black text-xs px-8 py-4 rounded-xl shadow-lg shadow-orbi-blue/30 transition-all transform hover:scale-105 uppercase tracking-wider cursor-pointer">
-                    SOLICITAR IMPLANTAÇÃO MUNICIPAL
+    <!-- 7. SEÇÃO "VEJA A ORBI FUNCIONANDO" (INTERATIVO) -->
+    <section id="veja-a-orbi" class="py-16 md:py-24 px-4 md:px-8 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-[1350px] mx-auto space-y-10">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto">
+                <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
+                    DEMONSTRAÇÃO VISUAL DA PLATAFORMA
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-orbi-navy tracking-tight">
+                    Veja a ORBI funcionando na prática
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    Navegue pelos componentes reais da plataforma e entenda como cada módulo simplifica a gestão da Educação Especial no seu município.
+                </p>
+            </div>
+
+            <!-- TABS DE NAVEGAÇÃO ENTRE TELAS REALISTAS -->
+            <div class="flex flex-wrap items-center justify-center gap-2 max-w-4xl mx-auto">
+                <button onclick="mudarTabDemonstracao('tab-dash')" id="btn-tab-dash" class="btn-tab-demo active px-4 py-2.5 rounded-xl text-xs font-extrabold bg-orbi-blue text-white shadow-md transition-all cursor-pointer">
+                    01 — Dashboard da Secretaria
+                </button>
+                <button onclick="mudarTabDemonstracao('tab-aluno')" id="btn-tab-aluno" class="btn-tab-demo px-4 py-2.5 rounded-xl text-xs font-extrabold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition-all cursor-pointer">
+                    02 — Perfil do Aluno
+                </button>
+                <button onclick="mudarTabDemonstracao('tab-aee')" id="btn-tab-aee" class="btn-tab-demo px-4 py-2.5 rounded-xl text-xs font-extrabold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition-all cursor-pointer">
+                    03 — AEE & Atendimentos
+                </button>
+                <button onclick="mudarTabDemonstracao('tab-pei')" id="btn-tab-pei" class="btn-tab-demo px-4 py-2.5 rounded-xl text-xs font-extrabold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition-all cursor-pointer">
+                    04 — PEI Multidocente
+                </button>
+                <button onclick="mudarTabDemonstracao('tab-estudo')" id="btn-tab-estudo" class="btn-tab-demo px-4 py-2.5 rounded-xl text-xs font-extrabold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition-all cursor-pointer">
+                    05 — Estudo de Caso
+                </button>
+                <button onclick="mudarTabDemonstracao('tab-indicadores')" id="btn-tab-indicadores" class="btn-tab-demo px-4 py-2.5 rounded-xl text-xs font-extrabold bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 transition-all cursor-pointer">
+                    06 — Indicadores & Gestão
                 </button>
             </div>
+
+            <!-- CONTAINER DOS CONTEÚDOS DAS TABS DA PLATAFORMA -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-xl max-w-5xl mx-auto">
+                
+                <!-- TAB 01: DASHBOARD SECRETARIA -->
+                <div id="content-tab-dash" class="content-tab-demo space-y-6">
+                    <div class="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span class="text-xs font-mono text-orbi-blue">Dashboard / Visão Panorâmica da Rede Municipal</span>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-bold">Instância Ativa</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold">Total de Alunos AEE</span>
+                                <div class="text-2xl font-black text-white mt-1">248</div>
+                                <span class="text-[11px] text-slate-400">100% com Prontuário Rastreável</span>
+                            </div>
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold">PEIs Homologados</span>
+                                <div class="text-2xl font-black text-orbi-blue mt-1">194</div>
+                                <span class="text-[11px] text-slate-400">78% de taxa de conclusão</span>
+                            </div>
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold">Salas de Recursos (SRM)</span>
+                                <div class="text-2xl font-black text-emerald-400 mt-1">14</div>
+                                <span class="text-[11px] text-slate-400">Com plano de sessão semanal</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EXPLICAÇÃO PARA O GESTOR -->
+                    <div class="bg-orbi-50 border border-orbi-200 rounded-2xl p-5 text-slate-800 space-y-2">
+                        <span class="text-xs font-black text-orbi-blue uppercase tracking-wider block">💡 O que o gestor consegue fazer com isso?</span>
+                        <p class="text-xs leading-relaxed font-medium text-slate-700">
+                            O Secretário de Educação enxerga o panorama geral do município em segundos: quantitativo total de alunos com deficiência/TEA, taxa de homologação dos PEIs por escola e acompanhamento em tempo real das Salas de Recursos.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TAB 02: PERFIL DO ALUNO -->
+                <div id="content-tab-aluno" class="content-tab-demo hidden space-y-6">
+                    <div class="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span class="text-xs font-mono text-orbi-blue">Prontuário Único / Ficha do Estudante</span>
+                            <span class="text-[10px] bg-orbi-blue/20 text-orbi-blue px-2.5 py-1 rounded-full font-bold">ID #0248</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center text-xl font-bold text-white">👦</div>
+                                <div>
+                                    <h4 class="font-black text-white text-xs">Carlos Eduardo Silva</h4>
+                                    <span class="text-[10px] text-slate-400">Matrícula: 2026-9482</span>
+                                </div>
+                            </div>
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold">Diagnóstico / CID-10</span>
+                                <div class="text-sm font-black text-amber-400 mt-1">F84.0 — Autismo Infantil</div>
+                                <span class="text-[10px] text-slate-400">Com Laudo Médico Anexado</span>
+                            </div>
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                <span class="text-[10px] text-slate-400 uppercase font-bold">Status do Prontuário</span>
+                                <div class="text-sm font-black text-emerald-400 mt-1">Ativo • Transferência Disponível</div>
+                                <span class="text-[10px] text-slate-400">Com Chancela de Autenticidade</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-orbi-50 border border-orbi-200 rounded-2xl p-5 text-slate-800 space-y-2">
+                        <span class="text-xs font-black text-orbi-blue uppercase tracking-wider block">💡 O que o gestor consegue fazer com isso?</span>
+                        <p class="text-xs leading-relaxed font-medium text-slate-700">
+                            Centraliza toda a trajetória do estudante em um Dossiê Único. Mesmo que o aluno mude de escola ou de professor, todo o histórico de diagnósticos, CIDs, medicações, PEIs anteriores e termo de transferência permanece protegido e auditável.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TAB 03: AEE & ATENDIMENTOS -->
+                <div id="content-tab-aee" class="content-tab-demo hidden space-y-6">
+                    <div class="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span class="text-xs font-mono text-orbi-blue">AEE / Atendimentos na Sala de Recursos</span>
+                            <span class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full font-bold">Frequência Registrada</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                                <span class="font-bold text-white block">Registro de Atendimento Individual</span>
+                                <div class="text-[11px] text-slate-300">Data: 18/08/2026 • Horário: 08:30 às 09:30</div>
+                                <div class="text-[11px] text-slate-400">Recursos: Jogos pedagógicos adaptados e prancha AAC</div>
+                            </div>
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+                                <span class="font-bold text-white block">Evolução Pedagógica</span>
+                                <p class="text-[11px] text-slate-300">"Estudante apresentou excelente retenção de foco durante a atividade de pareamento de formas."</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-orbi-50 border border-orbi-200 rounded-2xl p-5 text-slate-800 space-y-2">
+                        <span class="text-xs font-black text-orbi-blue uppercase tracking-wider block">💡 O que o gestor consegue fazer com isso?</span>
+                        <p class="text-xs leading-relaxed font-medium text-slate-700">
+                            Monitora a assiduidade e a qualidade dos atendimentos no AEE. Permite à coordenação pedagógica verificar o plano de sessão de cada especialista e mensurar a evolução diária dos alunos atendidos nas SRM.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TAB 04: PEI MULTIDOCENTE -->
+                <div id="content-tab-pei" class="content-tab-demo hidden space-y-6">
+                    <div class="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span class="text-xs font-mono text-orbi-blue">PEI / Plano de Ensino Individualizado</span>
+                            <span class="text-[10px] bg-orbi-blue/20 text-orbi-blue px-2.5 py-1 rounded-full font-bold">Matriz de Barreiras LBI</span>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                            <div class="flex justify-between items-center text-slate-300">
+                                <span class="font-bold text-white">Objetivos de Curto e Médio Prazo (Português & Matemática)</span>
+                                <span class="text-[10px] text-emerald-400 font-bold">Assinado pelo Professor Regente</span>
+                            </div>
+                            <p class="text-[11px] text-slate-400 leading-relaxed">
+                                Estratégias flexibilizadas, métodos de avaliação adaptados e salvaguarda de autoria por disciplina.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-orbi-50 border border-orbi-200 rounded-2xl p-5 text-slate-800 space-y-2">
+                        <span class="text-xs font-black text-orbi-blue uppercase tracking-wider block">💡 O que o gestor consegue fazer com isso?</span>
+                        <p class="text-xs leading-relaxed font-medium text-slate-700">
+                            Garante a elaboração padronizada do PEI em todas as escolas da rede municipal. Permite que múltiplos professores regentes insiram suas metas mantendo inviolabilidade de autoria por componente curricular.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TAB 05: ESTUDO DE CASO -->
+                <div id="content-tab-estudo" class="content-tab-demo hidden space-y-6">
+                    <div class="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span class="text-xs font-mono text-orbi-blue">Estudo de Caso / Triagem Multidisciplinar</span>
+                            <span class="text-[10px] bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full font-bold">Parecer Homologado</span>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-2">
+                            <span class="font-bold text-white block">Levantamento de Informações Escolares & Entrevista Familiar</span>
+                            <p class="text-[11px] text-slate-400">
+                                Mapeamento de barreiras arquitetônicas, pedagógicas e comunicação. Indicação de suporte de apoio escolar e acompanhamento por psicopedagogo/fonoaudiólogo.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="bg-orbi-50 border border-orbi-200 rounded-2xl p-5 text-slate-800 space-y-2">
+                        <span class="text-xs font-black text-orbi-blue uppercase tracking-wider block">💡 O que o gestor consegue fazer com isso?</span>
+                        <p class="text-xs leading-relaxed font-medium text-slate-700">
+                            Consolida a avaliação diagnóstica inicial realizada pelos profissionais de saúde e educação. Ajuda a definir com precisão quais estudantes necessitam de profissional de apoio escolar, sala de recursos ou parecer técnico.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- TAB 06: INDICADORES & GESTÃO -->
+                <div id="content-tab-indicadores" class="content-tab-demo hidden space-y-6">
+                    <div class="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span class="text-xs font-mono text-orbi-blue">Relatórios & Transporte Adaptado (FUNDEB)</span>
+                            <span class="text-[10px] bg-purple-500/20 text-purple-400 px-2.5 py-1 rounded-full font-bold">Relatório Gerencial</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                <span class="font-bold text-white block">Logística de Transporte Adaptado</span>
+                                <span class="text-[11px] text-slate-400 block mt-1">Controle de rotas, acompanhantes, veículos adaptados e relatórios prontos para auditoria do FUNDEB.</span>
+                            </div>
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                <span class="font-bold text-white block">Exportação & Prestação de Contas</span>
+                                <span class="text-[11px] text-slate-400 block mt-1">Relatórios em PDF com dados agregados por escola, modalidade e perfil de deficiência.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-orbi-50 border border-orbi-200 rounded-2xl p-5 text-slate-800 space-y-2">
+                        <span class="text-xs font-black text-orbi-blue uppercase tracking-wider block">💡 O que o gestor consegue fazer com isso?</span>
+                        <p class="text-xs leading-relaxed font-medium text-slate-700">
+                            Transforma dados em relatórios práticos para conselhos, Ministério Público e prestação de contas do FUNDEB. Garante que a Secretaria de Educação tenha total controle administrativo sobre o transporte escolar adaptado.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
     </section>
 
-    <!-- 8. SEÇÃO DE REDE FEDERADA DE MUNICÍPIOS -->
-    <section id="rede-federada" class="py-16 md:py-24 px-4 md:px-8 bg-white border-b border-slate-200">
+    <!-- 8. SEÇÃO DE MÓDULOS INTEGRADOS DA ORBI -->
+    <section id="modulos" class="py-16 md:py-24 px-4 md:px-8 bg-white border-b border-slate-200">
+        <div class="max-w-[1350px] mx-auto space-y-12">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto">
+                <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
+                    MÓDULOS DE ALTA PERFORMANCE
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-orbi-navy tracking-tight">
+                    Módulos desenvolvidos sob medida para a rotina da Secretaria
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    Conheça a estrutura de módulos funcionais reais que integram o ecossistema da Plataforma ORBI.
+                </p>
+            </div>
+
+            <!-- GRADE DE MÓDULOS ORGANIZADA POR CATEGORIAS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- CAT 1: GESTÃO DE ALUNOS & DOSSIÊ -->
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-5 shadow-xs">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-4">
+                        <div class="w-10 h-10 bg-orbi-blue text-white rounded-xl flex items-center justify-center font-bold text-lg">🎓</div>
+                        <div>
+                            <h3 class="font-black text-orbi-navy text-base">Gestão de Estudantes & Prontuário</h3>
+                            <span class="text-[11px] text-slate-500 font-medium">Dossie Único do Aluno</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-700 font-medium">
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-blue font-bold">✓</span>
+                            <span><strong>Cadastro Unificado:</strong> Matrícula, CID-10, foto oficial, contatos de urgência e acessibilidade.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-blue font-bold">✓</span>
+                            <span><strong>Prontuário Único Rastreável:</strong> Dossiê digital com histórico pedagógico e de saúde.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-blue font-bold">✓</span>
+                            <span><strong>Termo de Transferência:</strong> Emissão de comprovante oficial em PDF com chave de auditoria.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- CAT 2: INSTRUMENTOS PEDAGÓGICOS -->
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-5 shadow-xs">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-4">
+                        <div class="w-10 h-10 bg-orbi-green text-white rounded-xl flex items-center justify-center font-bold text-lg">📝</div>
+                        <div>
+                            <h3 class="font-black text-orbi-navy text-base">Instrumentos Pedagógicos Inclusivos</h3>
+                            <span class="text-[11px] text-slate-500 font-medium">PEI, PAEE e Estudo de Caso</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-700 font-medium">
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-green font-bold">✓</span>
+                            <span><strong>PEI Multidocente:</strong> Plano Individual flexível com salvaguarda de autoria por disciplina.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-green font-bold">✓</span>
+                            <span><strong>PAEE Mecanizado:</strong> Plano de AEE em conformidade com o checklist oficial do MEC.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-green font-bold">✓</span>
+                            <span><strong>Estudo de Caso Estruturado:</strong> Entrevista familiar, observação pedagógica e parecer.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- CAT 3: AEE & MULTIDISCIPLINAR -->
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-5 shadow-xs">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-4">
+                        <div class="w-10 h-10 bg-orbi-purple text-white rounded-xl flex items-center justify-center font-bold text-lg">🧠</div>
+                        <div>
+                            <h3 class="font-black text-orbi-navy text-base">Atendimento Educacional Especializado (AEE)</h3>
+                            <span class="text-[11px] text-slate-500 font-medium">Salas de Recursos & Atendimentos</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-700 font-medium">
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-purple font-bold">✓</span>
+                            <span><strong>Agenda em SRM:</strong> Agendamento de horários, frequência e lista de espera.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-purple font-bold">✓</span>
+                            <span><strong>Relatórios Evolutivos:</strong> Registro detalhado das sessões de atendimento do AEE.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-purple font-bold">✓</span>
+                            <span><strong>Triagem & Encaminhamentos:</strong> Encaminhamentos para fonoaudiólogo, psicólogo e TO.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- CAT 4: LOGÍSTICA & GOVERNANÇA -->
+                <div class="bg-slate-50 border border-slate-200 rounded-3xl p-7 space-y-5 shadow-xs">
+                    <div class="flex items-center gap-3 border-b border-slate-200 pb-4">
+                        <div class="w-10 h-10 bg-orbi-orange text-white rounded-xl flex items-center justify-center font-bold text-lg">🏛️</div>
+                        <div>
+                            <h3 class="font-black text-orbi-navy text-base">Governança, Escolas & Transporte</h3>
+                            <span class="text-[11px] text-slate-500 font-medium">Gestão da Rede Municipal</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-3 text-xs text-slate-700 font-medium">
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-orange font-bold">✓</span>
+                            <span><strong>Rede Escolar:</strong> Mapeamento de rampas, banheiros adaptados e salas de recursos.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-orange font-bold">✓</span>
+                            <span><strong>Transporte Adaptado (FUNDEB):</strong> Gestão de rotas, veículos adaptados e monitores.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <span class="text-orbi-orange font-bold">✓</span>
+                            <span><strong>Painel Mestre:</strong> Controle de acesso restrito por perfil (Secretaria, Diretor, AEE, Professor).</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 9. SEÇÃO "ANTES DA ORBI × COM A ORBI" -->
+    <section id="antes-depois" class="py-16 md:py-24 px-4 md:px-8 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-[1300px] mx-auto space-y-12">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto">
+                <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
+                    TRANSFORMAÇÃO REAL DA GESTÃO
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-orbi-navy tracking-tight">
+                    Antes da ORBI × Com a ORBI
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    Compare a diferença entre uma gestão fragmentada em papel e uma rede municipal totalmente integrada.
+                </p>
+            </div>
+
+            <!-- TABELA COMPARATIVA VISUAL -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- COLUNA ANTES -->
+                <div class="bg-red-50/50 border border-red-200 rounded-3xl p-7 space-y-5">
+                    <div class="flex items-center gap-3 border-b border-red-200 pb-4">
+                        <span class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-sm">✕</span>
+                        <div>
+                            <h3 class="font-black text-red-950 text-base">Antes da ORBI</h3>
+                            <span class="text-[11px] text-red-700 font-medium">Gestão Desconectada & Fragmentada</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 text-xs text-red-950 font-medium">
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-red-500 font-bold">❌</span>
+                            <span>Informações dispersas em cadernos, papéis e planilhas individuais sem backup.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-red-500 font-bold">❌</span>
+                            <span>PEIs sem padronização e sem histórico integrado dos anos letivos anteriores.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-red-500 font-bold">❌</span>
+                            <span>Dificuldade para monitorar a rotina e a assiduidade real das Salas de Recursos.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-red-500 font-bold">❌</span>
+                            <span>Relatórios demorados sob demanda de conselhos e órgãos de fiscalização.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-red-500 font-bold">❌</span>
+                            <span>Ausência de dados unificados sobre o transporte escolar adaptado.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- COLUNA COM A ORBI -->
+                <div class="bg-emerald-50/60 border border-emerald-300 rounded-3xl p-7 space-y-5 shadow-sm">
+                    <div class="flex items-center gap-3 border-b border-emerald-200 pb-4">
+                        <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">✓</span>
+                        <div>
+                            <h3 class="font-black text-emerald-950 text-base">Com a ORBI</h3>
+                            <span class="text-[11px] text-emerald-700 font-bold">Rede Municipal 100% Integrada</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 text-xs text-emerald-950 font-semibold">
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-emerald-600 font-bold">✅</span>
+                            <span>Prontuário único digital acessível com controle estrito por perfil de usuário.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-emerald-600 font-bold">✅</span>
+                            <span>PEI e PAEE estruturados com salvaguarda de autoria por componente curricular.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-emerald-600 font-bold">✅</span>
+                            <span>Controle em tempo real de agendamentos, frequências e relatórios evolutivos do AEE.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-emerald-600 font-bold">✅</span>
+                            <span>Painel de indicadores gerenciais instantâneos para tomada de decisão fundamentada.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="text-emerald-600 font-bold">✅</span>
+                            <span>Gestão logística de rotas adaptadas e relatórios prontos para prestação do FUNDEB.</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 10. SEÇÃO DE INDICADORES & VISIBILIDADE -->
+    <section id="indicadores" class="py-16 md:py-24 px-4 md:px-8 bg-white border-b border-slate-200">
+        <div class="max-w-[1300px] mx-auto space-y-10">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto">
+                <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
+                    INFORMAÇÃO PARA DECISÃO
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-orbi-navy tracking-tight">
+                    Transforme dados dispersos em informação para decisão.
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    Acompanhe em tempo real os indicadores gerenciais da Educação Especial no seu município.
+                </p>
+            </div>
+
+            <!-- CARDS DE METRICAS GERENCIAIS DA REDE -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+                
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-2 text-center shadow-xs">
+                    <span class="text-3xl font-black text-orbi-blue block">100%</span>
+                    <h4 class="font-black text-orbi-navy text-sm">Alunos Mapeados</h4>
+                    <p class="text-xs text-slate-500">Com prontuário único rastreável e fotos cadastradas.</p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-2 text-center shadow-xs">
+                    <span class="text-3xl font-black text-orbi-green block">Em Dia</span>
+                    <h4 class="font-black text-orbi-navy text-sm">Homologação de PEI</h4>
+                    <p class="text-xs text-slate-500">Status transparente de pareceres por escola e docente.</p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-2 text-center shadow-xs">
+                    <span class="text-3xl font-black text-orbi-purple block">SRM</span>
+                    <h4 class="font-black text-orbi-navy text-sm">Visibilidade do AEE</h4>
+                    <p class="text-xs text-slate-500">Controle de frequência e diário de atendimento inclusivo.</p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-2 text-center shadow-xs">
+                    <span class="text-3xl font-black text-orbi-orange block">FUNDEB</span>
+                    <h4 class="font-black text-orbi-navy text-sm">Relatórios Prontos</h4>
+                    <p class="text-xs text-slate-500">Prestação de contas do transporte escolar adaptado.</p>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 11. PROVA SOCIAL / PREFEITURAS INTEGRADAS -->
+    <section id="rede-federada" class="py-16 md:py-24 px-4 md:px-8 bg-slate-50 border-b border-slate-200">
         <div class="max-w-[1350px] mx-auto space-y-8">
             <div class="text-center space-y-3 max-w-2xl mx-auto">
                 <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
-                    REDE FEDERADA DE ENSINO
+                    REDE MUNICIPAL INTEGRADA
                 </span>
                 <h2 class="text-3xl font-black text-orbi-navy tracking-tight">
-                    Prefeituras Integradas
+                    Municípios que já estão construindo uma nova forma de gerir a Educação Especial
                 </h2>
                 <p class="text-xs text-slate-600">
-                    Instâncias municipais ativas utilizando a Plataforma ORBI Gestoor 360.
+                    Instâncias municipais cadastradas na plataforma.
                 </p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
                 {% for m in municipios %}
-                <div class="bg-slate-50 border border-slate-200 p-5 rounded-2xl flex flex-col items-center text-center space-y-3 shadow-sm hover:border-orbi-blue/40 transition-all">
-                    <div class="w-14 h-14 bg-white rounded-xl p-2 border border-slate-200 flex items-center justify-center shadow-xs">
+                <div class="bg-white border border-slate-200 p-5 rounded-2xl flex flex-col items-center text-center space-y-3 shadow-xs hover:border-orbi-blue/40 transition-all">
+                    <div class="w-14 h-14 bg-slate-50 rounded-xl p-2 border border-slate-200 flex items-center justify-center">
                         {% if m.brasao_url %}
                             <img src="{{ m.brasao_url }}" alt="Brasão de {{ m.nome }}" class="w-full h-full object-contain">
                         {% else %}
@@ -398,75 +1048,209 @@
                     </div>
                     <div>
                         <h4 class="font-black text-orbi-navy text-sm">{{ m.nome }}</h4>
-                        <span class="text-[10px] font-mono text-orbi-blue font-bold">{{ m.estado }} • Brasil</span>
+                        <span class="text-[10px] font-mono text-orbi-blue font-bold uppercase">{{ m.estado }} • Brasil</span>
                     </div>
                 </div>
                 {% else %}
                 <div class="col-span-full py-8 text-center text-slate-400 text-xs font-medium">
-                    Nenhum município cadastrado até o momento.
+                    Instâncias municipais em processo de homologação técnica.
                 </div>
                 {% endfor %}
             </div>
         </div>
     </section>
 
-    <!-- 9. SEÇÃO DE PERGUNTAS FREQUENTES (FAQ ACCORDION) -->
-    <section id="faq" class="py-16 md:py-24 px-4 md:px-8 bg-slate-50 border-b border-slate-200">
+    <!-- 12. SEGURANÇA, PRIVACIDADE E RASTREABILIDADE (LGPD) -->
+    <section id="seguranca" class="py-16 md:py-24 px-4 md:px-8 bg-white border-b border-slate-200">
+        <div class="max-w-[1300px] mx-auto space-y-12">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto">
+                <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
+                    GOVERNANÇA & SEGURANÇA DA INFORMAÇÃO
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-orbi-navy tracking-tight">
+                    Segurança da informação e governança institucional
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    Plataforma desenvolvida para garantir a proteção de dados pessoais sensíveis e a auditoria administrativa da rede.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-3">
+                    <span class="text-2xl block">🔑</span>
+                    <h4 class="font-black text-orbi-navy text-sm">Controle de Acesso por Perfil</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Acesso estritamente delimitado por nível de permissão (Secretaria, Diretor, AEE, Professor, Psicopedagogo, Família).
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-3">
+                    <span class="text-2xl block">📜</span>
+                    <h4 class="font-black text-orbi-navy text-sm">Diretrizes da Educação Especial</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Recursos desenvolvidos considerando as diretrizes aplicáveis à Educação Especial (LBI e diretrizes do MEC).
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-3">
+                    <span class="text-2xl block">🛡️</span>
+                    <h4 class="font-black text-orbi-navy text-sm">Rastreabilidade Administrativa</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Registros estruturados para facilitar acompanhamento, prestação de informações e chancela institucional.
+                    </p>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 p-6 rounded-2xl space-y-3">
+                    <span class="text-2xl block">🔒</span>
+                    <h4 class="font-black text-orbi-navy text-sm">Privacidade & LGPD</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Isolamento em nuvem multitenant com salvaguarda rigorosa contra acesso não autorizado a dados de menores.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 13. SEÇÃO JORNADA DE IMPLANTAÇÃO MUNICIPAL -->
+    <section id="implantação" class="py-16 md:py-24 px-4 md:px-8 bg-slate-50 border-b border-slate-200">
+        <div class="max-w-[1300px] mx-auto space-y-12">
+            
+            <div class="text-center space-y-4 max-w-3xl mx-auto">
+                <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
+                    JORNADA DE SUCESSO DO MUNICÍPIO
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-black text-orbi-navy tracking-tight">
+                    "Uma nova tecnologia só gera resultado quando a equipe consegue utilizá-la."
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+                    Conheça as 6 etapas da nossa metodologia de implantação governamental assistida.
+                </p>
+            </div>
+
+            <!-- ETAPAS DA IMPLANTAÇÃO -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-xs relative">
+                    <span class="text-xs font-black text-orbi-blue bg-orbi-50 px-2.5 py-1 rounded-md border border-orbi-200">ETAPA 01</span>
+                    <h4 class="font-black text-orbi-navy text-base">Diagnóstico da Rede</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">Mapeamento do quantitativo de alunos, escolas, salas de recursos e perfil das equipes da Secretaria.</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-xs relative">
+                    <span class="text-xs font-black text-orbi-blue bg-orbi-50 px-2.5 py-1 rounded-md border border-orbi-200">ETAPA 02</span>
+                    <h4 class="font-black text-orbi-navy text-base">Configuração da Instância</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">Criação do ambiente isolado da prefeitura com slug personalizado e parametrização local.</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-xs relative">
+                    <span class="text-xs font-black text-orbi-blue bg-orbi-50 px-2.5 py-1 rounded-md border border-orbi-200">ETAPA 03</span>
+                    <h4 class="font-black text-orbi-navy text-base">Organização dos Dados</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">Organização e estruturação do cadastro inicial dos alunos, escolas e profissionais da rede.</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-xs relative">
+                    <span class="text-xs font-black text-orbi-blue bg-orbi-50 px-2.5 py-1 rounded-md border border-orbi-200">ETAPA 04</span>
+                    <h4 class="font-black text-orbi-navy text-base">Capacitação das Equipes</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">Treinamento prático e acessível para secretários, diretores, especialistas do AEE e docentes.</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-xs relative">
+                    <span class="text-xs font-black text-orbi-blue bg-orbi-50 px-2.5 py-1 rounded-md border border-orbi-200">ETAPA 05</span>
+                    <h4 class="font-black text-orbi-navy text-base">Implantação Assistida</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">Entrada em operação com suporte técnico dedicado tirando dúvidas das equipes em tempo real.</p>
+                </div>
+
+                <div class="bg-white border border-slate-200 p-6 rounded-2xl space-y-3 shadow-xs relative">
+                    <span class="text-xs font-black text-orbi-blue bg-orbi-50 px-2.5 py-1 rounded-md border border-orbi-200">ETAPA 06</span>
+                    <h4 class="font-black text-orbi-navy text-base">Acompanhamento Contínuo</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">Monitoramento constante dos indicadores de adesão, emissão de pareceres e relatórios.</p>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 14. CTA FINAL DE IMPACTO -->
+    <section id="cta-final" class="bg-gradient-to-r from-orbi-navy via-[#0A2540] to-orbi-navy-dark text-white py-16 md:py-24 px-4 text-center relative overflow-hidden">
+        <div class="h-1.5 w-full bg-gradient-to-r from-orbi-orange via-orbi-blue via-orbi-green to-orbi-purple absolute top-0 left-0"></div>
+        <div class="max-w-[900px] mx-auto space-y-6 relative z-10">
+            <span class="text-xs font-black uppercase tracking-widest text-orbi-blue bg-orbi-blue/20 px-3.5 py-1.5 rounded-full border border-orbi-blue/30">
+                TRANSFORMAÇÃO DA EDUCAÇÃO ESPECIAL
+            </span>
+            <h2 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-white">
+                Está na hora de transformar a gestão da Educação Especial.
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto font-medium leading-relaxed">
+                Descubra como a ORBI pode ajudar sua Secretaria a organizar informações, conectar profissionais e acompanhar cada aluno de forma mais integrada.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+                <button onclick="abrirModalImplantacao()" class="w-full sm:w-auto bg-orbi-blue hover:bg-orbi-blue-hover text-white font-black text-xs sm:text-sm px-8 py-4 rounded-xl shadow-lg shadow-orbi-blue/30 transition-all transform hover:scale-105 uppercase tracking-wider cursor-pointer">
+                    AGENDAR UMA DEMONSTRAÇÃO
+                </button>
+                <a href="https://wa.me/5589999742096" target="_blank" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs sm:text-sm px-7 py-4 rounded-xl shadow-md transition-all uppercase tracking-wider flex items-center justify-center gap-2">
+                    <span>FALAR COM A EQUIPE</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 15. SEÇÃO DE PERGUNTAS FREQUENTES (FAQ) -->
+    <section id="faq" class="py-16 md:py-24 px-4 md:px-8 bg-white border-b border-slate-200">
         <div class="max-w-[900px] mx-auto space-y-10">
             
             <div class="text-center space-y-3">
                 <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
-                    DÚVIDAS FREQUENTES
+                    ESCLARECIMENTOS TÉCNICOS
                 </span>
                 <h2 class="text-3xl font-black text-orbi-navy tracking-tight">
                     Perguntas Frequentes (FAQ)
                 </h2>
             </div>
 
-            <!-- CONTAINER ACCORDION -->
             <div class="space-y-4">
                 
-                <!-- FAQ ITEM 1 -->
-                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                    <button onclick="toggleFaq(1)" class="w-full text-left p-5 font-black text-orbi-navy text-xs sm:text-sm flex justify-between items-center focus:outline-none">
-                        <span>O que é a Plataforma ORBI Gestoor 360 / PNGI?</span>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                    <button onclick="toggleFaq(1)" class="w-full text-left p-5 font-black text-orbi-navy text-xs sm:text-sm flex justify-between items-center focus:outline-none cursor-pointer">
+                        <span>O que é a Plataforma ORBI?</span>
                         <span id="faq-icon-1" class="text-orbi-blue text-lg transition-transform">+</span>
                     </button>
-                    <div id="faq-ans-1" class="faq-answer px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                        Trata-se de uma plataforma SaaS governamental desenvolvida para modernizar a Educação Especial Inclusiva em redes municipais. Permite a emissão simplificada de PEI, PAEE e Estudo de Caso, Prontuário Rastreável do Estudante e Logística de Transporte Adaptado.
+                    <div id="faq-ans-1" class="faq-answer px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 pt-3">
+                        A ORBI é uma solução GovTech desenvolvida para secretarias municipais de educação organizarem, conectarem e acompanharem toda a Educação Especial da rede. Ela permite a gestão unificada de PEI, PAEE, Estudo de Caso, atendimentos em Salas de Recursos, prontuário único e logística de transporte adaptado.
                     </div>
                 </div>
 
-                <!-- FAQ ITEM 2 -->
-                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                    <button onclick="toggleFaq(2)" class="w-full text-left p-5 font-black text-orbi-navy text-xs sm:text-sm flex justify-between items-center focus:outline-none">
-                        <span>Como funciona o isolamento por município?</span>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                    <button onclick="toggleFaq(2)" class="w-full text-left p-5 font-black text-orbi-navy text-xs sm:text-sm flex justify-between items-center focus:outline-none cursor-pointer">
+                        <span>Como funciona o isolamento por município (Multitenant)?</span>
                         <span id="faq-icon-2" class="text-orbi-blue text-lg transition-transform">+</span>
                     </button>
-                    <div id="faq-ans-2" class="faq-answer px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                        Cada prefeitura conta com uma instância isolada em banco de dados multitenant seguro. Apenas servidores autorizados da Secretaria e professores da rede local possuem acesso aos dados dos seus estudantes.
+                    <div id="faq-ans-2" class="faq-answer px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 pt-3">
+                        Cada prefeitura conta com uma instância isolada em banco de dados multitenant seguro. Apenas servidores autorizados da Secretaria e professores da rede municipal possuem acesso aos dados de seus respectivos alunos.
                     </div>
                 </div>
 
-                <!-- FAQ ITEM 3 -->
-                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                    <button onclick="toggleFaq(3)" class="w-full text-left p-5 font-black text-orbi-navy text-xs sm:text-sm flex justify-between items-center focus:outline-none">
-                        <span>Como funciona a garantia de autoria no PEI Multidocente?</span>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                    <button onclick="toggleFaq(3)" class="w-full text-left p-5 font-black text-orbi-navy text-xs sm:text-sm flex justify-between items-center focus:outline-none cursor-pointer">
+                        <span>Como é mantida a autoria das informações no PEI Multidocente?</span>
                         <span id="faq-icon-3" class="text-orbi-blue text-lg transition-transform">+</span>
                     </button>
-                    <div id="faq-ans-3" class="faq-answer px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                        Cada professor possui autonomia total para adicionar os componentes curriculares, conteúdos e estratégias de sua disciplina nas Seções 7 e 8 do PEI. O sistema bloqueia a alteração ou exclusão de registros inseridos por outros docentes.
+                    <div id="faq-ans-3" class="faq-answer px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 pt-3">
+                        Cada professor possui autonomia para adicionar os conteúdos e estratégias de sua disciplina nas seções de objetivos. O sistema registra a autoria docente por componente curricular, garantindo segurança pedagógica e integridade dos registros.
                     </div>
                 </div>
 
-                <!-- FAQ ITEM 4 -->
-                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                    <button onclick="toggleFaq(4)" class="w-full text-left p-5 font-black text-orbi-navy text-xs sm:text-sm flex justify-between items-center focus:outline-none">
-                        <span>O que acontece quando o aluno é transferido de município?</span>
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                    <button onclick="toggleFaq(4)" class="w-full text-left p-5 font-black text-orbi-navy text-xs sm:text-sm flex justify-between items-center focus:outline-none cursor-pointer">
+                        <span>Como a plataforma lida com alunos transferidos?</span>
                         <span id="faq-icon-4" class="text-orbi-blue text-lg transition-transform">+</span>
                     </button>
-                    <div id="faq-ans-4" class="faq-answer px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                        Para transferências dentro da rede integrada, o prontuário é migrado digitalmente em tempo real. Para transferências externas, o sistema gera o Termo Oficial de Transferência (PDF) com chave única de auditoria e rastreabilidade digital.
+                    <div id="faq-ans-4" class="faq-answer px-5 pb-5 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 pt-3">
+                        O prontuário único armazena todo o histórico evolutivo. Nas transferências dentro da rede integrada, o registro migra digitalmente. Nas transferências externas, o sistema gera o Termo Oficial de Transferência (PDF) com chave de autenticidade.
                     </div>
                 </div>
 
@@ -475,71 +1259,47 @@
         </div>
     </section>
 
-    <!-- 10. SEÇÃO DE ATENDIMENTO DIRETO & IMPLANTAÇÃO MUNICIPAL -->
-    <section id="adesao" class="py-16 md:py-24 px-4 md:px-8 bg-white border-b border-slate-200">
-        <div class="max-w-[900px] mx-auto text-center space-y-6">
-            <div class="bg-slate-50 border border-slate-200 rounded-3xl p-8 sm:p-12 space-y-6 shadow-sm">
-                <span class="text-xs font-black text-orbi-blue uppercase tracking-widest bg-orbi-50 px-3.5 py-1.5 rounded-full border border-orbi-200">
-                    SOLICITAÇÃO DE IMPLANTAÇÃO
-                </span>
-                <h2 class="text-2xl sm:text-3xl font-black text-orbi-navy">
-                    Pronto para transformar a Educação Especial do seu Município?
-                </h2>
-                <p class="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto font-normal">
-                    Fale diretamente com nossa equipe de suporte governamental e solicite a homologação da sua prefeitura.
-                </p>
-                <div class="pt-2">
-                    <button onclick="abrirModalImplantacao()" class="inline-block bg-orbi-blue hover:bg-orbi-blue-hover text-white font-black text-xs px-8 py-4 rounded-xl shadow-md shadow-orbi-blue/20 transition-all uppercase tracking-wider cursor-pointer">
-                        INICIAR IMPLANTAÇÃO MUNICIPAL
-                    </button>
-                </div>
-                <div class="pt-4 text-xs font-bold text-slate-700 border-t border-slate-200">
-                    Para atendimento imediato ligue ou chame no WhatsApp: <a href="https://wa.me/5589999742096" target="_blank" class="text-orbi-blue font-mono font-black text-sm hover:underline">(89) 99997-42096</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 11. RODAPÉ INSTITUCIONAL -->
+    <!-- 16. RODAPÉ INSTITUCIONAL -->
     <footer class="bg-orbi-navy text-slate-400 py-12 px-4 md:px-8 text-xs border-t-4 border-orbi-blue">
         <div class="max-w-[1350px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-slate-800">
             
             <div class="space-y-3 md:col-span-2">
                 <div class="flex items-center gap-3">
-                    <div class="h-11 w-auto flex items-center justify-center p-1 rounded-xl bg-white shadow-sm">
+                    <div class="h-11 w-auto flex items-center justify-center p-1 rounded-xl bg-white shadow-xs">
                         <img src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="ORBI Logo" class="h-full w-auto object-contain rounded-lg">
                     </div>
                     <div class="flex flex-col">
                         <span class="font-black text-white text-xl tracking-tight leading-none">ORBI</span>
-                        <span class="text-[9px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">CONECTAR • INCLUIR • TRANSFORMAR</span>
+                        <span class="text-[9px] text-orbi-blue font-bold tracking-widest uppercase mt-0.5">CONECTAR • INCLUIR • TRANSFORMAR</span>
                     </div>
                 </div>
                 <p class="text-slate-400 text-xs leading-relaxed max-w-md">
-                    Tecnologia pública de alta performance desenvolvida para secretarias municipais de educação. Apoio completo ao AEE, elaboração de PEI/PAEE e conformidade LBI.
+                    Tecnologia pública desenvolvida para secretarias municipais de educação organizarem, conectarem e acompanharem toda a Educação Especial da rede.
                 </p>
             </div>
 
             <div class="space-y-2">
-                <h4 class="font-black text-white text-xs uppercase tracking-wider">Links Rápidos</h4>
-                <ul class="space-y-1 text-slate-400">
-                    <li><a href="#diferenciais" class="hover:text-white transition-colors">Diferenciais</a></li>
-                    <li><a href="#recursos" class="hover:text-white transition-colors">Recursos do AEE</a></li>
-                    <li><a href="#rede-federada" class="hover:text-white transition-colors">Rede Integrada</a></li>
-                    <li><a href="#faq" class="hover:text-white transition-colors">Perguntas Frequentes</a></li>
+                <h4 class="font-black text-white text-xs uppercase tracking-wider">Navegação</h4>
+                <ul class="space-y-1.5 text-slate-400">
+                    <li><a href="#problema" class="hover:text-white transition-colors">O Problema</a></li>
+                    <li><a href="#ecossistema" class="hover:text-white transition-colors">Ecossistema Conectado</a></li>
+                    <li><a href="#veja-a-orbi" class="hover:text-white transition-colors">A Plataforma</a></li>
+                    <li><a href="#modulos" class="hover:text-white transition-colors">Módulos da Rede</a></li>
+                    <li><a href="#implantação" class="hover:text-white transition-colors">Jornada de Implantação</a></li>
                 </ul>
             </div>
 
             <div class="space-y-2">
                 <h4 class="font-black text-white text-xs uppercase tracking-wider">Contato Oficial</h4>
-                <p class="text-slate-400">WhatsApp/Tel: (89) 99997-42096</p>
-                <p class="text-slate-400">E-mail: carlosvictor.pessoal@gmail.com</p>
-                <p class="text-slate-400">Plataforma em Conformidade com a Lei 13.146/2015</p>
+                <p class="text-slate-400">Suporte/WhatsApp: <span class="text-white font-mono">(89) 99997-42096</span></p>
+                <p class="text-slate-400">E-mail: <span class="text-white font-mono">carlosvictor.pessoal@gmail.com</span></p>
+                <p class="text-slate-400">Conformidade: Lei 13.146/2015 & Diretrizes LBI</p>
             </div>
 
         </div>
 
         <div class="max-w-[1350px] mx-auto pt-6 text-center text-slate-500 text-[11px]">
-            ORBI Gestoor 360 Inclusão — Tecnologia Pública para a Educação Especial Inclusiva © 2026. Todos os direitos reservados.
+            ORBI Gestoor 360 — Tecnologia Governamental para a Educação Especial Inclusiva © 2026. Todos os direitos reservados.
         </div>
     </footer>
 
@@ -579,11 +1339,29 @@
             if (slugEncontrado) {
                 window.location.href = `/auth/${slugEncontrado}/login`;
             } else {
-                alert("Jurisdição não encontrada na busca direta. Por favor, selecione uma das opções da lista de sugestões.");
+                alert("Instância municipal não localizada na busca direta. Por favor, escolha uma das opções da lista sugerida.");
             }
         }
 
-        // 4. CONTROLADOR ACCORDION FAQ
+        // 4. TAB SWITCHER NA SEÇÃO "VEJA A ORBI FUNCIONANDO"
+        function mudarTabDemonstracao(tabId) {
+            document.querySelectorAll('.content-tab-demo').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.btn-tab-demo').forEach(el => {
+                el.classList.remove('bg-orbi-blue', 'text-white', 'shadow-md');
+                el.classList.add('bg-white', 'text-slate-700', 'border', 'border-slate-300');
+            });
+
+            const contentTarget = document.getElementById(`content-${tabId}`);
+            const btnTarget = document.getElementById(`btn-${tabId}`);
+            
+            if (contentTarget && btnTarget) {
+                contentTarget.classList.remove('hidden');
+                btnTarget.classList.remove('bg-white', 'text-slate-700', 'border', 'border-slate-300');
+                btnTarget.classList.add('bg-orbi-blue', 'text-white', 'shadow-md');
+            }
+        }
+
+        // 5. CONTROLADOR ACCORDION FAQ
         function toggleFaq(id) {
             const ans = document.getElementById(`faq-ans-${id}`);
             const icon = document.getElementById(`faq-icon-${id}`);
@@ -591,7 +1369,6 @@
                 ans.classList.remove('open');
                 icon.textContent = '+';
             } else {
-                // Fecha outros
                 document.querySelectorAll('.faq-answer').forEach(el => el.classList.remove('open'));
                 document.querySelectorAll('[id^="faq-icon-"]').forEach(el => el.textContent = '+');
                 
@@ -600,7 +1377,7 @@
             }
         }
 
-        // 5. CANVAS LEVE DE PARTÍCULAS COM AS CORES DA MARCA ORBI
+        // 6. CANVAS DE PARTÍCULAS HERO
         (function() {
             const canvas = document.getElementById('hero-canvas');
             if (!canvas) return;
@@ -608,10 +1385,10 @@
             let width, height;
             let particles = [];
             const brandColors = [
-                'rgba(0, 132, 206, 0.5)',   // Orbi Blue
-                'rgba(242, 142, 19, 0.5)',  // Orbi Orange
-                'rgba(63, 168, 63, 0.5)',   // Orbi Green
-                'rgba(107, 63, 160, 0.5)'   // Orbi Purple
+                'rgba(0, 132, 206, 0.4)',
+                'rgba(242, 142, 19, 0.4)',
+                'rgba(63, 168, 63, 0.4)',
+                'rgba(107, 63, 160, 0.4)'
             ];
 
             function resize() {
@@ -622,12 +1399,12 @@
             window.addEventListener('resize', resize);
             resize();
 
-            for (let i = 0; i < 38; i++) {
+            for (let i = 0; i < 35; i++) {
                 particles.push({
                     x: Math.random() * (width || 1000),
                     y: Math.random() * (height || 600),
-                    vx: (Math.random() - 0.5) * 0.5,
-                    vy: (Math.random() - 0.5) * 0.5,
+                    vx: (Math.random() - 0.5) * 0.4,
+                    vy: (Math.random() - 0.5) * 0.4,
                     radius: Math.random() * 2.5 + 1,
                     color: brandColors[i % brandColors.length]
                 });
@@ -654,7 +1431,7 @@
                             ctx.beginPath();
                             ctx.moveTo(p.x, p.y);
                             ctx.lineTo(p2.x, p2.y);
-                            ctx.strokeStyle = 'rgba(0, 132, 206, ' + (1 - dist / 120) * 0.15 + ')';
+                            ctx.strokeStyle = 'rgba(0, 132, 206, ' + (1 - dist / 120) * 0.12 + ')';
                             ctx.lineWidth = 0.5;
                             ctx.stroke();
                         }
@@ -665,7 +1442,7 @@
             animate();
         })();
 
-        // 6. MODAL INTERATIVO DE SOLICITAÇÃO DE IMPLANTAÇÃO MUNICIPAL
+        // 7. MODAL INTERATIVO DE SOLICITAÇÃO DE IMPLANTAÇÃO MUNICIPAL
         function abrirModalImplantacao() {
             document.getElementById('modal-implantacao').classList.remove('hidden');
             document.getElementById('modal-etapa-formulario').classList.remove('hidden');
@@ -687,18 +1464,20 @@
             const email = document.getElementById('imp_email').value.trim();
             const alunos = document.getElementById('imp_alunos').value;
             const sistemaAtual = document.getElementById('imp_sistema_atual').value;
+            const desafio = document.getElementById('imp_desafio').value;
             const obs = document.getElementById('imp_obs').value.trim();
 
             // Mensagem formatada para o WhatsApp do suporte
-            const textoMensagem = `🏛️ *SOLICITAÇÃO DE IMPLANTAÇÃO MUNICIPAL — ORBI INCLUSÃO*\n\n` +
+            const textoMensagem = `🏛️ *SOLICITAÇÃO DE DEMONSTRAÇÃO / IMPLANTAÇÃO MUNICIPAL — ORBI*\n\n` +
                 `📍 *Município:* ${municipio} - ${uf}\n` +
-                `👤 *Responsável:* ${nome} (${cargo})\n` +
+                `👤 *Solicitante:* ${nome} (${cargo})\n` +
                 `📱 *WhatsApp:* ${whatsapp}\n` +
                 `📧 *E-mail:* ${email}\n` +
                 `🎓 *Porte de Alunos AEE:* ${alunos}\n` +
                 `💻 *Possui Sistema Atual:* ${sistemaAtual}\n` +
+                `🎯 *Principal Desafio:* ${desafio}\n` +
                 (obs ? `📝 *Observações:* ${obs}\n\n` : `\n`) +
-                `_Enviado através do Portal Institucional ORBI._`;
+                `_Enviado através da Plataforma Institucional ORBI._`;
 
             const linkWhatsapp = `https://wa.me/5589999742096?text=${encodeURIComponent(textoMensagem)}`;
             const linkEmail = `mailto:carlosvictor.pessoal@gmail.com?subject=${encodeURIComponent(`[Implantação ORBI] Prefeitura de ${municipio} - ${uf}`)}&body=${encodeURIComponent(textoMensagem)}`;
@@ -712,7 +1491,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    municipio, uf, nome, cargo, whatsapp, email, alunos, sistemaAtual, obs
+                    municipio, uf, nome, cargo, whatsapp, email, alunos, sistemaAtual, desafio, obs
                 })
             }).catch(err => console.log('Envio local:', err));
 
@@ -724,7 +1503,7 @@
             document.getElementById('modal-etapa-sucesso').classList.remove('hidden');
         }
 
-        // 7. BOTÃO FLUTUANTE VOLTAR AO TOPO
+        // 8. BOTÃO FLUTUANTE VOLTAR AO TOPO
         function voltarAoTopo() {
             window.scrollTo({
                 top: 0,
@@ -739,8 +1518,7 @@
             const scrollPosition = window.scrollY + window.innerHeight;
             const documentHeight = document.documentElement.scrollHeight;
             
-            // Exibe o botão quando o usuário rola até a parte inferior ou após rolar mais de 600px
-            if (scrollPosition >= documentHeight - 300 || window.scrollY > 600) {
+            if (scrollPosition >= documentHeight - 300 || window.scrollY > 500) {
                 btnTopo.classList.remove('hidden');
                 setTimeout(() => {
                     btnTopo.classList.remove('opacity-0', 'translate-y-4');
@@ -750,7 +1528,7 @@
                 btnTopo.classList.remove('opacity-100', 'translate-y-0');
                 btnTopo.classList.add('opacity-0', 'translate-y-4');
                 setTimeout(() => {
-                    if (window.scrollY <= 600 && (window.scrollY + window.innerHeight) < (documentHeight - 300)) {
+                    if (window.scrollY <= 500 && (window.scrollY + window.innerHeight) < (documentHeight - 300)) {
                         btnTopo.classList.add('hidden');
                     }
                 }, 300);
@@ -769,29 +1547,29 @@
         <span class="text-xs font-black uppercase tracking-wider hidden sm:inline-block pr-0.5">Topo</span>
     </button>
 
-    <!-- HTML DO MODAL DE SOLICITAÇÃO DE IMPLANTAÇÃO -->
+    <!-- MODAL DE SOLICITAÇÃO DE DEMONSTRAÇÃO / IMPLANTAÇÃO MUNICIPAL -->
     <div id="modal-implantacao" class="fixed inset-0 z-[999] hidden flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="fecharModalImplantacao()"></div>
 
         <div class="relative bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-2xl overflow-hidden z-10 my-8 transition-all">
             
             <!-- Modal Header -->
-            <div class="bg-slate-900 p-6 sm:p-8 text-white relative border-b border-orbi-blue/30">
+            <div class="bg-orbi-navy p-6 sm:p-8 text-white relative border-b border-orbi-blue/30">
                 <button onclick="fecharModalImplantacao()" class="absolute top-5 right-5 text-slate-400 hover:text-white bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center transition-colors text-sm font-bold cursor-pointer">
                     ✕
                 </button>
                 <span class="inline-block bg-orbi-blue/30 border border-orbi-blue/40 text-orbi-blue-light text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full mb-2">
-                    Diagnóstico & Homologação Municipal
+                    Diagnóstico Governamental & Homologação
                 </span>
                 <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight">
-                    Transforme a Educação Especial do seu Município
+                    Solicitar Demonstração Técnica para o Município
                 </h3>
                 <p class="text-xs text-slate-300 mt-1 max-w-lg">
                     Preencha o formulário institucional para receber o plano de homologação técnica da sua prefeitura.
                 </p>
             </div>
 
-            <!-- Formulário -->
+            <!-- Formulário Enriquecido -->
             <div id="modal-etapa-formulario" class="p-6 sm:p-8 max-h-[75vh] overflow-y-auto">
                 <form id="form-implantacao" onsubmit="enviarSolicitacaoImplantacao(event)" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -893,11 +1671,29 @@
 
                     </div>
 
+                    <!-- NOVO CAMPO: PRINCIPAL DESAFIO DA EDUCAÇÃO ESPECIAL -->
+                    <div>
+                        <label class="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1">
+                            Qual é hoje o principal desafio da Educação Especial do seu município? <span class="text-red-500">*</span>
+                        </label>
+                        <select id="imp_desafio" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/20 outline-none transition-all font-medium">
+                            <option value="">Selecione o desafio principal...</option>
+                            <option value="Organização dos alunos">Organização dos alunos</option>
+                            <option value="PEI / PAEE">PEI / PAEE</option>
+                            <option value="Gestão do AEE">Gestão do AEE</option>
+                            <option value="Falta de informações consolidadas">Falta de informações consolidadas</option>
+                            <option value="Acompanhamento dos profissionais">Acompanhamento dos profissionais</option>
+                            <option value="Transporte adaptado">Transporte adaptado</option>
+                            <option value="Relatórios e indicadores">Relatórios e indicadores</option>
+                            <option value="Outro Desafio">Outro Desafio</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label class="block text-[11px] font-black uppercase tracking-wider text-slate-700 mb-1">
                             Observações ou Necessidades Principais (Opcional)
                         </label>
-                        <textarea id="imp_obs" rows="2" placeholder="Ex: Queremos padronizar a emissão dos relatórios de PEI e organizar a rotina do AEE..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/20 outline-none transition-all font-medium"></textarea>
+                        <textarea id="imp_obs" rows="2" placeholder="Ex: Queremos padronizar os relatórios de PEI e organizar os registros do AEE nas escolas..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/20 outline-none transition-all font-medium"></textarea>
                     </div>
 
                     <div class="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100">
@@ -905,7 +1701,7 @@
                             🔒 Resposta governamental em até 2 horas úteis.
                         </p>
                         <button type="submit" class="w-full sm:w-auto bg-orbi-blue hover:bg-orbi-blue-hover text-white font-black text-xs px-6 py-3.5 rounded-xl shadow-md shadow-orbi-blue/20 transition-all uppercase tracking-wider flex items-center justify-center gap-2 cursor-pointer">
-                            <span>ENVIAR SOLICITAÇÃO</span>
+                            <span>ENVIAR E SOLICITAR DEMONSTRAÇÃO</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                         </button>
                     </div>
