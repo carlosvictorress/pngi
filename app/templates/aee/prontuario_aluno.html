@@ -1,0 +1,445 @@
+{% extends 'base.html' %}
+
+{% block title %}Prontuário da Sala de AEE — {{ aluno.nome }} — {{ g.municipio.nome }}{% endblock %}
+{% block header_title %}Prontuário Individual do AEE — {{ aluno.nome }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-12 font-sans">
+
+    <!-- CABEÇALHO DO PRONTUÁRIO COM DADOS PESSOAIS COMPLETOS -->
+    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm relative overflow-hidden">
+        <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500"></div>
+
+        <div class="flex flex-col lg:flex-row justify-between items-start gap-6">
+            <div class="space-y-3 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="bg-blue-50 text-blue-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-blue-200">
+                        Prontuário Oficial da Sala de Recursos Multifuncionais
+                    </span>
+                    {% if aluno.cid %}
+                    <span class="bg-emerald-50 text-emerald-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-emerald-200">
+                        CID: {{ aluno.cid }}
+                    </span>
+                    {% endif %}
+                    {% if aluno.em_investigacao %}
+                    <span class="bg-amber-50 text-amber-800 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-amber-200">
+                        🔍 Em Investigação Diagnóstica
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight uppercase">
+                        {{ aluno.nome }}
+                    </h1>
+                    <p class="text-xs text-slate-500 font-mono mt-1">
+                        CPF: {{ aluno.cpf or 'Não informado' }} • Data de Nascimento: {{ aluno.data_nascimento or 'Não informada' }} • Matrícula: {{ aluno.matricula }}
+                    </p>
+                </div>
+
+                <!-- GRADE DE DADOS CIVIS, FILIAÇÃO, ENDEREÇO E ESCOLA -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 pt-3 border-t border-slate-100 text-xs">
+                    <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-100">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Filiação</span>
+                        <div class="text-slate-800 font-semibold mt-0.5">
+                            <div><span class="text-slate-400">Mãe:</span> {{ aluno.nome_mae or 'Não informada' }}</div>
+                            <div><span class="text-slate-400">Pai:</span> {{ aluno.nome_pai or 'Não informado' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-100">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Endereço Residencial</span>
+                        <div class="text-slate-800 font-semibold mt-0.5">
+                            <div>{{ aluno.endereco or 'Não informado' }}</div>
+                            <div class="text-slate-500 text-[10px]">Bairro: {{ aluno.bairro or 'Não informado' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50/80 p-3 rounded-xl border border-slate-100">
+                        <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block">Vínculo Escolar</span>
+                        <div class="text-slate-800 font-semibold mt-0.5">
+                            <div class="truncate">{{ aluno.escola.nome if aluno.escola else 'Escola Não Definida' }}</div>
+                            <div class="text-blue-600 text-[10px]">Série / Turma: {{ aluno.turma }} ({{ aluno.etapa_ensino or 'Regular' }})</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if aluno.hipotese_diagnostica %}
+                <div class="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-xs text-amber-900">
+                    <span class="font-bold">Hipótese Clínica / Investigação:</span> {{ aluno.hipotese_diagnostica }}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- PAINEL LATERAL DE SESSÕES & AÇÕES RÁPIDAS -->
+            <div class="flex flex-col gap-3 shrink-0 w-full lg:w-72">
+                <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-md space-y-4">
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-2">
+                        Resumo do Acompanhamento
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-300 font-medium">Sessões Realizadas:</span>
+                        <span class="text-xl font-black text-emerald-400">{{ total_realizadas }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-300 font-medium">Faltas Registradas:</span>
+                        <span class="text-xl font-black text-rose-400">{{ total_faltas }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs text-slate-300 font-medium">Taxa de Presença:</span>
+                        <span class="text-base font-extrabold text-blue-400">{{ taxa_presenca }}%</span>
+                    </div>
+
+                    <button onclick="document.getElementById('modal-lancar-sessao').classList.remove('hidden')"
+                            class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black py-2.5 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-sm transform hover:scale-[1.02]">
+                        <span>➕</span> Lançar Sessão de AEE
+                    </button>
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="document.getElementById('modal-editar-dados').classList.remove('hidden')"
+                            class="flex-1 bg-white hover:bg-slate-50 text-slate-700 font-bold py-2 px-3 rounded-xl border border-slate-200 text-xs text-center transition-all shadow-sm">
+                        ✏️ Atualizar Ficha
+                    </button>
+
+                    <a href="{{ url_for('aee.sala_recursos', municipio_slug=g.municipio.slug) }}"
+                       class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all text-center">
+                        ← Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTÓRICO DE SESSÕES REALIZADAS E METODOLOGIAS (O QUE FOI FEITO E COMO FOI FEITO) -->
+    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div>
+                <h2 class="text-lg font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <span>📝</span> Histórico de Sessões na Sala de Recursos
+                </h2>
+                <p class="text-xs text-slate-400">
+                    Registro descritivo de cada atendimento: assiduidade, atividades desenvolvidas e metodologia aplicada.
+                </p>
+            </div>
+
+            <span class="text-xs font-extrabold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+                Total de Atendimentos: {{ sessoes|length }}
+            </span>
+        </div>
+
+        {% if sessoes %}
+        <div class="space-y-4">
+            {% for s in sessoes %}
+            <div class="p-5 rounded-2xl border transition-all {% if s.compareceu or s.frequencia %}bg-slate-50/50 border-slate-200/80 hover:border-blue-300{% else %}bg-rose-50/30 border-rose-200{% endif %}">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/60 pb-3">
+                    <div class="flex items-center gap-3">
+                        {% if s.compareceu or s.frequencia %}
+                        <span class="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-[10px] font-black px-3 py-1 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> COMPARECEU À SESSÃO
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center gap-1.5 bg-rose-100 text-rose-800 text-[10px] font-black px-3 py-1 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span> FALTOU À SESSÃO
+                        </span>
+                        {% endif %}
+
+                        <span class="text-xs font-bold text-slate-700">
+                            📅 {{ s.data_atendimento.strftime('%d/%m/%Y') if hasattr(s.data_atendimento, 'strftime') else s.data_atendimento }}
+                        </span>
+                        
+                        {% if s.horario_inicio %}
+                        <span class="text-[10px] text-slate-400 font-mono">
+                            ⏰ {{ s.horario_inicio.strftime('%H:%M') if hasattr(s.horario_inicio, 'strftime') else s.horario_inicio }}
+                            {% if s.horario_fim %} às {{ s.horario_fim.strftime('%H:%M') if hasattr(s.horario_fim, 'strftime') else s.horario_fim }}{% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="text-[10px] text-slate-400 font-semibold">
+                        Profissional: <span class="text-slate-700">{{ s.profissional_nome or 'Especialista AEE' }}</span>
+                    </div>
+                </div>
+
+                {% if s.compareceu or s.frequencia %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 text-xs">
+                    <!-- O QUE FOI FEITO NA SESSÃO -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs space-y-1.5">
+                        <div class="flex items-center gap-1.5 text-blue-700 font-extrabold text-[11px] uppercase tracking-wider">
+                            <span>🎯</span> O QUE FOI FEITO NA SESSÃO
+                        </div>
+                        <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line">
+                            {{ s.o_que_foi_feito or s.plano_sessao or 'Atividades pedagógicas individualizadas com foco nas barreiras de aprendizagem.' }}
+                        </p>
+                    </div>
+
+                    <!-- COMO FOI FEITO NA SESSÃO -->
+                    <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs space-y-1.5">
+                        <div class="flex items-center gap-1.5 text-indigo-700 font-extrabold text-[11px] uppercase tracking-wider">
+                            <span>🛠️</span> COMO FOI FEITO (METODOLOGIA & RECURSOS)
+                        </div>
+                        <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line">
+                            {{ s.como_foi_feito or s.evolucao_registro or 'Mediação direta, recursos de tecnologia assistiva e jogos adaptados.' }}
+                        </p>
+                    </div>
+                </div>
+
+                {% if s.recursos_utilizados %}
+                <div class="mt-3 text-[10px] text-slate-500 font-medium bg-white p-2.5 rounded-lg border border-slate-100 flex items-center gap-2">
+                    <span class="font-bold text-slate-700">Recursos e Materiais:</span>
+                    <span>{{ s.recursos_utilizados }}</span>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="pt-3 text-xs text-rose-700">
+                    <span class="font-bold">Motivo/Justificativa da Falta:</span> {{ s.justificativa_falta or 'Ausência sem justificativa prévia.' }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="py-12 text-center text-slate-400 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+            <span class="text-3xl block mb-2">📋</span>
+            <span class="text-xs font-semibold block text-slate-600">Nenhuma sessão registrada para este estudante até o momento.</span>
+            <p class="text-[11px] text-slate-400 mt-1 max-w-md mx-auto">
+                Clique no botão <strong>"+ Lançar Sessão de AEE"</strong> acima para registrar o primeiro atendimento com frequência, o que foi feito e como foi feito.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- MODAL: LANÇAR NOVA SESSÃO DE AEE -->
+<div id="modal-lancar-sessao" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 md:p-8 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+                <h3 class="text-base font-black text-slate-900 tracking-tight">Lançar Nova Sessão de AEE</h3>
+                <p class="text-xs text-slate-400">Estudante: <strong class="text-slate-800">{{ aluno.nome }}</strong></p>
+            </div>
+            <button onclick="document.getElementById('modal-lancar-sessao').classList.add('hidden')"
+                    class="text-slate-400 hover:text-slate-600 font-black text-xl leading-none">✕</button>
+        </div>
+
+        <form action="{{ url_for('aee.lancar_sessao_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id) }}" method="POST" class="space-y-4">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Data da Sessão *</label>
+                    <input type="date" name="data_atendimento" value="{{ now.strftime('%Y-%m-%d') }}" required
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 font-sans">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Horário Início</label>
+                    <input type="time" name="horario_inicio" value="08:00"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Horário Fim</label>
+                    <input type="time" name="horario_fim" value="08:50"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- CONTROLE DE PRESENÇA -->
+            <div class="p-3.5 bg-blue-50/70 border border-blue-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <span class="text-xs font-black text-blue-900 block">Comparecimento do Estudante</span>
+                    <span class="text-[10px] text-blue-700">Confirme se o aluno esteve presente na Sala de Recursos</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="compareceu" value="true" checked class="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                               onchange="toggleCamposPresenca(true)">
+                        <span class="text-xs font-extrabold text-emerald-800">✅ Compareceu</span>
+                    </label>
+                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="compareceu" value="false" class="w-4 h-4 text-rose-600 focus:ring-rose-500"
+                               onchange="toggleCamposPresenca(false)">
+                        <span class="text-xs font-extrabold text-rose-800">❌ Faltou</span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="campo-justificativa" class="space-y-1 hidden">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Justificativa da Falta</label>
+                <input type="text" name="justificativa_falta" placeholder="Ex: Atestado médico, chuva forte, viagem familiar..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div id="campos-sessao-realizada" class="space-y-4">
+                <!-- O QUE FOI FEITO NA SESSÃO -->
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-blue-800 flex items-center gap-1.5">
+                        <span>🎯</span> O QUE FOI FEITO NA SESSÃO * (Atividades e Conteúdos)
+                    </label>
+                    <textarea name="o_que_foi_feito" rows="3" required placeholder="Descreva quais atividades, conteúdos, habilidades ou desafios foram trabalhados com o estudante..."
+                              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
+                </div>
+
+                <!-- COMO FOI FEITO NA SESSÃO -->
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-indigo-800 flex items-center gap-1.5">
+                        <span>🛠️</span> COMO FOI FEITO * (Metodologia, Estratégias e Recursos)
+                    </label>
+                    <textarea name="como_foi_feito" rows="3" required placeholder="Descreva como a atividade foi conduzida: que metodologia foi utilizada, tipos de mediação, apoio visual, tempo de resposta, estratégias de engajamento..."
+                              class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Recursos e Materiais Utilizados</label>
+                    <input type="text" name="recursos_utilizados" placeholder="Ex: Jogos sensoriais, prancha de CAA, software adaptado, alfabeto móvel..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-lancar-sessao').classList.add('hidden')"
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-sm">
+                    Salvar Sessão no Prontuário
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: ATUALIZAR DADOS CADASTRAIS (ENDEREÇO, PAIS, SÉRIE, CID/INVESTIGAÇÃO) -->
+<div id="modal-editar-dados" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 md:p-8 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <h3 class="text-base font-black text-slate-900 tracking-tight">Atualizar Ficha do Estudante</h3>
+            <button onclick="document.getElementById('modal-editar-dados').classList.add('hidden')"
+                    class="text-slate-400 hover:text-slate-600 font-black text-xl leading-none">✕</button>
+        </div>
+
+        <form action="{{ url_for('aee.atualizar_dados_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id) }}" method="POST" class="space-y-3.5">
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Nome Completo *</label>
+                <input type="text" name="nome" value="{{ aluno.nome }}" required
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Data de Nascimento</label>
+                    <input type="text" name="data_nascimento" value="{{ aluno.data_nascimento or '' }}" placeholder="AAAA-MM-DD"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">CPF</label>
+                    <input type="text" name="cpf" value="{{ aluno.cpf or '' }}" placeholder="000.000.000-00"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Nome da Mãe</label>
+                    <input type="text" name="nome_mae" value="{{ aluno.nome_mae or '' }}"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Nome do Pai</label>
+                    <input type="text" name="nome_pai" value="{{ aluno.nome_pai or '' }}"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+                <div class="col-span-2 space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Endereço Residencial</label>
+                    <input type="text" name="endereco" value="{{ aluno.endereco or '' }}" placeholder="Rua, número, complemento..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Bairro</label>
+                    <input type="text" name="bairro" value="{{ aluno.bairro or '' }}" placeholder="Bairro..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Série / Turma</label>
+                    <input type="text" name="turma" value="{{ aluno.turma }}"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Etapa / Ano</label>
+                    <input type="text" name="etapa_ensino" value="{{ aluno.etapa_ensino or '' }}" placeholder="Ex: Fundamental I, 3º Ano..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- DIAGNÓSTICO / CID OU INVESTIGAÇÃO -->
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
+                <span class="text-xs font-bold text-slate-800 block">Diagnóstico Clínico / Investigação</span>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">CID (Se houver laudo)</label>
+                        <input type="text" name="cid" value="{{ aluno.cid or '' }}" placeholder="Ex: F84.0, G80..."
+                               class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Tipo de Deficiência</label>
+                        <input type="text" name="tipo_deficiencia" value="{{ aluno.tipo_deficiencia }}"
+                               class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 pt-1">
+                    <input type="checkbox" id="check-invest" name="em_investigacao" value="true" {% if aluno.em_investigacao %}checked{% endif %}
+                           class="w-4 h-4 text-amber-600 rounded border-slate-300">
+                    <label for="check-invest" class="text-xs font-bold text-amber-800 cursor-pointer">
+                        Estudante em Investigação Diagnóstica (Suspeita clínica em avaliação)
+                    </label>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Hipótese Clínica / Observações da Triagem</label>
+                    <input type="text" name="hipotese_diagnostica" value="{{ aluno.hipotese_diagnostica or '' }}" placeholder="Ex: Sinais de TEA nível 1, hipótese de TDAH, atraso de neurodesenvolvimento..."
+                           class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-editar-dados').classList.add('hidden')"
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-sm">
+                    Atualizar Dados
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleCamposPresenca(compareceu) {
+    const camposSessao = document.getElementById('campos-sessao-realizada');
+    const campoJust = document.getElementById('campo-justificativa');
+    if (compareceu) {
+        camposSessao.classList.remove('hidden');
+        campoJust.classList.add('hidden');
+    } else {
+        camposSessao.classList.add('hidden');
+        campoJust.classList.remove('hidden');
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatórios de Escuta & Encaminhamentos — Equipe Multi — {{ g.municipio.nome }}{% endblock %}
+{% block header_title %}Relatórios de Escuta Qualificada & Encaminhamentos para a Rede (IA){% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-12 font-sans">
+
+    <!-- CABEÇALHO -->
+    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-blue-200">
+                ARTICULAÇÃO INTERSETORIAL • SUAS / SUS / REDE DE PROTEÇÃO
+            </div>
+            <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                Relatórios de Escuta Qualificada & Encaminhamentos
+            </h1>
+            <p class="text-xs text-slate-500">
+                Instrumentos técnicos emitidos com auxílio de Inteligência Artificial para CAPS Infantil, CRAS, CREAS e Saúde.
+            </p>
+        </div>
+
+        <div class="flex gap-2 shrink-0">
+            <a href="{{ url_for('equipe_multi.novo_relatorio_escuta', municipio_slug=g.municipio.slug) }}"
+               class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 transform hover:scale-[1.02]">
+                <span>✨</span> Emitir Relatório com IA
+            </a>
+            <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=g.municipio.slug) }}"
+               class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+                Painel Multi
+            </a>
+        </div>
+    </div>
+
+    <!-- LISTAGEM DE DOCUMENTOS EMITIDOS -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+                <span>📑</span> Histórico de Documentos Emitidos ({{ relatorios|length }})
+            </h2>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Autenticação Digital Ativa
+            </span>
+        </div>
+
+        <div class="divide-y divide-slate-100">
+            {% for r in relatorios %}
+            <div class="p-6 hover:bg-slate-50/60 transition-colors flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="space-y-1.5 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-black px-2.5 py-0.5 rounded-full">
+                            {{ r.tipo_documento }}
+                        </span>
+                        
+                        <span class="bg-purple-100 text-purple-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+                            Destino: {{ r.orgao_destino }}
+                        </span>
+
+                        {% if r.gerado_com_ia %}
+                        <span class="bg-emerald-100 text-emerald-800 text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <span>✨</span> Gerado com IA
+                        </span>
+                        {% endif %}
+
+                        <span class="text-[10px] font-mono text-slate-400">
+                            Chave: {{ r.chave_autenticidade or 'N/A' }}
+                        </span>
+                    </div>
+
+                    <h3 class="text-sm font-extrabold text-slate-900">{{ r.aluno.nome }}</h3>
+                    <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                        <strong class="text-slate-800">Motivo:</strong> {{ r.motivo_demanda }} — {{ r.sintese_escuta }}
+                    </p>
+
+                    <div class="text-[10px] text-slate-400 font-medium pt-1">
+                        Emitido por: <strong class="text-slate-700">{{ r.profissional.nome }}</strong> ({{ r.profissional.perfil }}) em {{ r.data_emissao.strftime('%d/%m/%Y') }}
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2 shrink-0">
+                    <a href="{{ url_for('equipe_multi.imprimir_relatorio_escuta', municipio_slug=g.municipio.slug, id=r.id) }}" target="_blank"
+                       class="bg-slate-900 hover:bg-black text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-sm">
+                        <span>🖨️</span> Imprimir Documento Oficial ↗
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="p-12 text-center text-slate-400 text-xs space-y-2">
+                <span class="text-3xl block">📑</span>
+                <span class="font-bold text-slate-700 block">Nenhum relatório ou encaminhamento emitido até o momento.</span>
+                <p class="text-[11px] text-slate-400">Clique em "+ Emitir Relatório com IA" para gerar a primeira guia técnica com inteligência artificial.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

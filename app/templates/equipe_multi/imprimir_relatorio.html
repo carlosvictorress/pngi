@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ relatorio.tipo_documento }} — {{ relatorio.aluno.nome }} — {{ g.municipio.nome }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { font-size: 11pt; background: #fff !important; }
+            @page { margin: 15mm 20mm; size: A4; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 p-4 md:p-10 font-sans text-slate-800 antialiased">
+
+    <!-- BARRA NO-PRINT -->
+    <div class="max-w-4xl mx-auto mb-6 flex justify-between items-center no-print">
+        <a href="javascript:history.back()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold shadow">
+            ← Voltar
+        </a>
+        <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-xs font-extrabold shadow-md flex items-center gap-2">
+            <span>🖨️</span> Imprimir Documento Oficial Timbrado
+        </button>
+    </div>
+
+    <!-- FOLHA TIMBRADA -->
+    <div class="max-w-4xl mx-auto bg-white p-8 md:p-14 rounded-3xl shadow-lg border border-slate-200 print:border-none print:shadow-none print:p-0 space-y-6">
+        
+        <!-- CABEÇALHO OFICIAL DO MUNICÍPIO -->
+        <div class="border-b-2 border-slate-900 pb-5 flex items-start justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 block">
+                    ESTADO DO {{ g.municipio.estado }} • PREFEITURA MUNICIPAL DE {{ g.municipio.nome|upper }}
+                </span>
+                <h1 class="text-base font-black text-slate-900 tracking-tight">
+                    SECRETARIA MUNICIPAL DE EDUCAÇÃO • EQUIPE MULTIDISCIPLINAR DE APOIO ESCOLAR
+                </h1>
+                <span class="text-xs font-black text-blue-900 uppercase block tracking-wider mt-1">
+                    {{ relatorio.tipo_documento }}
+                </span>
+            </div>
+
+            <div class="text-right space-y-1">
+                <div class="inline-block bg-slate-900 text-white text-[9px] font-mono font-bold px-2.5 py-1 rounded">
+                    CHAVE: {{ relatorio.chave_autenticidade or 'N/A' }}
+                </div>
+                <div class="text-[9px] text-slate-400 font-mono">
+                    Emitido em: {{ relatorio.data_emissao.strftime('%d/%m/%Y') }}
+                </div>
+            </div>
+        </div>
+
+        <!-- ÓRGÃO DE DESTINATÁRIO -->
+        <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-200 text-xs">
+            <span class="text-[10px] font-bold uppercase text-blue-800 block">Ao(À) Ilustríssimo(a) Senhor(a) Coordenador(a) / Gestor(a) de:</span>
+            <span class="text-sm font-black text-slate-900 block mt-0.5">{{ relatorio.orgao_destino }}</span>
+            <span class="text-[10px] text-slate-500 font-medium block mt-0.5">
+                Rede Municipal de Proteção, Saúde e Assistência Social de {{ g.municipio.nome }} — {{ g.municipio.estado }}
+            </span>
+        </div>
+
+        <!-- DADOS DO ESTUDANTE -->
+        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+                <span class="text-[9px] font-bold uppercase text-slate-400 block">Estudante</span>
+                <span class="font-extrabold text-slate-900 block">{{ relatorio.aluno.nome }}</span>
+            </div>
+            <div>
+                <span class="text-[9px] font-bold uppercase text-slate-400 block">CPF / Data Nasc.</span>
+                <span class="font-semibold text-slate-700 block">{{ relatorio.aluno.cpf or 'Não informado' }} • {{ relatorio.aluno.data_nascimento or 'N/A' }}</span>
+            </div>
+            <div>
+                <span class="text-[9px] font-bold uppercase text-slate-400 block">Unidade Escolar</span>
+                <span class="font-semibold text-slate-700 block">{{ relatorio.aluno.escola.nome if relatorio.aluno.escola else 'Rede Municipal' }}</span>
+            </div>
+            <div>
+                <span class="text-[9px] font-bold uppercase text-slate-400 block">Turma / Série</span>
+                <span class="font-semibold text-slate-700 block">{{ relatorio.aluno.turma }}</span>
+            </div>
+        </div>
+
+        <!-- MOTIVO DA DEMANDA -->
+        <div class="space-y-1.5 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1">
+                1. Objeto / Motivo da Demanda
+            </h3>
+            <p class="text-slate-800 leading-relaxed font-normal text-justify">
+                {{ relatorio.motivo_demanda }}
+            </p>
+        </div>
+
+        <!-- SÍNTESE DA ESCUTA QUALIFICADA -->
+        <div class="space-y-1.5 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1">
+                2. Síntese Técnica da Escuta Qualificada
+            </h3>
+            <p class="text-slate-800 leading-relaxed font-normal whitespace-pre-line text-justify">
+                {{ relatorio.sintese_escuta }}
+            </p>
+        </div>
+
+        <!-- SITUAÇÃO CONTEXTUAL -->
+        {% if relatorio.situacao_contextual %}
+        <div class="space-y-1.5 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1">
+                3. Dinâmica Contextual (Escolar e Familiar)
+            </h3>
+            <p class="text-slate-800 leading-relaxed font-normal whitespace-pre-line text-justify">
+                {{ relatorio.situacao_contextual }}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- ANÁLISE / HIPÓTESE TÉCNICA -->
+        {% if relatorio.hipotese_ou_vulnerabilidade %}
+        <div class="space-y-1.5 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1">
+                4. Avaliação e Parecer Multiprofissional
+            </h3>
+            <p class="text-slate-800 leading-relaxed font-normal whitespace-pre-line text-justify">
+                {{ relatorio.hipotese_ou_vulnerabilidade }}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- PROVIDÊNCIAS RECOMENDADAS & SOLICITAÇÕES -->
+        <div class="space-y-1.5 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1">
+                5. Providências Solicitadas ao Órgão Destinatário
+            </h3>
+            <p class="text-slate-800 leading-relaxed font-normal whitespace-pre-line text-justify">
+                {{ relatorio.providencias_recomendadas }}
+            </p>
+        </div>
+
+        <!-- CAMPO DE ASSINATURA TÉCNICA -->
+        <div class="pt-14 text-center space-y-2">
+            <div class="w-72 border-b border-slate-800 mx-auto"></div>
+            <div class="font-extrabold text-xs text-slate-900">{{ relatorio.profissional.nome }}</div>
+            <div class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
+                {{ relatorio.profissional.perfil|upper }} • EQUIPE MULTIDISCIPLINAR MUNICIPAL
+            </div>
+            <div class="text-[9px] text-slate-400 font-mono">
+                Secretaria Municipal de Educação de {{ g.municipio.nome }} — Autenticado sob chave: {{ relatorio.chave_autenticidade }}
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

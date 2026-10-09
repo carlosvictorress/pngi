@@ -98,6 +98,14 @@
                         <input type="text" name="nome_pai" placeholder="Nome completo do genitor" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
                     </div>
                     <div>
+                        <label class="block text-slate-700 font-bold mb-1">Endereço Residencial (Rua, Nº, Compl.)</label>
+                        <input type="text" name="endereco" placeholder="Ex: Rua Central, 120" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Bairro / Localidade</label>
+                        <input type="text" name="bairro" placeholder="Ex: Centro / Bairro Novo" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    </div>
+                    <div>
                         <label class="block text-slate-700 font-bold mb-1">Telefone Principal de Contato e WhatsApp *</label>
                         <input type="text" name="contato_urgencia" placeholder="(86) 99999-9999" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
                     </div>
@@ -193,11 +201,19 @@
                         <label class="block text-slate-700 font-bold mb-1">Código CID Principal</label>
                         <input type="text" name="cid" placeholder="Ex: F84.0, G80" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none">
                     </div>
+                    <div>
+                        <label class="block text-slate-700 font-bold mb-1">Hipótese Diagnóstica (se em investigação)</label>
+                        <input type="text" name="hipotese_diagnostica" placeholder="Ex: Atraso global no desenvolvimento" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    </div>
                     
-                    <div class="grid grid-cols-1 gap-2 pt-2 md:pt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 col-span-1 md:col-span-3 gap-4 pt-2">
+                        <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-amber-950 bg-amber-50 border border-amber-200 rounded-xl p-2.5 hover:bg-amber-100/60 transition-colors">
+                            <input type="checkbox" name="em_investigacao" class="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-600 cursor-pointer">
+                            <span>🔍 Em processo de investigação clínica / Sem laudo</span>
+                        </label>
                         <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-purple-950 bg-purple-50 border border-purple-200 rounded-xl p-2.5 hover:bg-purple-100/60 transition-colors">
                             <input type="checkbox" name="possui_tea" class="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-600 cursor-pointer">
-                            <span>Estudante com Transtorno do Espectro Autista (TEA)</span>
+                            <span>Estudante com TEA</span>
                         </label>
                         <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-teal-950 bg-teal-50 border border-teal-200 rounded-xl p-2.5 hover:bg-teal-100/60 transition-colors">
                             <input type="checkbox" name="possui_superdotacao" class="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-600 cursor-pointer">

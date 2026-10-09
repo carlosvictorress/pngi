@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ plano.titulo }} — Equipe Multi — {{ g.municipio.nome }}{% endblock %}
+{% block header_title %}Detalhamento do Plano de Ação Mensal{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6 pb-12 font-sans">
+
+    <!-- CABEÇALHO -->
+    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-purple-200">
+                ATA TÉCNICA • ESTUDO DE CASOS • {{ plano.mes_referencia }}/{{ plano.ano_referencia }}
+            </div>
+            <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                {{ plano.titulo }}
+            </h1>
+            <p class="text-xs text-slate-500">
+                Data da Reunião: {{ plano.data_reuniao.strftime('%d/%m/%Y') }} • Local: {{ plano.local_reuniao }}
+            </p>
+        </div>
+
+        <div class="flex gap-2 shrink-0">
+            <a href="{{ url_for('equipe_multi.imprimir_plano_acao', municipio_slug=g.municipio.slug, id=plano.id) }}" target="_blank"
+               class="bg-purple-600 hover:bg-purple-700 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2">
+                <span>🖨️</span> Imprimir para Apresentar à Gestão ↗
+            </a>
+            <a href="{{ url_for('equipe_multi.listar_planos_acao', municipio_slug=g.municipio.slug) }}"
+               class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+                Voltar
+            </a>
+        </div>
+    </div>
+
+    <!-- MEMBROS PRESENTES -->
+    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-2">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
+            Profissionais Participantes da Equipe Multidisciplinar
+        </h2>
+        <p class="text-xs text-slate-700 font-semibold leading-relaxed">
+            {{ plano.profissionais_presentes }}
+        </p>
+    </div>
+
+    <!-- CASOS DISCUTIDOS -->
+    {% if casos %}
+    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+        <h2 class="text-xs font-extrabold uppercase tracking-wider text-purple-700 border-b border-slate-100 pb-2">
+            Casos de Estudantes Analisados na Sessão ({{ casos|length }})
+        </h2>
+        <div class="space-y-3">
+            {% for c in casos %}
+            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1.5 text-xs">
+                <div class="flex items-center justify-between">
+                    <span class="font-extrabold text-slate-900 text-sm">{{ c.aluno_nome }}</span>
+                    {% if c.diagnostico %}
+                    <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">{{ c.diagnostico }}</span>
+                    {% endif %}
+                </div>
+                <p class="text-slate-600 leading-relaxed font-normal whitespace-pre-line">
+                    {{ c.sintese }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- AÇÕES POR ESPECIALIDADE -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="bg-indigo-50/50 p-5 rounded-3xl border border-indigo-100 space-y-2">
+            <h3 class="font-black text-indigo-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <span>🧠</span> Psicologia Escolar
+            </h3>
+            <p class="text-slate-700 leading-relaxed whitespace-pre-line">
+                {{ plano.acoes_psicologia or 'Acompanhamento preventivo e acolhimentos agendados.' }}
+            </p>
+        </div>
+
+        <div class="bg-emerald-50/50 p-5 rounded-3xl border border-emerald-100 space-y-2">
+            <h3 class="font-black text-emerald-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <span>🧩</span> Psicopedagogia
+            </h3>
+            <p class="text-slate-700 leading-relaxed whitespace-pre-line">
+                {{ plano.acoes_psicopedagogia or 'Avaliações de aprendizagem e mediação curricular.' }}
+            </p>
+        </div>
+
+        <div class="bg-amber-50/50 p-5 rounded-3xl border border-amber-100 space-y-2">
+            <h3 class="font-black text-amber-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <span>🤝</span> Serviço Social
+            </h3>
+            <p class="text-slate-700 leading-relaxed whitespace-pre-line">
+                {{ plano.acoes_servico_social or 'Visitas domiciliares e articulações com a rede SUAS.' }}
+            </p>
+        </div>
+    </div>
+
+    <!-- DELIBERAÇÕES GERAIS E METAS -->
+    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4 text-xs">
+        <div class="space-y-1.5">
+            <h3 class="font-extrabold text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-100 pb-1">
+                Deliberações Gerais & Encaminhamentos à Gestão
+            </h3>
+            <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line">
+                {{ plano.deliberacoes_gerais or 'Alinhamentos consolidados em ata.' }}
+            </p>
+        </div>
+
+        {% if plano.metas_proximo_mes %}
+        <div class="space-y-1.5 pt-2">
+            <h3 class="font-extrabold text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-100 pb-1">
+                Metas para o Próximo Mês
+            </h3>
+            <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line">
+                {{ plano.metas_proximo_mes }}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

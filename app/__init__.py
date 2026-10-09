@@ -70,6 +70,7 @@ def create_app():
     from app.routes import publico_bp
     from app.blueprints.aee.routes import aee_bp
     from app.blueprints.escolas.routes import escolas_bp
+    from app.blueprints.equipe_multi.routes import equipe_multi_bp
 
     app.register_blueprint(publico_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -79,6 +80,7 @@ def create_app():
     app.register_blueprint(pei_bp, url_prefix='/<municipio_slug>/pei')
     app.register_blueprint(aee_bp, url_prefix='/<municipio_slug>/aee')
     app.register_blueprint(escolas_bp, url_prefix='/<municipio_slug>/escolas')
+    app.register_blueprint(equipe_multi_bp, url_prefix='/<municipio_slug>/equipe-multi')
 
     # Injetor de contexto global para os templates (MOVIDO PARA DENTRO DA FUNÇÃO)
     @app.context_processor

@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Espera — Sala de AEE — {{ g.municipio.nome }}{% endblock %}
+{% block header_title %}Fila & Lista de Espera da Sala de AEE{% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-12 font-sans">
+
+    <!-- BANNER SUPERIOR DA LISTA DE ESPERA -->
+    <div class="bg-gradient-to-r from-amber-900 via-slate-900 to-yellow-950 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden border border-amber-800/40">
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div class="space-y-2 max-w-2xl">
+                <div class="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-400/30 uppercase tracking-widest">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    GESTÃO DE FLUXO & TRIAGEM DE VAGAS DA SALA DE RECURSOS
+                </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Lista de Espera da Sala de AEE</h1>
+                <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                    Controle transparente de candidatos aguardando atendimento educacional especializado. 
+                    Ordene por prioridade, registre contatos telefônicos de responsáveis e convoque para triagem.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2.5 shrink-0">
+                <button onclick="document.getElementById('modal-novo-espera').classList.remove('hidden')"
+                        class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 transform hover:scale-[1.02]">
+                    <span>➕</span> Cadastrar na Fila de Espera
+                </button>
+
+                <a href="{{ url_for('aee.sala_recursos', municipio_slug=g.municipio.slug) }}" 
+                   class="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all border border-white/20 flex items-center gap-2">
+                    <span>🎒</span> Voltar à Sala de AEE
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARDS DE MÉTRICAS DA FILA -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Aguardando Vaga</span>
+                <div class="text-2xl font-black text-amber-600">{{ total_espera }}</div>
+                <span class="text-[10px] text-amber-700 font-semibold">Candidatos na fila ativa</span>
+            </div>
+            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                ⏳
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Chamados / Convocados</span>
+                <div class="text-2xl font-black text-blue-600">{{ total_chamados }}</div>
+                <span class="text-[10px] text-blue-700 font-semibold">Em processo de triagem</span>
+            </div>
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                📞
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Matriculados no AEE</span>
+                <div class="text-2xl font-black text-emerald-600">{{ total_matriculados }}</div>
+                <span class="text-[10px] text-emerald-700 font-semibold">Vagas efetivadas na SRM</span>
+            </div>
+            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                🎓
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTROS E BUSCA -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Buscar Candidato</label>
+                <input type="text" name="busca" value="{{ busca }}" placeholder="Nome, CPF ou Telefone..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Status na Fila</label>
+                <select name="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                    <option value="">Todos os status</option>
+                    <option value="Aguardando Vaga" {% if filtro_status == 'Aguardando Vaga' %}selected{% endif %}>Aguardando Vaga</option>
+                    <option value="Chamado/Convocado" {% if filtro_status == 'Chamado/Convocado' %}selected{% endif %}>Chamado/Convocado</option>
+                    <option value="Em Triagem" {% if filtro_status == 'Em Triagem' %}selected{% endif %}>Em Triagem</option>
+                    <option value="Matriculado no AEE" {% if filtro_status == 'Matriculado no AEE' %}selected{% endif %}>Matriculado no AEE</option>
+                    <option value="Desistente" {% if filtro_status == 'Desistente' %}selected{% endif %}>Desistente</option>
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Prioridade</label>
+                <select name="prioridade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                    <option value="">Todas as prioridades</option>
+                    <option value="Alta / Urgente" {% if filtro_prioridade == 'Alta / Urgente' %}selected{% endif %}>Alta / Urgente</option>
+                    <option value="Média" {% if filtro_prioridade == 'Média' %}selected{% endif %}>Média</option>
+                    <option value="Baixa" {% if filtro_prioridade == 'Baixa' %}selected{% endif %}>Baixa</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition-all shadow-sm">
+                    Filtrar Lista
+                </button>
+                <a href="{{ url_for('aee.lista_espera', municipio_slug=g.municipio.slug) }}" 
+                   class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all text-center">
+                    Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- TABELA DA LISTA DE ESPERA -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+                <span>📋</span> Candidatos na Lista de Espera ({{ candidatos|length }})
+            </h2>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Ordenado por Prioridade e Data de Solicitação
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">
+                        <th class="py-3 px-4">Candidato</th>
+                        <th class="py-3 px-4">Telefone & Contato</th>
+                        <th class="py-3 px-4">Escola / Série</th>
+                        <th class="py-3 px-4">Hipótese / Diagnóstico</th>
+                        <th class="py-3 px-4 text-center">Prioridade</th>
+                        <th class="py-3 px-4 text-center">Status</th>
+                        <th class="py-3 px-4 text-right">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+                    {% for c in candidatos %}
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3.5 px-4">
+                            <div class="font-extrabold text-slate-900 text-xs">{{ c.nome_completo }}</div>
+                            <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+                                CPF: {{ c.cpf or 'Não informado' }} • Nasc: {{ c.data_nascimento or 'N/A' }}
+                            </div>
+                            {% if c.nome_responsavel %}
+                            <div class="text-[10px] text-slate-500 mt-0.5">
+                                <span class="font-semibold text-slate-600">Responsável:</span> {{ c.nome_responsavel }}
+                            </div>
+                            {% endif %}
+                            {% if c.endereco %}
+                            <div class="text-[10px] text-slate-400 truncate max-w-xs mt-0.5">
+                                📍 {{ c.endereco }}
+                            </div>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 font-mono">
+                            <div class="font-bold text-slate-800">{{ c.telefone }}</div>
+                            <a href="https://wa.me/55{{ c.telefone|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}" target="_blank"
+                               class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 mt-0.5">
+                                <span>💬</span> Enviar WhatsApp
+                            </a>
+                        </td>
+
+                        <td class="py-3.5 px-4">
+                            <span class="font-bold text-slate-800 block text-xs">{{ c.escola_origem or 'Não informada' }}</span>
+                            <span class="text-[10px] text-blue-600 font-semibold block mt-0.5">
+                                Série: {{ c.ano_serie or 'A definir' }} • Turno: {{ c.turno_pretendido }}
+                            </span>
+                        </td>
+
+                        <td class="py-3.5 px-4">
+                            <span class="text-xs text-slate-800 font-semibold block">{{ c.diagnostico_hipotese or 'Em triagem inicial' }}</span>
+                            {% if c.em_investigacao %}
+                            <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[9px] font-extrabold px-2 py-0.5 rounded border border-amber-200 mt-1">
+                                <span>🔍</span> Em Investigação
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 text-center">
+                            {% if c.prioridade == 'Alta / Urgente' %}
+                            <span class="bg-rose-100 text-rose-800 text-[10px] font-black px-2.5 py-1 rounded-full border border-rose-200">
+                                🚨 Alta / Urgente
+                            </span>
+                            {% elif c.prioridade == 'Média' %}
+                            <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-1 rounded-full border border-amber-200">
+                                Média
+                            </span>
+                            {% else %}
+                            <span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                                Baixa
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 text-center">
+                            <form action="{{ url_for('aee.alterar_status_espera', municipio_slug=g.municipio.slug, id=c.id) }}" method="POST">
+                                <select name="novo_status" onchange="this.form.submit()"
+                                        class="text-[10px] font-bold rounded-lg px-2 py-1 border outline-none cursor-pointer
+                                        {% if c.status == 'Aguardando Vaga' %}bg-amber-50 text-amber-800 border-amber-200
+                                        {% elif c.status == 'Chamado/Convocado' %}bg-blue-50 text-blue-800 border-blue-200
+                                        {% elif c.status == 'Matriculado no AEE' %}bg-emerald-50 text-emerald-800 border-emerald-200
+                                        {% else %}bg-slate-50 text-slate-700 border-slate-200{% endif %}">
+                                    <option value="Aguardando Vaga" {% if c.status == 'Aguardando Vaga' %}selected{% endif %}>Aguardando Vaga</option>
+                                    <option value="Chamado/Convocado" {% if c.status == 'Chamado/Convocado' %}selected{% endif %}>Chamado / Convocado</option>
+                                    <option value="Em Triagem" {% if c.status == 'Em Triagem' %}selected{% endif %}>Em Triagem</option>
+                                    <option value="Matriculado no AEE" {% if c.status == 'Matriculado no AEE' %}selected{% endif %}>Matriculado no AEE</option>
+                                    <option value="Desistente" {% if c.status == 'Desistente' %}selected{% endif %}>Desistente</option>
+                                </select>
+                            </form>
+                        </td>
+
+                        <td class="py-3.5 px-4 text-right">
+                            <form action="{{ url_for('aee.excluir_espera', municipio_slug=g.municipio.slug, id=c.id) }}" method="POST"
+                                  onsubmit="return confirm('Tem certeza que deseja remover este candidato da lista de espera?');" class="inline">
+                                <button type="submit" class="text-rose-500 hover:text-rose-700 p-1 font-bold text-xs" title="Remover da Lista">
+                                    🗑️
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="py-10 text-center text-slate-400 text-xs">
+                            Nenhum candidato registrado na lista de espera no momento.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL: CADASTRAR NA LISTA DE ESPERA -->
+<div id="modal-novo-espera" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 md:p-8 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div>
+                <h3 class="text-base font-black text-slate-900 tracking-tight">Cadastrar na Lista de Espera AEE</h3>
+                <p class="text-xs text-slate-400">Inserção de candidato na fila de triagem da Sala de Recursos</p>
+            </div>
+            <button onclick="document.getElementById('modal-novo-espera').classList.add('hidden')"
+                    class="text-slate-400 hover:text-slate-600 font-black text-xl leading-none">✕</button>
+        </div>
+
+        <form action="{{ url_for('aee.lista_espera', municipio_slug=g.municipio.slug) }}" method="POST" class="space-y-3.5">
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Nome Completo do Candidato *</label>
+                <input type="text" name="nome_completo" required placeholder="Nome completo da criança/estudante..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Data de Nascimento *</label>
+                    <input type="date" name="data_nascimento" required
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">CPF</label>
+                    <input type="text" name="cpf" placeholder="000.000.000-00"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Número de Telefone / WhatsApp *</label>
+                    <input type="text" name="telefone" required placeholder="(86) 99999-9999"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Nome do Responsável</label>
+                    <input type="text" name="nome_responsavel" placeholder="Mãe, pai ou tutor legal..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Escola de Origem</label>
+                    <input type="text" name="escola_origem" placeholder="Nome da escola..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Ano / Série Escolar</label>
+                    <input type="text" name="ano_serie" placeholder="Ex: 2º Ano Fundamental..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Endereço Residencial</label>
+                <input type="text" name="endereco" placeholder="Rua, número, bairro..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Diagnóstico ou Suspeita Clínica (CID ou Investigação)</label>
+                <input type="text" name="diagnostico_hipotese" placeholder="Ex: TEA, TDAH, Deficiência Intelectual, Transtorno de Linguagem..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="check-invest-espera" name="em_investigacao" value="true"
+                       class="w-4 h-4 text-amber-600 rounded border-slate-300">
+                <label for="check-invest-espera" class="text-xs font-bold text-amber-800 cursor-pointer">
+                    Estudante em Investigação Diagnóstica (sem laudo definitivo ainda)
+                </label>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Prioridade na Fila</label>
+                    <select name="prioridade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                        <option value="Alta / Urgente">🚨 Alta / Urgente (Demanda severa)</option>
+                        <option value="Média" selected>Média (Fluxo regular)</option>
+                        <option value="Baixa">Baixa (Observação)</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Turno de Preferência</label>
+                    <select name="turno_pretendido" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                        <option value="Contraturno" selected>Contraturno Escolar</option>
+                        <option value="Manhã">Manhã</option>
+                        <option value="Tarde">Tarde</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Observações da Triagem</label>
+                <textarea name="observacoes_triagem" rows="2" placeholder="Queixas da escola ou família, encaminhamentos prévios..."
+                          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-novo-espera').classList.add('hidden')"
+                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
+                    Cancelar
+                </button>
+                <button type="submit"
+                        class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-sm">
+                    Salvar na Lista de Espera
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

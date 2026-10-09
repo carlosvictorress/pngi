@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}Sala de AEE — Prontuário & Atendimentos — {{ g.municipio.nome }}{% endblock %}
+{% block header_title %}Módulo Sala de Recursos Multifuncionais (AEE){% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-12 font-sans">
+
+    <!-- BANNER SUPERIOR DA SALA DE RECURSOS / AEE -->
+    <div class="bg-gradient-to-r from-blue-900 via-slate-900 to-indigo-950 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden border border-blue-800/40">
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div class="space-y-2 max-w-3xl">
+                <div class="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 text-[10px] font-bold px-3 py-1 rounded-full border border-blue-400/30 uppercase tracking-widest">
+                    <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                    SALA DE RECURSOS MULTIFUNCIONAIS • ATENDIMENTO EDUCACIONAL ESPECIALIZADO
+                </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Sala de AEE & Prontuário Individual</h1>
+                <p class="text-xs text-slate-300 leading-relaxed font-normal">
+                    Controle individualizado de estudantes com deficiência, TEA, altas habilidades ou em investigação clínica. 
+                    Acompanhe histórico de sessões, presenças, o que e como foi trabalhado e a lista de espera municipal.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2.5 shrink-0">
+                <a href="{{ url_for('aee.lista_espera', municipio_slug=g.municipio.slug) }}" 
+                   class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 transform hover:scale-[1.02]">
+                    <span>⏳</span> Lista de Espera AEE ({{ total_espera }})
+                </a>
+                
+                <a href="{{ url_for('aee.agenda_aee', municipio_slug=g.municipio.slug) }}" 
+                   class="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all border border-white/20 flex items-center gap-2">
+                    <span>🗓️</span> Grade de Horários
+                </a>
+
+                <a href="{{ url_for('aee.painel_aee', municipio_slug=g.municipio.slug) }}" 
+                   class="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all border border-white/20 flex items-center gap-2">
+                    <span>👥</span> Equipe AEE
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- CARDS DE INDICADORES PRINCIPAIS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Alunos Atendidos AEE</span>
+                <div class="text-2xl font-black text-slate-800">{{ total_atendidos }}</div>
+                <span class="text-[10px] text-emerald-600 font-semibold">● Matriculados na rede</span>
+            </div>
+            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                🎒
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Sessões Realizadas</span>
+                <div class="text-2xl font-black text-emerald-600">{{ total_sessoes_geral }}</div>
+                <span class="text-[10px] text-slate-500 font-medium">Atendimentos concluídos</span>
+            </div>
+            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                ✅
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Em Investigação</span>
+                <div class="text-2xl font-black text-amber-600">{{ total_investigacao }}</div>
+                <span class="text-[10px] text-amber-700 font-medium">Suspeitas diagnósticas</span>
+            </div>
+            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                🔍
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Fila de Espera</span>
+                <div class="text-2xl font-black text-rose-600">{{ total_espera }}</div>
+                <span class="text-[10px] text-rose-700 font-medium">Aguardando vaga/triagem</span>
+            </div>
+            <div class="w-12 h-12 bg-rose-50 text-rose-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                ⏳
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE FILTROS E PESQUISA -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Buscar Estudante</label>
+                <input type="text" name="busca" value="{{ busca }}" placeholder="Nome, CPF ou Matrícula..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Unidade Escolar</label>
+                <select name="escola_id" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="">Todas as escolas</option>
+                    {% for esc in escolas %}
+                    <option value="{{ esc.id }}" {% if escola_id == esc.id %}selected{% endif %}>{{ esc.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Diagnóstico / Situação</label>
+                <select name="filtro_diag" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="">Todos os status</option>
+                    <option value="cid" {% if filtro_diag == 'cid' %}selected{% endif %}>Com Laudo Médico / CID</option>
+                    <option value="investigacao" {% if filtro_diag == 'investigacao' %}selected{% endif %}>Em Investigação Diagnóstica</option>
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition-all shadow-sm">
+                    Filtrar Resultados
+                </button>
+                <a href="{{ url_for('aee.sala_recursos', municipio_slug=g.municipio.slug) }}" 
+                   class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all text-center">
+                    Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- TABELA DOS ALUNOS DA SALA DE RECURSOS AEE -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-sm font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+                <span>📚</span> Estudantes Vinculados ao AEE ({{ dados_alunos|length }})
+            </h2>
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Prontuários Pedagógicos Ativos
+            </span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">
+                        <th class="py-3 px-4">Estudante & Filiação</th>
+                        <th class="py-3 px-4">Endereço</th>
+                        <th class="py-3 px-4">Escola / Série / Turma</th>
+                        <th class="py-3 px-4">Diagnóstico / CID</th>
+                        <th class="py-3 px-4 text-center">Sessões Realizadas</th>
+                        <th class="py-3 px-4 text-center">Assiduidade</th>
+                        <th class="py-3 px-4 text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs text-slate-700">
+                    {% for item in dados_alunos %}
+                    {% set aluno = item.aluno %}
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3.5 px-4">
+                            <div class="font-extrabold text-slate-900 text-xs">{{ aluno.nome }}</div>
+                            <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+                                CPF: {{ aluno.cpf or 'Não informado' }} • Nasc: {{ aluno.data_nascimento or 'N/A' }}
+                            </div>
+                            <div class="text-[10px] text-slate-500 mt-1">
+                                <span class="font-semibold text-slate-600">Mãe:</span> {{ aluno.nome_mae or 'Não informada' }}
+                                {% if aluno.nome_pai %} • <span class="font-semibold text-slate-600">Pai:</span> {{ aluno.nome_pai }}{% endif %}
+                            </div>
+                        </td>
+
+                        <td class="py-3.5 px-4">
+                            <span class="block text-slate-700 text-xs">{{ aluno.endereco or 'Endereço não cadastrado' }}</span>
+                            {% if aluno.bairro %}
+                            <span class="text-[10px] text-slate-400 font-semibold block">Bairro: {{ aluno.bairro }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4">
+                            <span class="font-bold text-slate-800 block text-xs">{{ aluno.escola.nome if aluno.escola else 'Escola Não Definida' }}</span>
+                            <span class="text-[10px] text-blue-600 font-semibold block mt-0.5">
+                                Série/Turma: {{ aluno.turma }} {% if aluno.etapa_ensino %}({{ aluno.etapa_ensino }}){% endif %}
+                            </span>
+                        </td>
+
+                        <td class="py-3.5 px-4">
+                            {% if aluno.cid %}
+                            <span class="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] font-extrabold px-2.5 py-1 rounded-md border border-emerald-200">
+                                <span>📋</span> CID: {{ aluno.cid }}
+                            </span>
+                            {% endif %}
+                            
+                            {% if aluno.em_investigacao %}
+                            <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[10px] font-extrabold px-2.5 py-1 rounded-md border border-amber-200 mt-1">
+                                <span>🔍</span> Em Investigação
+                            </span>
+                            {% endif %}
+
+                            {% if not aluno.cid and not aluno.em_investigacao %}
+                            <span class="text-[10px] text-slate-400 italic">Deficiência: {{ aluno.tipo_deficiencia or 'Em acolhimento' }}</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 text-center">
+                            <span class="inline-block bg-slate-100 text-slate-800 font-black px-2.5 py-1 rounded-lg text-xs">
+                                {{ item.total_realizadas }} sessões
+                            </span>
+                            {% if item.total_faltas > 0 %}
+                            <span class="text-[10px] text-rose-500 font-semibold block mt-0.5">({{ item.total_faltas }} faltas)</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="py-3.5 px-4 text-center">
+                            <div class="inline-flex items-center gap-1.5 font-bold text-xs {% if item.taxa_presenca >= 75 %}text-emerald-600{% elif item.taxa_presenca >= 50 %}text-amber-600{% else %}text-rose-600{% endif %}">
+                                <span class="w-1.5 h-1.5 rounded-full {% if item.taxa_presenca >= 75 %}bg-emerald-500{% elif item.taxa_presenca >= 50 %}bg-amber-500{% else %}bg-rose-500{% endif %}"></span>
+                                {{ item.taxa_presenca }}%
+                            </div>
+                        </td>
+
+                        <td class="py-3.5 px-4 text-right">
+                            <a href="{{ url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id) }}"
+                               class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-3 py-1.5 rounded-lg text-xs transition-all shadow-sm">
+                                <span>Ver Prontuário</span>
+                                <span>↗</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="py-10 text-center text-slate-400 text-xs">
+                            Nenhum estudante localizado com os filtros selecionados na Sala de Recursos.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

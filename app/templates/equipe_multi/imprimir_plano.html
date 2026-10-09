@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ata Mensal e Plano de Ação — {{ plano.titulo }} — {{ g.municipio.nome }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { font-size: 11pt; background: #fff !important; }
+            @page { margin: 15mm 20mm; size: A4; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 p-4 md:p-10 font-sans text-slate-800 antialiased">
+
+    <!-- BOTÕES NO-PRINT -->
+    <div class="max-w-4xl mx-auto mb-6 flex justify-between items-center no-print">
+        <a href="javascript:history.back()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 rounded-xl text-xs font-bold shadow">
+            ← Voltar
+        </a>
+        <button onclick="window.print()" class="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-xl text-xs font-extrabold shadow-md flex items-center gap-2">
+            <span>🖨️</span> Imprimir Relatório Oficial para a Gestão
+        </button>
+    </div>
+
+    <!-- FOLHA TIMBRADA -->
+    <div class="max-w-4xl mx-auto bg-white p-8 md:p-14 rounded-3xl shadow-lg border border-slate-200 print:border-none print:shadow-none print:p-0 space-y-6">
+        
+        <!-- CABEÇALHO OFICIAL DO MUNICÍPIO -->
+        <div class="border-b-2 border-slate-900 pb-5 flex items-start justify-between">
+            <div class="space-y-1">
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 block">
+                    ESTADO DO {{ g.municipio.estado }} • PREFEITURA MUNICIPAL DE {{ g.municipio.nome|upper }}
+                </span>
+                <h1 class="text-base font-black text-slate-900 tracking-tight">
+                    SECRETARIA MUNICIPAL DE EDUCAÇÃO • EQUIPE MULTIDISCIPLINAR DE APOIO ESCOLAR
+                </h1>
+                <span class="text-xs font-black text-purple-900 uppercase block tracking-wider mt-1">
+                    RELATÓRIO MENSAL DE ESTUDO DE CASOS E PLANO DE AÇÃO INSTITUCIONAL (LEI Nº 13.935/2019)
+                </span>
+            </div>
+
+            <div class="text-right space-y-1">
+                <div class="inline-block bg-slate-900 text-white text-[9px] font-mono font-bold px-2.5 py-1 rounded">
+                    DOC: {{ plano.chave_documento or 'PLANO-MULTI' }}
+                </div>
+                <div class="text-[9px] text-slate-400 font-mono">
+                    Exercício: {{ plano.mes_referencia }}/{{ plano.ano_referencia }}
+                </div>
+            </div>
+        </div>
+
+        <!-- DADOS DA SESSÃO TÉCNICA -->
+        <div class="bg-purple-50/70 p-4 rounded-xl border border-purple-200 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+            <div>
+                <span class="text-[9px] font-bold uppercase text-purple-800 block">Competência</span>
+                <span class="font-extrabold text-slate-900 text-sm block">{{ plano.mes_referencia }} de {{ plano.ano_referencia }}</span>
+            </div>
+
+            <div>
+                <span class="text-[9px] font-bold uppercase text-purple-800 block">Data da Reunião</span>
+                <span class="font-semibold text-slate-800 block">{{ plano.data_reuniao.strftime('%d/%m/%Y') }}</span>
+            </div>
+
+            <div>
+                <span class="text-[9px] font-bold uppercase text-purple-800 block">Local</span>
+                <span class="font-semibold text-slate-800 block">{{ plano.local_reuniao }}</span>
+            </div>
+        </div>
+
+        <!-- PROFISSIONAIS PARTICIPANTES -->
+        <div class="space-y-1 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1">
+                1. Membros da Equipe Técnica Presentes
+            </h3>
+            <p class="text-slate-800 leading-relaxed font-semibold">
+                {{ plano.profissionais_presentes }}
+            </p>
+        </div>
+
+        <!-- ESTUDO DE CASOS CLÍNICOS E PEDAGÓGICOS -->
+        <div class="space-y-3 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1 flex items-center justify-between">
+                <span>2. Estudo de Casos de Estudantes Discutidos</span>
+                <span class="text-[10px] text-slate-500 font-normal">({{ casos|length }} casos analisados)</span>
+            </h3>
+
+            {% if casos %}
+            <div class="space-y-2.5">
+                {% for c in casos %}
+                <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-1">
+                    <div class="flex items-center justify-between font-bold text-slate-900">
+                        <span>• Estudante: {{ c.aluno_nome }}</span>
+                        {% if c.diagnostico %}<span class="text-[10px] text-purple-800 font-bold bg-white px-2 py-0.5 rounded border border-slate-200">{{ c.diagnostico }}</span>{% endif %}
+                    </div>
+                    <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line pl-3">
+                        <strong class="text-slate-800">Direcionamento:</strong> {{ c.sintese }}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-slate-500 italic pl-3">
+                Discussão e alinhamento geral do fluxo institucional da rede sem especificação nominal nesta ata.
+            </p>
+            {% endif %}
+        </div>
+
+        <!-- DELIBERAÇÕES SETORIAIS POR ESPECIALIDADE -->
+        <div class="space-y-4 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1">
+                3. Planos de Intervenção por Especialidade Técnica
+            </h3>
+
+            <!-- PSICOLOGIA -->
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                <span class="font-black text-indigo-900 text-[11px] uppercase block">
+                    🧠 Psicologia Escolar e Educacional
+                </span>
+                <p class="text-slate-800 leading-relaxed font-normal whitespace-pre-line text-justify">
+                    {{ plano.acoes_psicologia or 'Acompanhamento preventivo e acolhimentos agendados.' }}
+                </p>
+            </div>
+
+            <!-- PSICOPEDAGOGIA -->
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                <span class="font-black text-emerald-900 text-[11px] uppercase block">
+                    🧩 Psicopedagogia Clínica e Institucional
+                </span>
+                <p class="text-slate-800 leading-relaxed font-normal whitespace-pre-line text-justify">
+                    {{ plano.acoes_psicopedagogia or 'Avaliações de aprendizagem e mediação curricular.' }}
+                </p>
+            </div>
+
+            <!-- SERVIÇO SOCIAL -->
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                <span class="font-black text-amber-900 text-[11px] uppercase block">
+                    🤝 Serviço Social na Educação
+                </span>
+                <p class="text-slate-800 leading-relaxed font-normal whitespace-pre-line text-justify">
+                    {{ plano.acoes_servico_social or 'Visitas domiciliares e articulações com a rede socioassistencial.' }}
+                </p>
+            </div>
+        </div>
+
+        <!-- DELIBERAÇÕES PARA A GESTÃO MUNICIPAL -->
+        <div class="space-y-1.5 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1">
+                4. Recomendações e Encaminhamentos à Gestão Escolar e Secretaria de Educação
+            </h3>
+            <p class="text-slate-800 leading-relaxed font-normal whitespace-pre-line text-justify">
+                {{ plano.deliberacoes_gerais or 'Deliberações acordadas em sessão ordinária da equipe.' }}
+            </p>
+        </div>
+
+        {% if plano.metas_proximo_mes %}
+        <div class="space-y-1.5 text-xs">
+            <h3 class="font-black text-slate-900 uppercase tracking-wider text-[11px] border-b border-slate-200 pb-1">
+                5. Metas Prioritárias do Próximo Mês
+            </h3>
+            <p class="text-slate-800 leading-relaxed font-normal whitespace-pre-line text-justify">
+                {{ plano.metas_proximo_mes }}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- FOLHA OFICIAL DE ASSINATURAS DA EQUIPE TÉCNICA E DA GESTÃO -->
+        <div class="pt-12 space-y-8">
+            <div class="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center border-b border-slate-200 pb-2">
+                ASSINATURAS DE HOMOLOGAÇÃO E CIÊNCIA DA GESTÃO
+            </div>
+
+            <div class="grid grid-cols-2 gap-8 text-center text-xs">
+                <div class="space-y-1">
+                    <div class="border-b border-slate-800 w-48 mx-auto"></div>
+                    <span class="font-extrabold text-slate-900 block text-[11px]">Coordenação Multiprofissional</span>
+                    <span class="text-[9px] text-slate-500 uppercase">Secretaria de Educação</span>
+                </div>
+
+                <div class="space-y-1">
+                    <div class="border-b border-slate-800 w-48 mx-auto"></div>
+                    <span class="font-extrabold text-slate-900 block text-[11px]">Psicólogo(a) Responsável</span>
+                    <span class="text-[9px] text-slate-500 uppercase">CRP / Equipe Multi</span>
+                </div>
+
+                <div class="space-y-1">
+                    <div class="border-b border-slate-800 w-48 mx-auto"></div>
+                    <span class="font-extrabold text-slate-900 block text-[11px]">Psicopedagogo(a) Responsável</span>
+                    <span class="text-[9px] text-slate-500 uppercase">ABPp / Equipe Multi</span>
+                </div>
+
+                <div class="space-y-1">
+                    <div class="border-b border-slate-800 w-48 mx-auto"></div>
+                    <span class="font-extrabold text-slate-900 block text-[11px]">Assistente Social Responsável</span>
+                    <span class="text-[9px] text-slate-500 uppercase">CRESS / Equipe Multi</span>
+                </div>
+            </div>
+
+            <div class="text-center pt-4 text-[9px] font-mono text-slate-400">
+                Documento Institucional timbrado • Chave de Autenticidade: {{ plano.chave_documento or 'PLANO-MULTI' }} • {{ g.municipio.nome }} — {{ g.municipio.estado }}
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

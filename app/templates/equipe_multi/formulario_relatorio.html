@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Relatório & Encaminhamento IA — Equipe Multi — {{ g.municipio.nome }}{% endblock %}
+{% block header_title %}Emissão de Relatório de Escuta Qualificada com IA{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6 pb-12 font-sans">
+
+    <!-- CABEÇALHO -->
+    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-blue-200">
+                GERAÇÃO TÉCNICA ASSISTIDA POR INTELIGÊNCIA ARTIFICIAL
+            </div>
+            <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                Relatório de Escuta Qualificada & Guia de Encaminhamento
+            </h1>
+            <p class="text-xs text-slate-500">
+                Preencha os dados essenciais e clique no botão de IA para redigir a minuta técnica institucional completa.
+            </p>
+        </div>
+
+        <a href="{{ url_for('equipe_multi.listar_relatorios', municipio_slug=g.municipio.slug) }}"
+           class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all shrink-0">
+            ← Voltar para Relatórios
+        </a>
+    </div>
+
+    <!-- PAINEL ASSISTENTE DE IA DESTAQUE -->
+    <div class="bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-950 p-6 rounded-3xl text-white shadow-xl space-y-4 border border-indigo-700/50">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-blue-500/30 border border-blue-400/40 flex items-center justify-center text-base">
+                    ✨
+                </div>
+                <div>
+                    <h3 class="text-sm font-black text-white">Assistente de Redação Técnica com IA</h3>
+                    <span class="text-[10px] text-blue-200 font-medium">Estruturação de termos técnicos nos padrões SUAS, SUS e ECA</span>
+                </div>
+            </div>
+            <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                IA Ativa
+            </span>
+        </div>
+
+        <p class="text-xs text-slate-300 leading-relaxed font-normal">
+            Selecione o estudante abaixo, defina o motivo e o órgão de destino. Em seguida, clique em 
+            <strong class="text-white">"Gerar Minuta com IA"</strong> para preencher automaticamente a síntese técnica, contexto e providências.
+        </p>
+
+        <button type="button" id="btn-gerar-ia" onclick="acionarIA()"
+                class="bg-white hover:bg-slate-100 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 transform hover:scale-[1.01]">
+            <span class="text-base">✨</span>
+            <span id="texto-btn-ia">Gerar Minuta Técnica com Assistente de IA</span>
+        </button>
+    </div>
+
+    <!-- FORMULÁRIO PRINCIPAL -->
+    <form action="{{ url_for('equipe_multi.novo_relatorio_escuta', municipio_slug=g.municipio.slug) }}" method="POST" class="space-y-6">
+        <input type="hidden" name="gerado_com_ia" id="input-gerado-com-ia" value="false">
+
+        <!-- 1. DADOS DE DESTINO E IDENTIFICAÇÃO -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
+                1. DESTINO DO ENCAMINHAMENTO & ESTUDANTE
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Tipo de Documento *</label>
+                    <select name="tipo_documento" id="select-tipo-doc"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Relatório de Escuta Qualificada">Relatório de Escuta Qualificada</option>
+                        <option value="Guia de Encaminhamento Intersetorial">Guia de Encaminhamento Intersetorial</option>
+                        <option value="Parecer Técnico Multiprofissional">Parecer Técnico Multiprofissional</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1 md:col-span-2">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Estudante *</label>
+                    <select name="aluno_id" id="select-aluno-id" required
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Selecione o estudante...</option>
+                        {% for al in alunos %}
+                        <option value="{{ al.id }}" {% if aluno_selecionado and aluno_selecionado.id == al.id %}selected{% endif %}>
+                            {{ al.nome }} ({{ al.turma }} — {{ al.escola.nome if al.escola else 'Rede Municipal' }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Órgão de Destino da Rede Municipal *</label>
+                    <input type="text" name="orgao_destino" id="input-orgao-destino" required
+                           list="lista-orgaos" placeholder="Ex: CAPS Infantil, CRAS, Conselho Tutelar, Neuropediatria..."
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:ring-2 focus:ring-blue-500 font-semibold">
+                    <datalist id="lista-orgaos">
+                        <option value="CAPS Infantil (Centro de Atenção Psicossocial Infantojuvenil)">
+                        <option value="CRAS (Centro de Referência de Assistência Social)">
+                        <option value="CREAS (Centro de Referência Especializado de Assistência Social)">
+                        <option value="Conselho Tutelar Municipal">
+                        <option value="Ambulatório de Neuropediatria SUS">
+                        <option value="Estratégia Saúde da Família (UBS / Posto de Saúde)">
+                        <option value="Vara da Infância e Juventude">
+                    </datalist>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Grau de Urgência</label>
+                    <select name="urgencia" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:ring-2 focus:ring-blue-500 font-bold">
+                        <option value="Urgente">🚨 Urgente (Risco ou violação iminente de direitos)</option>
+                        <option value="Média" selected>Média (Fluxo regular intersetorial)</option>
+                        <option value="Rotina">Rotina (Acompanhamento e suporte continuado)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="space-y-1 pt-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Motivo / Queixa Principal da Demanda *</label>
+                <input type="text" name="motivo_demanda" id="input-motivo-demanda" required
+                       placeholder="Ex: Dificuldade acentuada de regulação emocional, suspeita de TEA, isolamento social, evasão..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+        </div>
+
+        <!-- 2. CONTEÚDO TÉCNICO GERADO / EDITÁVEL -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-5">
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
+                2. PARECER TÉCNICO & RELATO DA ESCUTA
+            </h2>
+
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-800">Síntese Técnica da Escuta Qualificada *</label>
+                <textarea name="sintese_escuta" id="textarea-sintese" rows="4" required
+                          placeholder="Relato técnico dos pontos apurados durante a escuta com o estudante e seus familiares..."
+                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-800">Situação Contextual (Escolar, Familiar e Social)</label>
+                <textarea name="situacao_contextual" id="textarea-contexto" rows="3"
+                          placeholder="Contextualização da dinâmica da sala de aula, rotina doméstica e apoio parental..."
+                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-800">Análise Técnica / Hipótese / Vulnerabilidade</label>
+                <textarea name="hipotese_ou_vulnerabilidade" id="textarea-hipotese" rows="3"
+                          placeholder="Parecer técnico da equipe multiprofissional sobre as necessidades do estudante..."
+                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-800">Providências Recomendadas & Solicitação ao Órgão Destinatário *</label>
+                <textarea name="providencias_recomendadas" id="textarea-providencias" rows="4" required
+                          placeholder="Solicitações específicas formuladas ao órgão de destino (ex: agendamento de triagem, retorno de contrarreferência)..."
+                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="{{ url_for('equipe_multi.listar_relatorios', municipio_slug=g.municipio.slug) }}"
+               class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all">
+                Cancelar
+            </a>
+            <button type="submit"
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-md transform hover:scale-[1.01]">
+                Emitir Documento Institucional com Chave Autêntica
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+async function acionarIA() {
+    const alunoId = document.getElementById('select-aluno-id').value;
+    const motivo = document.getElementById('input-motivo-demanda').value;
+    const orgao = document.getElementById('input-orgao-destino').value;
+    const tipoDoc = document.getElementById('select-tipo-doc').value;
+    const btn = document.getElementById('btn-gerar-ia');
+    const textoBtn = document.getElementById('texto-btn-ia');
+
+    if (!alunoId) {
+        alert("Por favor, selecione primeiro o estudante para que a IA possa processar seus dados escolares.");
+        return;
+    }
+
+    // Feedback visual de carregamento
+    btn.disabled = true;
+    textoBtn.innerText = "Consultando Assistente de IA... Aguarde";
+
+    try {
+        const resp = await fetch("{{ url_for('equipe_multi.api_gerar_ia', municipio_slug=g.municipio.slug) }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                aluno_id: parseInt(alunoId),
+                motivo_demanda: motivo || "Acompanhamento multiprofissional escolar",
+                orgao_destino: orgao || "Rede Municipal Intersetorial",
+                tipo_documento: tipoDoc
+            })
+        });
+
+        const data = await resp.json();
+        if (data.sucesso && data.resultado) {
+            document.getElementById('textarea-sintese').value = data.resultado.sintese_escuta;
+            document.getElementById('textarea-contexto').value = data.resultado.situacao_contextual;
+            document.getElementById('textarea-hipotese').value = data.resultado.hipotese_ou_vulnerabilidade;
+            document.getElementById('textarea-providencias').value = data.resultado.providencias_recomendadas;
+            document.getElementById('input-gerado-com-ia').value = "true";
+
+            textoBtn.innerText = "✨ Minuta Gerada com Sucesso pela IA!";
+            setTimeout(() => {
+                textoBtn.innerText = "Regerar Minuta com IA";
+                btn.disabled = false;
+            }, 3000);
+        } else {
+            alert("Erro ao acionar a IA. Você pode preencher manualmente os campos.");
+            btn.disabled = false;
+            textoBtn.innerText = "Gerar Minuta com IA";
+        }
+    } catch (e) {
+        alert("Erro na conexão com o serviço de IA: " + e.message);
+        btn.disabled = false;
+        textoBtn.innerText = "Gerar Minuta com IA";
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Reunião Mensal & Plano de Ação — Equipe Multi — {{ g.municipio.nome }}{% endblock %}
+{% block header_title %}Registro da Reunião Mensal & Plano de Ação de Casos{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6 pb-12 font-sans">
+
+    <!-- CABEÇALHO -->
+    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-purple-200">
+                PLANEJAMENTO ESTRATÉGICO & PRESTAÇÃO DE CONTAS
+            </div>
+            <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                Ata Técnica Mensal & Plano de Intervenção
+            </h1>
+            <p class="text-xs text-slate-500">
+                Registro oficial da reunião mensal da equipe multidisciplinar com estudo de casos clínicos e metas setoriais.
+            </p>
+        </div>
+
+        <a href="{{ url_for('equipe_multi.listar_planos_acao', municipio_slug=g.municipio.slug) }}"
+           class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all shrink-0">
+            ← Voltar para Planos de Ação
+        </a>
+    </div>
+
+    <!-- FORMULÁRIO PRINCIPAL -->
+    <form action="{{ url_for('equipe_multi.novo_plano_acao', municipio_slug=g.municipio.slug) }}" method="POST" class="space-y-6">
+
+        <!-- 1. DADOS DA REUNIÃO MENSAL -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
+                1. DADOS DE IDENTIFICAÇÃO DA REUNIÃO MENSAL
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="space-y-1 md:col-span-2">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Título do Encontro / Reunião *</label>
+                    <input type="text" name="titulo" required
+                           value="Reunião Mensal de Alinhamento e Estudo de Casos — {{ mes_atual }}/{{ ano_atual }}"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Mês de Referência *</label>
+                    <select name="mes_referencia" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="Janeiro">Janeiro</option>
+                        <option value="Fevereiro">Fevereiro</option>
+                        <option value="Março">Março</option>
+                        <option value="Abril">Abril</option>
+                        <option value="Maio">Maio</option>
+                        <option value="Junho">Junho</option>
+                        <option value="Julho">Julho</option>
+                        <option value="Agosto">Agosto</option>
+                        <option value="Setembro">Setembro</option>
+                        <option value="Outubro" selected>Outubro</option>
+                        <option value="Novembro">Novembro</option>
+                        <option value="Dezembro">Dezembro</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Ano de Exercício</label>
+                    <input type="number" name="ano_referencia" value="{{ ano_atual }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Data da Realização</label>
+                    <input type="date" name="data_reuniao" value="{{ now.strftime('%Y-%m-%d') }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Local da Reunião</label>
+                    <input type="text" name="local_reuniao" value="Secretaria Municipal de Educação" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none">
+                </div>
+            </div>
+
+            <div class="space-y-1 pt-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Profissionais da Equipe Presentes * (Nomes e Funções)</label>
+                <textarea name="profissionais_presentes" rows="2" required placeholder="Ex: Dr. João da Silva (Psicólogo Escolar), Profa. Maria Santos (Psicopedagoga), Dra. Ana Oliveira (Assistente Social)..."
+                          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"></textarea>
+            </div>
+        </div>
+
+        <!-- 2. ESTUDO DE CASOS CLÍNICOS / PEDAGÓGICOS DISCUTIDOS -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                <h2 class="text-xs font-extrabold uppercase tracking-wider text-purple-700 flex items-center gap-1.5">
+                    <span>2.</span> ESTUDO DE CASOS DE ESTUDANTES DISCUTIDOS NA REUNIÃO
+                </h2>
+                <button type="button" onclick="adicionarLinhaCaso()"
+                        class="bg-purple-100 hover:bg-purple-200 text-purple-800 text-[10px] font-bold px-3 py-1 rounded-lg transition-all">
+                    + Adicionar Estudante Discutido
+                </button>
+            </div>
+
+            <p class="text-[11px] text-slate-400">
+                Liste os estudantes prioritários analisados pela equipe nesta sessão de estudo de casos:
+            </p>
+
+            <div id="container-casos" class="space-y-3">
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3 item-caso">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="space-y-1 md:col-span-2">
+                            <label class="text-[9px] font-bold uppercase text-slate-500">Nome do Estudante / Escola</label>
+                            <input type="text" name="caso_aluno_nome[]" placeholder="Nome do aluno e escola..."
+                                   class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 font-semibold">
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] font-bold uppercase text-slate-500">Diagnóstico / Situação</label>
+                            <input type="text" name="caso_aluno_diag[]" placeholder="Ex: TEA nível 2 / Em investigação..."
+                                   class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[9px] font-bold uppercase text-slate-500">Síntese do Caso e Encaminhamento Definido na Reunião</label>
+                        <textarea name="caso_aluno_sintese[]" rows="2" placeholder="Resumo dos desafios observados e o plano de ação acordado em conjunto pela equipe..."
+                                  class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" name="casos_discutidos_json" id="input-casos-json">
+        </div>
+
+        <!-- 3. PLANOS DE AÇÃO SETORIAIS ESPECÍFICOS -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-5">
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
+                3. DELIBERAÇÕES & PLANOS DE AÇÃO POR ESPECIALIDADE
+            </h2>
+
+            <!-- AÇÕES DA PSICOLOGIA -->
+            <div class="space-y-1.5 p-4 bg-indigo-50/40 rounded-2xl border border-indigo-100">
+                <label class="text-xs font-extrabold text-indigo-900 flex items-center gap-1.5">
+                    <span>🧠</span> Ações & Metas Definidas para a Psicologia Escolar
+                </label>
+                <textarea name="acoes_psicologia" rows="3" placeholder="Intervenções terapêuticas, escutas agendadas, oficinas de regulação emocional e suporte parental previstos..."
+                          class="w-full bg-white border border-indigo-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed"></textarea>
+            </div>
+
+            <!-- AÇÕES DA PSICOPEDAGOGIA -->
+            <div class="space-y-1.5 p-4 bg-emerald-50/40 rounded-2xl border border-emerald-100">
+                <label class="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
+                    <span>🧩</span> Ações & Metas Definidas para a Psicopedagogia
+                </label>
+                <textarea name="acoes_psicopedagogia" rows="3" placeholder="Avaliações cognitivas, visitas de orientação pedagógica aos professores regentes e adequação de PEI/PAEE..."
+                          class="w-full bg-white border border-emerald-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 leading-relaxed"></textarea>
+            </div>
+
+            <!-- AÇÕES DO SERVIÇO SOCIAL -->
+            <div class="space-y-1.5 p-4 bg-amber-50/40 rounded-2xl border border-amber-100">
+                <label class="text-xs font-extrabold text-amber-900 flex items-center gap-1.5">
+                    <span>🤝</span> Ações & Metas Definidas para o Serviço Social
+                </label>
+                <textarea name="acoes_servico_social" rows="3" placeholder="Visitas domiciliares prioritárias, reuniões de rede com CRAS/CREAS, auxílio no acesso ao BPC e acompanhamento familiar..."
+                          class="w-full bg-white border border-amber-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"></textarea>
+            </div>
+
+            <!-- DELIBERAÇÕES GERAIS E GESTÃO -->
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-800">Deliberações Gerais & Encaminhamentos para a Gestão Escolar / Secretaria</label>
+                <textarea name="deliberacoes_gerais" rows="3" placeholder="Recomendações técnicas à Secretaria de Educação, solicitações de formação docente ou adequações na rede..."
+                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"></textarea>
+            </div>
+
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-800">Metas Prioritárias para o Próximo Mês</label>
+                <textarea name="metas_proximo_mes" rows="2" placeholder="Principais metas e compromissos firmados para a próxima reunião de alinhamento..."
+                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"></textarea>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="{{ url_for('equipe_multi.listar_planos_acao', municipio_slug=g.municipio.slug) }}"
+               class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all">
+                Cancelar
+            </a>
+            <button type="submit" onclick="prepararEnvioJson()"
+                    class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-md transform hover:scale-[1.01]">
+                Homologar Reunião Mensal & Salvar Plano
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+function adicionarLinhaCaso() {
+    const container = document.getElementById('container-casos');
+    const div = document.createElement('div');
+    div.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3 item-caso';
+    div.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="space-y-1 md:col-span-2">
+                <label class="text-[9px] font-bold uppercase text-slate-500">Nome do Estudante / Escola</label>
+                <input type="text" name="caso_aluno_nome[]" placeholder="Nome do aluno e escola..."
+                       class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 font-semibold">
+            </div>
+            <div class="space-y-1">
+                <label class="text-[9px] font-bold uppercase text-slate-500">Diagnóstico / Situação</label>
+                <input type="text" name="caso_aluno_diag[]" placeholder="Ex: TEA nível 2 / Em investigação..."
+                       class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+        </div>
+        <div class="space-y-1">
+            <label class="text-[9px] font-bold uppercase text-slate-500">Síntese do Caso e Encaminhamento Definido na Reunião</label>
+            <textarea name="caso_aluno_sintese[]" rows="2" placeholder="Resumo dos desafios observados e o plano de ação acordado em conjunto pela equipe..."
+                      class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"></textarea>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function prepararEnvioJson() {
+    const nomes = document.getElementsByName('caso_aluno_nome[]');
+    const diags = document.getElementsByName('caso_aluno_diag[]');
+    const sinteses = document.getElementsByName('caso_aluno_sintese[]');
+
+    const lista = [];
+    for (let i = 0; i < nomes.length; i++) {
+        if (nomes[i].value.trim()) {
+            lista.push({
+                aluno_nome: nomes[i].value.trim(),
+                diagnostico: diags[i] ? diags[i].value.trim() : '',
+                sintese: sinteses[i] ? sinteses[i].value.trim() : ''
+            });
+        }
+    }
+    document.getElementById('input-casos-json').value = JSON.stringify(lista);
+}
+</script>
+{% endblock %}

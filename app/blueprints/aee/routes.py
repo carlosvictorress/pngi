@@ -5,7 +5,8 @@ from flask_login import login_required, current_user
 from app import db
 from app.models import (
     Municipio, Aluno, ProfissionalAEE, PlanoAEE, 
-    AgendaAEE, EvolucaoAEE, DocumentoAEE, EncaminhamentoAEE, Escola
+    AgendaAEE, EvolucaoAEE, DocumentoAEE, EncaminhamentoAEE, Escola,
+    AtendimentoAee, ListaEsperaAEE
 )
 
 aee_bp = Blueprint('aee', __name__)
@@ -356,3 +357,293 @@ def documentos_aee():
     documentos = DocumentoAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(DocumentoAEE.data_upload.desc()).all()
 
     return render_template('aee/documentos_aee.html', alunos=alunos, profissionais=profissionais, documentos=documentos)
+
+
+# =========================================================================
+# 7. MÓDULO EXCLUSIVO: SALA DE RECURSOS / AEE (PRONTUÁRIO & ACOMPANHAMENTO)
+# =========================================================================
+@aee_bp.route('/sala-recursos')
+@login_required
+def sala_recursos():
+    """Painel Geral da Sala de AEE com dados escolares, diagnósticos e métricas de sessões."""
+    busca = request.args.get('busca', '').strip()
+    escola_id = request.args.get('escola_id', type=int)
+    filtro_diag = request.args.get('filtro_diag', '') # 'cid', 'investigacao', 'todos'
+
+    query = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True)
+
+    if busca:
+        query = query.filter(
+            (Aluno.nome.ilike(f"%{busca}%")) | 
+            (Aluno.cpf.ilike(f"%{busca}%")) | 
+            (Aluno.matricula.ilike(f"%{busca}%"))
+        )
+    if escola_id:
+        query = query.filter(Aluno.escola_id == escola_id)
+    if filtro_diag == 'cid':
+        query = query.filter(Aluno.cid.isnot(None), Aluno.cid != '')
+    elif filtro_diag == 'investigacao':
+        query = query.filter(Aluno.em_investigacao == True)
+
+    alunos = query.order_by(Aluno.nome).all()
+    escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
+
+    # Cálculo dos dados de acompanhamento para cada aluno
+    dados_alunos = []
+    total_sessoes_geral = 0
+    total_investigacao = 0
+
+    for al in alunos:
+        sessoes = AtendimentoAee.query.filter_by(aluno_id=al.id).order_by(AtendimentoAee.data_atendimento.desc()).all()
+        sessoes_realizadas = [s for s in sessoes if s.compareceu or s.frequencia]
+        faltas = [s for s in sessoes if not (s.compareceu or s.frequencia)]
+        
+        total_sessoes_geral += len(sessoes_realizadas)
+        if al.em_investigacao:
+            total_investigacao += 1
+
+        dados_alunos.append({
+            'aluno': al,
+            'total_realizadas': len(sessoes_realizadas),
+            'total_faltas': len(faltas),
+            'total_agendadas': len(sessoes),
+            'taxa_presenca': int((len(sessoes_realizadas) / len(sessoes) * 100)) if sessoes else 100,
+            'ultima_sessao': sessoes[0] if sessoes else None
+        })
+
+    # Estatísticas da Fila de Espera
+    total_espera = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Aguardando Vaga').count()
+
+    return render_template(
+        'aee/sala_recursos.html',
+        dados_alunos=dados_alunos,
+        escolas=escolas,
+        total_atendidos=len(alunos),
+        total_sessoes_geral=total_sessoes_geral,
+        total_investigacao=total_investigacao,
+        total_espera=total_espera,
+        busca=busca,
+        escola_id=escola_id,
+        filtro_diag=filtro_diag
+    )
+
+
+@aee_bp.route('/aluno/<int:aluno_id>/prontuario')
+@login_required
+def prontuario_aluno_aee(aluno_id):
+    """
+    Prontuário Individual do Aluno na Sala de AEE.
+    Apresenta dados pessoais completos, pais, endereço, escola, série, CID ou investigação,
+    quantas sessões já foram realizadas e o histórico com o que foi feito e como foi feito.
+    """
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    
+    # Histórico de Atendimentos na Sala de Recursos
+    sessoes = AtendimentoAee.query.filter_by(aluno_id=aluno.id).order_by(AtendimentoAee.data_atendimento.desc(), AtendimentoAee.id.desc()).all()
+    sessoes_realizadas = [s for s in sessoes if s.compareceu or s.frequencia]
+    faltas = [s for s in sessoes if not (s.compareceu or s.frequencia)]
+    
+    total_realizadas = len(sessoes_realizadas)
+    total_faltas = len(faltas)
+    taxa_presenca = int((total_realizadas / len(sessoes) * 100)) if sessoes else 100
+
+    profissionais = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
+
+    return render_template(
+        'aee/prontuario_aluno.html',
+        aluno=aluno,
+        sessoes=sessoes,
+        total_realizadas=total_realizadas,
+        total_faltas=total_faltas,
+        taxa_presenca=taxa_presenca,
+        profissionais=profissionais
+    )
+
+
+@aee_bp.route('/aluno/<int:aluno_id>/sessao/nova', methods=['POST'])
+@login_required
+def lancar_sessao_aee(aluno_id):
+    """Registra uma nova sessão de atendimento na Sala de AEE."""
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+
+    data_str = request.form.get('data_atendimento')
+    try:
+        data_atendimento = datetime.strptime(data_str, '%Y-%m-%d').date() if data_str else datetime.utcnow().date()
+    except Exception:
+        data_atendimento = datetime.utcnow().date()
+
+    compareceu = request.form.get('compareceu') == 'true' or request.form.get('compareceu') == '1' or 'compareceu' in request.form
+    o_que_foi_feito = request.form.get('o_que_foi_feito', '').strip()
+    como_foi_feito = request.form.get('como_foi_feito', '').strip()
+    recursos_utilizados = request.form.get('recursos_utilizados', '').strip()
+    justificativa_falta = request.form.get('justificativa_falta', '').strip()
+    profissional_id = request.form.get('profissional_id', type=int)
+
+    prof_nome = current_user.nome
+    if profissional_id:
+        p_obj = ProfissionalAEE.query.get(profissional_id)
+        if p_obj:
+            prof_nome = p_obj.nome
+
+    nova_sessao = AtendimentoAee(
+        municipio_id=g.municipio.id,
+        aluno_id=aluno.id,
+        data_atendimento=data_atendimento,
+        compareceu=compareceu,
+        frequencia=compareceu,
+        o_que_foi_feito=o_que_foi_feito,
+        como_foi_feito=como_foi_feito,
+        recursos_utilizados=recursos_utilizados,
+        justificativa_falta=justificativa_falta,
+        plano_sessao=o_que_foi_feito,
+        evolucao_registro=como_foi_feito,
+        profissional_id=current_user.id,
+        profissional_nome=prof_nome
+    )
+    db.session.add(nova_sessao)
+    db.session.commit()
+
+    flash(f"Sessão de atendimento de {aluno.nome} registrada com sucesso!", "sucesso")
+    return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+
+@aee_bp.route('/aluno/<int:aluno_id>/atualizar-dados-aee', methods=['POST'])
+@login_required
+def atualizar_dados_aee(aluno_id):
+    """Atualização rápida dos dados pessoais e clínicos do estudante diretamente no prontuário AEE."""
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+
+    aluno.nome = request.form.get('nome', aluno.nome).strip()
+    aluno.cpf = request.form.get('cpf', aluno.cpf).strip()
+    aluno.data_nascimento = request.form.get('data_nascimento', aluno.data_nascimento)
+    aluno.nome_mae = request.form.get('nome_mae', aluno.nome_mae).strip()
+    aluno.nome_pai = request.form.get('nome_pai', aluno.nome_pai).strip()
+    aluno.endereco = request.form.get('endereco', aluno.endereco).strip()
+    aluno.bairro = request.form.get('bairro', aluno.bairro).strip()
+    aluno.turma = request.form.get('turma', aluno.turma).strip()
+    aluno.etapa_ensino = request.form.get('etapa_ensino', aluno.etapa_ensino).strip()
+    
+    # Diagnóstico e Investigação
+    aluno.cid = request.form.get('cid', aluno.cid).strip()
+    aluno.em_investigacao = request.form.get('em_investigacao') == 'on' or request.form.get('em_investigacao') == 'true'
+    aluno.hipotese_diagnostica = request.form.get('hipotese_diagnostica', aluno.hipotese_diagnostica).strip()
+    if request.form.get('tipo_deficiencia'):
+        aluno.tipo_deficiencia = request.form.get('tipo_deficiencia')
+
+    db.session.commit()
+    flash(f"Ficha cadastral de {aluno.nome} atualizada no prontuário da Sala de Recursos!", "sucesso")
+    return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+
+# =========================================================================
+# 8. MÓDULO LISTA DE ESPERA DA SALA DE RECURSOS / AEE
+# =========================================================================
+@aee_bp.route('/lista-espera', methods=['GET', 'POST'])
+@login_required
+def lista_espera():
+    """Gerenciamento da Fila e Lista de Espera da Sala de Recursos Multifuncionais / AEE."""
+    if request.method == 'POST':
+        nome = request.form.get('nome_completo', '').strip()
+        data_nasc = request.form.get('data_nascimento', '').strip()
+        cpf = request.form.get('cpf', '').strip()
+        telefone = request.form.get('telefone', '').strip()
+        nome_resp = request.form.get('nome_responsavel', '').strip()
+        escola_origem = request.form.get('escola_origem', '').strip()
+        ano_serie = request.form.get('ano_serie', '').strip()
+        endereco = request.form.get('endereco', '').strip()
+        diag = request.form.get('diagnostico_hipotese', '').strip()
+        em_invest = request.form.get('em_investigacao') == 'on' or request.form.get('em_investigacao') == 'true'
+        prioridade = request.form.get('prioridade', 'Média')
+        turno = request.form.get('turno_pretendido', 'Contraturno')
+        obs = request.form.get('observacoes_triagem', '').strip()
+
+        if not nome or not telefone:
+            flash("Nome completo e telefone para contato são obrigatórios!", "erro")
+        else:
+            novo_candidato = ListaEsperaAEE(
+                municipio_id=g.municipio.id,
+                nome_completo=nome,
+                data_nascimento=data_nasc,
+                cpf=cpf,
+                telefone=telefone,
+                nome_responsavel=nome_resp,
+                escola_origem=escola_origem,
+                ano_serie=ano_serie,
+                endereco=endereco,
+                diagnostico_hipotese=diag,
+                em_investigacao=em_invest,
+                prioridade=prioridade,
+                turno_pretendido=turno,
+                observacoes_triagem=obs,
+                status='Aguardando Vaga'
+            )
+            db.session.add(novo_candidato)
+            db.session.commit()
+            flash(f"Estudante '{nome}' inserido com sucesso na lista de espera do AEE!", "sucesso")
+            return redirect(url_for('aee.lista_espera', municipio_slug=g.municipio.slug))
+
+    filtro_status = request.args.get('status', '')
+    filtro_prioridade = request.args.get('prioridade', '')
+    busca = request.args.get('busca', '').strip()
+
+    query = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id)
+
+    if filtro_status:
+        query = query.filter(ListaEsperaAEE.status == filtro_status)
+    if filtro_prioridade:
+        query = query.filter(ListaEsperaAEE.prioridade == filtro_prioridade)
+    if busca:
+        query = query.filter(
+            (ListaEsperaAEE.nome_completo.ilike(f"%{busca}%")) | 
+            (ListaEsperaAEE.cpf.ilike(f"%{busca}%")) | 
+            (ListaEsperaAEE.telefone.ilike(f"%{busca}%"))
+        )
+
+    # Ordenação por prioridade (Alta primeiro) e data
+    candidatos = query.order_by(
+        db.case((ListaEsperaAEE.prioridade == 'Alta / Urgente', 1), (ListaEsperaAEE.prioridade == 'Média', 2), else_=3),
+        ListaEsperaAEE.data_solicitacao.asc()
+    ).all()
+
+    total_espera = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Aguardando Vaga').count()
+    total_chamados = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Chamado/Convocado').count()
+    total_matriculados = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Matriculado no AEE').count()
+
+    escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
+
+    return render_template(
+        'aee/lista_espera.html',
+        candidatos=candidatos,
+        total_espera=total_espera,
+        total_chamados=total_chamados,
+        total_matriculados=total_matriculados,
+        filtro_status=filtro_status,
+        filtro_prioridade=filtro_prioridade,
+        busca=busca,
+        escolas=escolas
+    )
+
+
+@aee_bp.route('/lista-espera/<int:id>/status', methods=['POST'])
+@login_required
+def alterar_status_espera(id):
+    """Atualiza o status de um candidato na lista de espera (ex: Chamado, Em Triagem, etc.)."""
+    candidato = ListaEsperaAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
+    novo_status = request.form.get('novo_status')
+    if novo_status:
+        candidato.status = novo_status
+        db.session.commit()
+        flash(f"Status de '{candidato.nome_completo}' alterado para '{novo_status}'!", "sucesso")
+    return redirect(url_for('aee.lista_espera', municipio_slug=g.municipio.slug))
+
+
+@aee_bp.route('/lista-espera/<int:id>/excluir', methods=['POST'])
+@login_required
+def excluir_espera(id):
+    """Remove um registro da lista de espera."""
+    candidato = ListaEsperaAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
+    nome = candidato.nome_completo
+    db.session.delete(candidato)
+    db.session.commit()
+    flash(f"Registro de '{nome}' removido da lista de espera.", "sucesso")
+    return redirect(url_for('aee.lista_espera', municipio_slug=g.municipio.slug))

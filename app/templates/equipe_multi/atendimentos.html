@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Atendimentos SOAP — Equipe Multidisciplinar — {{ g.municipio.nome }}{% endblock %}
+{% block header_title %}Atendimentos Multiprofissionais (Metodologia SOAP){% endblock %}
+
+{% block content %}
+<div class="space-y-6 pb-12 font-sans">
+
+    <!-- CABEÇALHO -->
+    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+            <div class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-purple-200">
+                PRONTUÁRIO MULTIPROFISSIONAL • LEI 13.935/2019
+            </div>
+            <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-1">
+                Registros de Atendimento SOAP Institucional
+            </h1>
+            <p class="text-xs text-slate-500">
+                Acompanhamento clínico-institucional categorizado por Psicologia, Psicopedagogia e Serviço Social.
+            </p>
+        </div>
+
+        <div class="flex gap-2 shrink-0">
+            <a href="{{ url_for('equipe_multi.novo_atendimento_soap', municipio_slug=g.municipio.slug) }}"
+               class="bg-purple-600 hover:bg-purple-700 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 transform hover:scale-[1.02]">
+                <span>➕</span> Novo Atendimento SOAP
+            </a>
+            <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=g.municipio.slug) }}"
+               class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+                Painel Multi
+            </a>
+        </div>
+    </div>
+
+    <!-- FILTROS -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Buscar Estudante ou Texto</label>
+                <input type="text" name="busca" value="{{ busca }}" placeholder="Nome do aluno, queixa, CPF..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Especialidade Técnica</label>
+                <select name="especialidade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 font-bold">
+                    <option value="">Todas as especialidades</option>
+                    <option value="psicologo" {% if especialidade_filtro == 'psicologo' %}selected{% endif %}>🧠 Psicologia Escolar</option>
+                    <option value="psicopedagogo" {% if especialidade_filtro == 'psicopedagogo' %}selected{% endif %}>🧩 Psicopedagogia</option>
+                    <option value="assistente_social" {% if especialidade_filtro == 'assistente_social' %}selected{% endif %}>🤝 Serviço Social</option>
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Filtrar por Estudante</label>
+                <select name="aluno_id" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
+                    <option value="">Todos os estudantes</option>
+                    {% for al in alunos %}
+                    <option value="{{ al.id }}" {% if aluno_filtro == al.id %}selected{% endif %}>{{ al.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition-all shadow-sm">
+                    Filtrar
+                </button>
+                <a href="{{ url_for('equipe_multi.listar_atendimentos', municipio_slug=g.municipio.slug) }}" 
+                   class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all text-center">
+                    Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- LISTAGEM DE ATENDIMENTOS -->
+    <div class="space-y-4">
+        {% for at in atendimentos %}
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4 hover:border-purple-200 transition-all">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-3">
+                    {% if at.especialidade == 'psicologo' %}
+                    <span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-xs font-black px-3 py-1 rounded-full border border-indigo-200">
+                        <span>🧠</span> Psicologia Escolar
+                    </span>
+                    {% elif at.especialidade == 'psicopedagogo' %}
+                    <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-black px-3 py-1 rounded-full border border-emerald-200">
+                        <span>🧩</span> Psicopedagogia
+                    </span>
+                    {% else %}
+                    <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-xs font-black px-3 py-1 rounded-full border border-amber-200">
+                        <span>🤝</span> Serviço Social
+                    </span>
+                    {% endif %}
+
+                    <div>
+                        <h2 class="text-sm font-extrabold text-slate-900">{{ at.aluno.nome }}</h2>
+                        <span class="text-[10px] text-slate-400">Modalidade: {{ at.tipo_sessao }} • {{ at.aluno.turma }} ({{ at.aluno.escola.nome if at.aluno.escola else 'Rede Municipal' }})</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-slate-700 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                        📅 {{ at.data_atendimento.strftime('%d/%m/%Y') }}
+                    </span>
+                    <a href="{{ url_for('equipe_multi.imprimir_atendimento_soap', municipio_slug=g.municipio.slug, id=at.id) }}" target="_blank"
+                       class="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg transition-all">
+                        <span>🖨️</span> Imprimir SOAP
+                    </a>
+                </div>
+            </div>
+
+            <!-- ESTRUTURA SOAP 4 COLUNAS/QUADROS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                
+                <!-- S -->
+                <div class="bg-blue-50/40 p-3.5 rounded-2xl border border-blue-100 space-y-1">
+                    <div class="text-[10px] font-black uppercase text-blue-800 tracking-wider flex items-center gap-1">
+                        <span class="w-4 h-4 rounded bg-blue-600 text-white flex items-center justify-center font-mono text-[9px]">S</span>
+                        Subjetivo
+                    </div>
+                    <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line text-[11px]">
+                        {{ at.soap_subjetivo }}
+                    </p>
+                </div>
+
+                <!-- O -->
+                <div class="bg-emerald-50/40 p-3.5 rounded-2xl border border-emerald-100 space-y-1">
+                    <div class="text-[10px] font-black uppercase text-emerald-800 tracking-wider flex items-center gap-1">
+                        <span class="w-4 h-4 rounded bg-emerald-600 text-white flex items-center justify-center font-mono text-[9px]">O</span>
+                        Objetivo
+                    </div>
+                    <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line text-[11px]">
+                        {{ at.soap_objetivo }}
+                    </p>
+                </div>
+
+                <!-- A -->
+                <div class="bg-amber-50/40 p-3.5 rounded-2xl border border-amber-100 space-y-1">
+                    <div class="text-[10px] font-black uppercase text-amber-800 tracking-wider flex items-center gap-1">
+                        <span class="w-4 h-4 rounded bg-amber-600 text-white flex items-center justify-center font-mono text-[9px]">A</span>
+                        Avaliação Técnica
+                    </div>
+                    <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line text-[11px]">
+                        {{ at.soap_avaliacao }}
+                    </p>
+                </div>
+
+                <!-- P -->
+                <div class="bg-purple-50/40 p-3.5 rounded-2xl border border-purple-100 space-y-1">
+                    <div class="text-[10px] font-black uppercase text-purple-800 tracking-wider flex items-center gap-1">
+                        <span class="w-4 h-4 rounded bg-purple-600 text-white flex items-center justify-center font-mono text-[9px]">P</span>
+                        Plano de Intervenção
+                    </div>
+                    <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line text-[11px]">
+                        {{ at.soap_plano }}
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-slate-100 text-[10px] text-slate-500">
+                <div>
+                    Profissional Relator: <strong class="text-slate-700">{{ at.profissional.nome }}</strong> ({{ at.profissional.perfil|upper }})
+                </div>
+
+                {% if at.encaminhamento_sugerido %}
+                <div class="bg-purple-50 text-purple-800 px-2.5 py-0.5 rounded-md font-semibold border border-purple-200">
+                    Encaminhamento Sugerido: {{ at.encaminhamento_sugerido }}
+                </div>
+                {% endif %}
+
+                {% if at.sigilo_etico %}
+                <span class="text-rose-600 font-bold">🔒 Prontuário sob sigilo ético</span>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-white p-12 text-center rounded-3xl border border-slate-200 text-slate-400 text-xs space-y-2">
+            <span class="text-3xl block">📝</span>
+            <span class="font-bold text-slate-700 block">Nenhum atendimento SOAP localizado com os filtros atuais.</span>
+            <p class="text-[11px] text-slate-400">Clique em "+ Novo Atendimento SOAP" para lançar o primeiro atendimento multiprofissional.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

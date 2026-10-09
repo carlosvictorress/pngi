@@ -90,6 +90,8 @@ class Aluno(db.Model):
     # Filiação e Indicadores Sociais
     nome_mae = db.Column(db.String(100), nullable=True)
     nome_pai = db.Column(db.String(100), nullable=True)
+    endereco = db.Column(db.String(255), nullable=True) # Endereço residencial do estudante
+    bairro = db.Column(db.String(100), nullable=True)   # Bairro residencial
     recebe_bpc = db.Column(db.Boolean, default=False, nullable=True)
 
     # Vínculo Escolar & Censo Regulamentar
@@ -108,6 +110,8 @@ class Aluno(db.Model):
     
     # Mapeamento Clínico & Atendimento Especializado (AEE)
     cid = db.Column(db.String(15), nullable=True)
+    em_investigacao = db.Column(db.Boolean, default=False, nullable=True) # Diagnóstico em investigação
+    hipotese_diagnostica = db.Column(db.String(255), nullable=True)       # Hipótese ou suspeita clínica
     tipo_deficiencia = db.Column(db.String(100), nullable=False)
     possui_tea = db.Column(db.Boolean, default=False, nullable=False)
     possui_superdotacao = db.Column(db.Boolean, default=False, nullable=False)
@@ -255,23 +259,44 @@ class Pei(db.Model):
 
 class AtendimentoAee(db.Model):
     """
-    Módulo 3: Registro de atendimentos na Sala de Recursos.
+    Módulo Sala de AEE: Registro de atendimentos e sessões na Sala de Recursos.
     """
     __tablename__ = 'atendimentos_aee'
 
     id = db.Column(db.Integer, primary_key=True)
-    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=True, index=True)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False, index=True)
+    profissional_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    profissional_nome = db.Column(db.String(150), nullable=True)
     
-    data_atendimento = db.Column(db.Date, nullable=False)
-    horario_inicio = db.Column(db.Time, nullable=False)
-    horario_fim = db.Column(db.Time, nullable=False)
+    data_atendimento = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    horario_inicio = db.Column(db.Time, nullable=True)
+    horario_fim = db.Column(db.Time, nullable=True)
     
+    # Controle de Presença / Frequência
     frequencia = db.Column(db.Boolean, default=True, nullable=False)
-    plano_sessao = db.Column(db.Text, nullable=False)
-    evolucao_registro = db.Column(db.Text, nullable=False)
-    recursos_utilizados = db.Column(db.String(200), nullable=True)
+    compareceu = db.Column(db.Boolean, default=True, nullable=False) # Se compareceu à sessão
+    justificativa_falta = db.Column(db.String(255), nullable=True)
+
+    # Registro Detalhado: O que foi feito e Como foi feito
+    o_que_foi_feito = db.Column(db.Text, nullable=True)  # Conteúdos, atividades e objetivos trabalhados
+    como_foi_feito = db.Column(db.Text, nullable=True)   # Metodologias, estratégias, mediação e recursos
+    recursos_utilizados = db.Column(db.String(255), nullable=True)
+    observacoes_evolucao = db.Column(db.Text, nullable=True)
+
+    # Campos legados (compatibilidade)
+    plano_sessao = db.Column(db.Text, nullable=True, default='')
+    evolucao_registro = db.Column(db.Text, nullable=True, default='')
     
     registrado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    @property
+    def atividade_realizada(self):
+        return self.o_que_foi_feito or self.plano_sessao or 'Atendimento individualizado na Sala de Recursos.'
+
+    @property
+    def metodologia_realizada(self):
+        return self.como_foi_feito or self.evolucao_registro or self.recursos_utilizados or 'Recursos pedagógicos adaptados e mediação direta.'
 
 
 class RotaTransporte(db.Model):
@@ -727,3 +752,173 @@ class TransferenciaAluno(db.Model):
     municipio_origem = db.relationship('Municipio', foreign_keys=[municipio_origem_id], lazy=True)
     municipio_destino = db.relationship('Municipio', foreign_keys=[municipio_destino_id], lazy=True)
     usuario = db.relationship('Usuario', lazy=True)
+
+
+# =========================================================================
+# MÓDULO 1: SALA DE RECURSOS / AEE — LISTA DE ESPERA E GESTÃO DE VAGAS
+# =========================================================================
+class ListaEsperaAEE(db.Model):
+    """
+    Lista de Espera da Sala de Recursos Multifuncionais / AEE.
+    Permite gerenciar a fila de triagem, prioridades e chamamento.
+    """
+    __tablename__ = 'lista_espera_aee'
+
+    id = db.Column(db.Integer, primary_key=True)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=True) # Opcional: vínculo se já cadastrado
+
+    # Dados Pessoais Obrigatórios Solicitados
+    nome_completo = db.Column(db.String(150), nullable=False, index=True)
+    data_nascimento = db.Column(db.String(10), nullable=True)
+    cpf = db.Column(db.String(14), nullable=True)
+    telefone = db.Column(db.String(20), nullable=False)
+
+    # Dados Escolares e Familiares
+    nome_responsavel = db.Column(db.String(150), nullable=True)
+    escola_origem = db.Column(db.String(150), nullable=True)
+    ano_serie = db.Column(db.String(50), nullable=True)
+    endereco = db.Column(db.String(255), nullable=True)
+
+    # Diagnóstico / Investigação
+    diagnostico_hipotese = db.Column(db.String(255), nullable=True) # CID ou Hipótese Clínica
+    em_investigacao = db.Column(db.Boolean, default=False)
+    
+    # Gestão de Fila e Triagem
+    prioridade = db.Column(db.String(20), default='Média') # 'Alta / Urgente', 'Média', 'Baixa'
+    status = db.Column(db.String(40), default='Aguardando Vaga') # 'Aguardando Vaga', 'Em Triagem', 'Chamado/Convocado', 'Matriculado no AEE', 'Desistente'
+    turno_pretendido = db.Column(db.String(30), default='Contraturno') # 'Manhã', 'Tarde', 'Contraturno'
+    observacoes_triagem = db.Column(db.Text, nullable=True)
+    data_solicitacao = db.Column(db.Date, default=datetime.utcnow)
+    data_atendimento = db.Column(db.DateTime, nullable=True)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relacionamentos
+    municipio = db.relationship('Municipio', backref=db.backref('candidatos_espera_aee', lazy=True))
+    aluno = db.relationship('Aluno', backref=db.backref('espera_aee_vinculo', lazy=True))
+
+
+# =========================================================================
+# MÓDULO 2: EQUIPE MULTIDISCIPLINAR — PSICOLOGIA, PSICOPEDAGOGIA E SERVIÇO SOCIAL
+# =========================================================================
+class AtendimentoMultiSOAP(db.Model):
+    """
+    Registro de Atendimento Institucional com Metodologia SOAP Especializada
+    diferenciada por área: Psicologia, Psicopedagogia e Serviço Social.
+    """
+    __tablename__ = 'atendimentos_multi_soap'
+
+    id = db.Column(db.Integer, primary_key=True)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False, index=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False) # Profissional executor
+
+    # Especialidade: 'psicologo', 'psicopedagogo', 'assistente_social'
+    especialidade = db.Column(db.String(50), nullable=False, index=True)
+    data_atendimento = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    horario_inicio = db.Column(db.String(10), nullable=True)
+    horario_fim = db.Column(db.String(10), nullable=True)
+    tipo_sessao = db.Column(db.String(50), default='Individual') # 'Individual', 'Familiar', 'Observação em Sala', 'Visita Domiciliar', 'Reunião com Professores'
+
+    # Campos Estruturados SOAP Institucional (com foco técnico na área de atuação)
+    # S: Subjetivo (Queixa do estudante/família, estado emocional, relato social)
+    soap_subjetivo = db.Column(db.Text, nullable=False)
+    # O: Objetivo (Conduta observada, dados comportamentais, testes, condições do ambiente)
+    soap_objetivo = db.Column(db.Text, nullable=False)
+    # A: Avaliação (Análise técnica, formulação diagnóstica, barreiras cognitivas ou sociais)
+    soap_avaliacao = db.Column(db.Text, nullable=False)
+    # P: Plano de Intervenção (Condutas, metas imediatas, orientações e encaminhamentos)
+    soap_plano = db.Column(db.Text, nullable=False)
+
+    # Encaminhamentos imediatos e controle de sigilo
+    encaminhamento_sugerido = db.Column(db.String(150), nullable=True)
+    sigilo_etico = db.Column(db.Boolean, default=False) # Prontuário com restrição de acesso
+    status = db.Column(db.String(30), default='Finalizado')
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relacionamentos
+    aluno = db.relationship('Aluno', backref=db.backref('atendimentos_multi_soap', lazy=True, order_by='AtendimentoMultiSOAP.data_atendimento.desc()'))
+    profissional = db.relationship('Usuario', backref=db.backref('atendimentos_soap_registrados', lazy=True))
+    municipio = db.relationship('Municipio', lazy=True)
+
+
+class RelatorioEscutaEncaminhamento(db.Model):
+    """
+    Emissão de Relatórios Técnicos de Escuta Qualificada e Encaminhamentos Intersetoriais
+    para a Rede Municipal (SUS, CAPS, CRAS, CREAS, Conselho Tutelar) com Assistência de IA.
+    """
+    __tablename__ = 'relatorios_escuta_encaminhamentos'
+
+    id = db.Column(db.Integer, primary_key=True)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False, index=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False) # Profissional relator
+
+    # Tipo de Instrumento Técnico
+    tipo_documento = db.Column(db.String(80), nullable=False) # 'Relatório de Escuta Qualificada', 'Guia de Encaminhamento Intersetorial', 'Parecer Técnico Conjunto'
+    
+    # Órgão de Destino da Rede Municipal / Intersetorial
+    orgao_destino = db.Column(db.String(150), nullable=False) # 'CAPS Infantil', 'CRAS / CREAS', 'Conselho Tutelar', 'Neuropediatria SUS', 'Vara da Infância', 'UBS / Saúde da Família'
+    
+    # Conteúdo Técnico Estruturado
+    motivo_demanda = db.Column(db.Text, nullable=False)
+    sintese_escuta = db.Column(db.Text, nullable=False)       # Relato técnico da escuta
+    situacao_contextual = db.Column(db.Text, nullable=True)   # Contexto escolar, dinâmicas relacionais e familiares
+    hipotese_ou_vulnerabilidade = db.Column(db.Text, nullable=True) # Hipótese diagnóstica ou risco social apurado
+    providencias_recomendadas = db.Column(db.Text, nullable=False)  # Solicitações e encaminhamentos ao órgão
+    urgencia = db.Column(db.String(20), default='Média') # 'Urgente', 'Média', 'Rotina'
+
+    # Recursos de IA
+    gerado_com_ia = db.Column(db.Boolean, default=False)
+    ia_prompt_ou_modelo = db.Column(db.String(100), nullable=True)
+
+    # Autenticação e Chave de Impressão Timbrada
+    chave_autenticidade = db.Column(db.String(64), unique=True, nullable=True)
+    status = db.Column(db.String(30), default='Emitido') # 'Rascunho', 'Emitido', 'Protocolado'
+    data_emissao = db.Column(db.Date, default=datetime.utcnow)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relacionamentos
+    aluno = db.relationship('Aluno', backref=db.backref('relatorios_escuta_multi', lazy=True, order_by='RelatorioEscutaEncaminhamento.id.desc()'))
+    profissional = db.relationship('Usuario', backref=db.backref('relatorios_escuta_emitidos', lazy=True))
+    municipio = db.relationship('Municipio', lazy=True)
+
+
+class PlanoAcaoMensalMulti(db.Model):
+    """
+    Plano de Ação Mensal e Ata Técnica de Alinhamento da Equipe Multidisciplinar
+    para discussão periódica de casos e prestação de contas à gestão municipal com impressão oficial.
+    """
+    __tablename__ = 'planos_acao_mensais_multi'
+
+    id = db.Column(db.Integer, primary_key=True)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
+    usuario_coordenador_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+
+    titulo = db.Column(db.String(150), nullable=False)
+    mes_referencia = db.Column(db.String(30), nullable=False) # Janeiro, Fevereiro, ...
+    ano_referencia = db.Column(db.Integer, nullable=False, default=2026)
+    data_reuniao = db.Column(db.Date, nullable=False, default=datetime.utcnow)
+    local_reuniao = db.Column(db.String(150), default='Secretaria Municipal de Educação')
+
+    # Profissionais Presentes (Nomes e Funções)
+    profissionais_presentes = db.Column(db.Text, nullable=False)
+
+    # Casos Estudados e Discutidos (JSON estruturado com ID do aluno, nome, escola, síntese e direcionamento)
+    casos_discutidos_json = db.Column(db.Text, nullable=True)
+
+    # Planos de Ação por Especialidade (Diretrizes Solicitadas)
+    acoes_psicologia = db.Column(db.Text, nullable=True)
+    acoes_psicopedagogia = db.Column(db.Text, nullable=True)
+    acoes_servico_social = db.Column(db.Text, nullable=True)
+    
+    deliberacoes_gerais = db.Column(db.Text, nullable=True) # Prazos e articulação com escolas e gestão
+    metas_proximo_mes = db.Column(db.Text, nullable=True)
+
+    status = db.Column(db.String(40), default='Homologado') # 'Rascunho', 'Aprovado em Reunião', 'Apresentado à Gestão'
+    chave_documento = db.Column(db.String(64), unique=True, nullable=True)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relacionamentos
+    coordenador = db.relationship('Usuario', backref=db.backref('planos_acao_coordenados', lazy=True))
+    municipio = db.relationship('Municipio', lazy=True)

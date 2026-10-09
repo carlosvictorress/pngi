@@ -132,6 +132,8 @@ def novo():
             naturalidade=request.form.get('naturalidade'),
             nome_mae=request.form.get('nome_mae'),
             nome_pai=request.form.get('nome_pai'),
+            endereco=request.form.get('endereco'),
+            bairro=request.form.get('bairro'),
             recebe_bpc='recebe_bpc' in request.form,
             codigo_inep=request.form.get('codigo_inep'),
             matricula=request.form.get('matricula'),
@@ -144,6 +146,8 @@ def novo():
             recurso_libras='recurso_libras' in request.form,
             recurso_ampliado='recurso_ampliado' in request.form,
             cid=request.form.get('cid') or None,
+            em_investigacao='em_investigacao' in request.form,
+            hipotese_diagnostica=request.form.get('hipotese_diagnostica'),
             tipo_deficiencia=request.form.get('tipo_deficiencia'),
             possui_tea='possui_tea' in request.form,
             possui_superdotacao='possui_superdotacao' in request.form,
@@ -179,6 +183,8 @@ def editar_aluno(id):
         aluno.naturalidade = request.form.get('naturalidade')
         aluno.nome_mae = request.form.get('nome_mae')
         aluno.nome_pai = request.form.get('nome_pai')
+        aluno.endereco = request.form.get('endereco')
+        aluno.bairro = request.form.get('bairro')
         aluno.contato_urgencia = request.form.get('contato_urgencia')
         aluno.recebe_bpc = 'recebe_bpc' in request.form
         aluno.codigo_inep = request.form.get('codigo_inep')
@@ -193,6 +199,8 @@ def editar_aluno(id):
         aluno.recurso_ampliado = 'recurso_ampliado' in request.form
         aluno.tipo_deficiencia = request.form.get('tipo_deficiencia')
         aluno.cid = request.form.get('cid')
+        aluno.em_investigacao = 'em_investigacao' in request.form
+        aluno.hipotese_diagnostica = request.form.get('hipotese_diagnostica')
         aluno.possui_tea = 'possui_tea' in request.form
         aluno.possui_superdotacao = 'possui_superdotacao' in request.form
         aluno.local_aee = request.form.get('local_aee')
