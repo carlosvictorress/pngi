@@ -41,9 +41,28 @@ def create_app():
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'chave-temporaria-de-seguranca')
     
     # Tratamento da URL do banco de dados (Railway/PostgreSQL compatibility)
-    db_url = os.getenv('DATABASE_URL')
+    db_url = (
+        os.getenv('DATABASE_URL') or
+        os.getenv('DATABASE_PRIVATE_URL') or
+        os.getenv('DATABASE_PUBLIC_URL') or
+        os.getenv('POSTGRES_URL')
+    )
+
+    # Se estiver no Railway e a URL for localhost ou vazia, tenta montar a partir das variáveis individuais do Postgres
+    is_railway = bool(os.getenv('RAILWAY_ENVIRONMENT') or os.getenv('RAILWAY_SERVICE_ID'))
+    if (not db_url or (is_railway and ('localhost' in db_url or '127.0.0.1' in db_url))) and os.getenv('PGHOST'):
+        pghost = os.getenv('PGHOST')
+        pgport = os.getenv('PGPORT', '5432')
+        pguser = os.getenv('PGUSER', 'postgres')
+        pgpass = os.getenv('PGPASSWORD', '')
+        pgdb = os.getenv('PGDATABASE', 'railway')
+        db_url = f"postgresql://{pguser}:{pgpass}@{pghost}:{pgport}/{pgdb}"
+
     if db_url and db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    if not db_url:
+        print("[AVISO] Nenhuma variável DATABASE_URL encontrada. Verifique as configurações de variáveis de ambiente no painel de deploy.")
         
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
