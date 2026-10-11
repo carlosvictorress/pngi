@@ -572,6 +572,30 @@ def _garantir_tabela_espera():
     except Exception:
         db.session.rollback()
 
+    try:
+        from sqlalchemy import text
+        with db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            ddls = [
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS ano_serie VARCHAR(50);",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS serie_ano VARCHAR(50);",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS endereco VARCHAR(255);",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS nome_responsavel VARCHAR(150);",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS motivo_encaminhamento TEXT;",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS em_investigacao BOOLEAN DEFAULT FALSE;",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS turno_pretendido VARCHAR(30) DEFAULT 'Contraturno';",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS observacoes_triagem TEXT;",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS data_atendimento TIMESTAMP;",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+            ]
+            for cmd in ddls:
+                try:
+                    conn.execute(text(cmd))
+                except Exception:
+                    pass
+    except Exception:
+        db.session.rollback()
+
 @aee_bp.route('/lista-espera', methods=['GET', 'POST'])
 @login_required
 def lista_espera():

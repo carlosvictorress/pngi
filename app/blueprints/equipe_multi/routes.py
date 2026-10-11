@@ -24,11 +24,71 @@ def get_municipio_slug(endpoint, values):
 
 
 def _garantir_tabelas_multi():
-    """Garante que as tabelas do módulo equipe multi existam no PostgreSQL."""
+    """Garante que as tabelas e colunas do módulo equipe multi existam no PostgreSQL."""
     try:
         AtendimentoMultiSOAP.__table__.create(db.engine, checkfirst=True)
         RelatorioEscutaEncaminhamento.__table__.create(db.engine, checkfirst=True)
         PlanoAcaoMensalMulti.__table__.create(db.engine, checkfirst=True)
+    except Exception:
+        db.session.rollback()
+
+    try:
+        from sqlalchemy import text
+        with db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            ddls = [
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS usuario_id INTEGER;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS especialidade_emissor VARCHAR(50);",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS tipo_documento VARCHAR(80);",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS orgao_destino VARCHAR(150);",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS motivo_demanda TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS sintese_escuta TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS sintese_escuta_qualificada TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS situacao_contextual TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS evidencias_observadas TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS acoes_ja_realizadas_escola TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS hipotese_ou_vulnerabilidade TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS providencias_recomendadas TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS sugestoes_encaminhamento TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS urgencia VARCHAR(20) DEFAULT 'Média';",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS gerado_com_ia BOOLEAN DEFAULT FALSE;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS ia_prompt_ou_modelo VARCHAR(100);",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS chave_autenticidade VARCHAR(64);",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS status VARCHAR(30) DEFAULT 'Emitido';",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS data_emissao DATE DEFAULT CURRENT_DATE;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS usuario_id INTEGER;",
+                "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
+                "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;",
+                "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS justificativa_falta VARCHAR(255);",
+                "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS encaminhamento_sugerido VARCHAR(150);",
+                "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS status VARCHAR(30) DEFAULT 'Finalizado';",
+                "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+                "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS usuario_coordenador_id INTEGER;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS coordenador_reuniao_id INTEGER;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS titulo VARCHAR(150);",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS pauta_discutida TEXT;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS local_reuniao VARCHAR(150) DEFAULT 'Secretaria Municipal de Educação';",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS profissionais_presentes TEXT;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS participantes_nomes TEXT;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS casos_discutidos_json TEXT;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS casos_discutidos TEXT;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS deliberacoes_gerais TEXT;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS encaminhamentos_gestao TEXT;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS metas_proximo_mes TEXT;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS chave_documento VARCHAR(64);",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS chave_autenticidade VARCHAR(64);",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+            ]
+            for cmd in ddls:
+                try:
+                    conn.execute(text(cmd))
+                except Exception:
+                    pass
     except Exception:
         db.session.rollback()
 

@@ -91,11 +91,88 @@ def create_app():
     app.jinja_env.filters['from_json'] = json.loads
 
     def sincronizar_schema_automatico():
-        """Garante a criação segura das novas tabelas no banco de dados sem alterar tabelas existentes."""
+        """Garante a criação segura das novas tabelas e alinhamento de colunas no PostgreSQL."""
         try:
             db.create_all()
         except Exception as e:
             print(f"[INFO] DB check notice: {e}")
+
+        # Alinhamento seguro de colunas nos 4 novos modelos sem alterar tabelas legadas
+        try:
+            from sqlalchemy import text
+            with db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+                ddl_comandos = [
+                    # 1. relatorios_escuta_encaminhamentos
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS usuario_id INTEGER;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS especialidade_emissor VARCHAR(50);",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS tipo_documento VARCHAR(80);",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS orgao_destino VARCHAR(150);",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS motivo_demanda TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS sintese_escuta TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS sintese_escuta_qualificada TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS situacao_contextual TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS evidencias_observadas TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS acoes_ja_realizadas_escola TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS hipotese_ou_vulnerabilidade TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS providencias_recomendadas TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS sugestoes_encaminhamento TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS urgencia VARCHAR(20) DEFAULT 'Média';",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS gerado_com_ia BOOLEAN DEFAULT FALSE;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS ia_prompt_ou_modelo VARCHAR(100);",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS chave_autenticidade VARCHAR(64);",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS status VARCHAR(30) DEFAULT 'Emitido';",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS data_emissao DATE DEFAULT CURRENT_DATE;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                    # 2. atendimentos_multi_soap
+                    "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS usuario_id INTEGER;",
+                    "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
+                    "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;",
+                    "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS justificativa_falta VARCHAR(255);",
+                    "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS encaminhamento_sugerido VARCHAR(150);",
+                    "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS status VARCHAR(30) DEFAULT 'Finalizado';",
+                    "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+                    "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                    # 3. planos_acao_mensais_multi
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS usuario_coordenador_id INTEGER;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS coordenador_reuniao_id INTEGER;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS titulo VARCHAR(150);",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS pauta_discutida TEXT;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS local_reuniao VARCHAR(150) DEFAULT 'Secretaria Municipal de Educação';",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS profissionais_presentes TEXT;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS participantes_nomes TEXT;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS casos_discutidos_json TEXT;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS casos_discutidos TEXT;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS deliberacoes_gerais TEXT;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS encaminhamentos_gestao TEXT;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS metas_proximo_mes TEXT;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS chave_documento VARCHAR(64);",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS chave_autenticidade VARCHAR(64);",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+                    "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                    # 4. lista_espera_aee
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS ano_serie VARCHAR(50);",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS serie_ano VARCHAR(50);",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS endereco VARCHAR(255);",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS nome_responsavel VARCHAR(150);",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS motivo_encaminhamento TEXT;",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS em_investigacao BOOLEAN DEFAULT FALSE;",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS turno_pretendido VARCHAR(30) DEFAULT 'Contraturno';",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS observacoes_triagem TEXT;",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS data_atendimento TIMESTAMP;",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+                ]
+                for ddl in ddl_comandos:
+                    try:
+                        conn.execute(text(ddl))
+                    except Exception:
+                        pass
+        except Exception as e:
+            print(f"[INFO] DDL schema notice: {e}")
 
     # Força o Flask a carregar as classes dos modelos e sincronizar tabelas no startup
     with app.app_context():

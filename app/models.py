@@ -854,36 +854,46 @@ class ListaEsperaAEE(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
-    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=True) # Opcional: vínculo se já cadastrado
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=True)
 
     # Dados Pessoais Obrigatórios Solicitados
     nome_completo = db.Column(db.String(150), nullable=False, index=True)
-    data_nascimento = db.Column(db.String(10), nullable=True)
-    cpf = db.Column(db.String(14), nullable=True)
-    telefone = db.Column(db.String(20), nullable=False)
+    data_nascimento = db.Column(db.String(20), nullable=True)
+    cpf = db.Column(db.String(20), nullable=True)
+    telefone = db.Column(db.String(30), nullable=False)
 
     # Dados Escolares e Familiares
     nome_responsavel = db.Column(db.String(150), nullable=True)
     escola_origem = db.Column(db.String(150), nullable=True)
     ano_serie = db.Column(db.String(50), nullable=True)
+    serie_ano = db.Column(db.String(50), nullable=True)
     endereco = db.Column(db.String(255), nullable=True)
 
     # Diagnóstico / Investigação
-    diagnostico_hipotese = db.Column(db.String(255), nullable=True) # CID ou Hipótese Clínica
+    diagnostico_hipotese = db.Column(db.String(255), nullable=True)
+    motivo_encaminhamento = db.Column(db.Text, nullable=True)
     em_investigacao = db.Column(db.Boolean, default=False)
     
     # Gestão de Fila e Triagem
-    prioridade = db.Column(db.String(20), default='Média') # 'Alta / Urgente', 'Média', 'Baixa'
-    status = db.Column(db.String(40), default='Aguardando Vaga') # 'Aguardando Vaga', 'Em Triagem', 'Chamado/Convocado', 'Matriculado no AEE', 'Desistente'
-    turno_pretendido = db.Column(db.String(30), default='Contraturno') # 'Manhã', 'Tarde', 'Contraturno'
+    prioridade = db.Column(db.String(30), default='Média')
+    status = db.Column(db.String(40), default='Aguardando Vaga')
+    turno_pretendido = db.Column(db.String(30), default='Contraturno')
     observacoes_triagem = db.Column(db.Text, nullable=True)
     data_solicitacao = db.Column(db.Date, default=datetime.utcnow)
     data_atendimento = db.Column(db.DateTime, nullable=True)
+    data_atualizacao = db.Column(db.DateTime, default=datetime.utcnow)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relacionamentos
     municipio = db.relationship('Municipio', backref=db.backref('candidatos_espera_aee', lazy=True))
     aluno = db.relationship('Aluno', backref=db.backref('espera_aee_vinculo', lazy=True))
+
+    def __init__(self, **kwargs):
+        if 'ano_serie' in kwargs and 'serie_ano' not in kwargs:
+            kwargs['serie_ano'] = kwargs['ano_serie']
+        elif 'serie_ano' in kwargs and 'ano_serie' not in kwargs:
+            kwargs['ano_serie'] = kwargs['serie_ano']
+        super().__init__(**kwargs)
 
 
 # =========================================================================
@@ -899,35 +909,42 @@ class AtendimentoMultiSOAP(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
     aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False, index=True)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False) # Profissional executor
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    profissional_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
 
     # Especialidade: 'psicologo', 'psicopedagogo', 'assistente_social'
     especialidade = db.Column(db.String(50), nullable=False, index=True)
     data_atendimento = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     horario_inicio = db.Column(db.String(10), nullable=True)
     horario_fim = db.Column(db.String(10), nullable=True)
-    tipo_sessao = db.Column(db.String(50), default='Individual') # 'Individual', 'Familiar', 'Observação em Sala', 'Visita Domiciliar', 'Reunião com Professores'
+    tipo_sessao = db.Column(db.String(50), default='Individual')
+    compareceu = db.Column(db.Boolean, default=True)
+    justificativa_falta = db.Column(db.String(255), nullable=True)
 
-    # Campos Estruturados SOAP Institucional (com foco técnico na área de atuação)
-    # S: Subjetivo (Queixa do estudante/família, estado emocional, relato social)
+    # Campos Estruturados SOAP Institucional
     soap_subjetivo = db.Column(db.Text, nullable=False)
-    # O: Objetivo (Conduta observada, dados comportamentais, testes, condições do ambiente)
     soap_objetivo = db.Column(db.Text, nullable=False)
-    # A: Avaliação (Análise técnica, formulação diagnóstica, barreiras cognitivas ou sociais)
     soap_avaliacao = db.Column(db.Text, nullable=False)
-    # P: Plano de Intervenção (Condutas, metas imediatas, orientações e encaminhamentos)
     soap_plano = db.Column(db.Text, nullable=False)
 
-    # Encaminhamentos imediatos e controle de sigilo
     encaminhamento_sugerido = db.Column(db.String(150), nullable=True)
-    sigilo_etico = db.Column(db.Boolean, default=False) # Prontuário com restrição de acesso
+    sigilo_etico = db.Column(db.Boolean, default=False)
     status = db.Column(db.String(30), default='Finalizado')
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    data_registro = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relacionamentos
     aluno = db.relationship('Aluno', backref=db.backref('atendimentos_multi_soap', lazy=True, order_by='AtendimentoMultiSOAP.data_atendimento.desc()'))
-    profissional = db.relationship('Usuario', backref=db.backref('atendimentos_soap_registrados', lazy=True))
+    profissional = db.relationship('Usuario', foreign_keys=[profissional_id], lazy=True)
+    usuario = db.relationship('Usuario', foreign_keys=[usuario_id], lazy=True)
     municipio = db.relationship('Municipio', lazy=True)
+
+    def __init__(self, **kwargs):
+        if 'usuario_id' in kwargs and 'profissional_id' not in kwargs:
+            kwargs['profissional_id'] = kwargs['usuario_id']
+        elif 'profissional_id' in kwargs and 'usuario_id' not in kwargs:
+            kwargs['usuario_id'] = kwargs['profissional_id']
+        super().__init__(**kwargs)
 
 
 class RelatorioEscutaEncaminhamento(db.Model):
@@ -940,21 +957,27 @@ class RelatorioEscutaEncaminhamento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
     aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False, index=True)
-    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False) # Profissional relator
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    profissional_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
 
     # Tipo de Instrumento Técnico
-    tipo_documento = db.Column(db.String(80), nullable=False) # 'Relatório de Escuta Qualificada', 'Guia de Encaminhamento Intersetorial', 'Parecer Técnico Conjunto'
+    tipo_documento = db.Column(db.String(80), nullable=True)
+    especialidade_emissor = db.Column(db.String(50), nullable=True)
     
     # Órgão de Destino da Rede Municipal / Intersetorial
-    orgao_destino = db.Column(db.String(150), nullable=False) # 'CAPS Infantil', 'CRAS / CREAS', 'Conselho Tutelar', 'Neuropediatria SUS', 'Vara da Infância', 'UBS / Saúde da Família'
+    orgao_destino = db.Column(db.String(150), nullable=False)
     
     # Conteúdo Técnico Estruturado
     motivo_demanda = db.Column(db.Text, nullable=False)
-    sintese_escuta = db.Column(db.Text, nullable=False)       # Relato técnico da escuta
-    situacao_contextual = db.Column(db.Text, nullable=True)   # Contexto escolar, dinâmicas relacionais e familiares
-    hipotese_ou_vulnerabilidade = db.Column(db.Text, nullable=True) # Hipótese diagnóstica ou risco social apurado
-    providencias_recomendadas = db.Column(db.Text, nullable=False)  # Solicitações e encaminhamentos ao órgão
-    urgencia = db.Column(db.String(20), default='Média') # 'Urgente', 'Média', 'Rotina'
+    sintese_escuta = db.Column(db.Text, nullable=True)
+    sintese_escuta_qualificada = db.Column(db.Text, nullable=True)
+    situacao_contextual = db.Column(db.Text, nullable=True)
+    evidencias_observadas = db.Column(db.Text, nullable=True)
+    acoes_ja_realizadas_escola = db.Column(db.Text, nullable=True)
+    hipotese_ou_vulnerabilidade = db.Column(db.Text, nullable=True)
+    providencias_recomendadas = db.Column(db.Text, nullable=True)
+    sugestoes_encaminhamento = db.Column(db.Text, nullable=True)
+    urgencia = db.Column(db.String(20), default='Média')
 
     # Recursos de IA
     gerado_com_ia = db.Column(db.Boolean, default=False)
@@ -962,14 +985,36 @@ class RelatorioEscutaEncaminhamento(db.Model):
 
     # Autenticação e Chave de Impressão Timbrada
     chave_autenticidade = db.Column(db.String(64), unique=True, nullable=True)
-    status = db.Column(db.String(30), default='Emitido') # 'Rascunho', 'Emitido', 'Protocolado'
+    status = db.Column(db.String(30), default='Emitido')
     data_emissao = db.Column(db.Date, default=datetime.utcnow)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relacionamentos
     aluno = db.relationship('Aluno', backref=db.backref('relatorios_escuta_multi', lazy=True, order_by='RelatorioEscutaEncaminhamento.id.desc()'))
-    profissional = db.relationship('Usuario', backref=db.backref('relatorios_escuta_emitidos', lazy=True))
+    profissional = db.relationship('Usuario', foreign_keys=[profissional_id], lazy=True)
+    usuario = db.relationship('Usuario', foreign_keys=[usuario_id], lazy=True)
     municipio = db.relationship('Municipio', lazy=True)
+
+    def __init__(self, **kwargs):
+        if 'usuario_id' in kwargs and 'profissional_id' not in kwargs:
+            kwargs['profissional_id'] = kwargs['usuario_id']
+        elif 'profissional_id' in kwargs and 'usuario_id' not in kwargs:
+            kwargs['usuario_id'] = kwargs['profissional_id']
+
+        if 'sintese_escuta' in kwargs and 'sintese_escuta_qualificada' not in kwargs:
+            kwargs['sintese_escuta_qualificada'] = kwargs['sintese_escuta']
+        elif 'sintese_escuta_qualificada' in kwargs and 'sintese_escuta' not in kwargs:
+            kwargs['sintese_escuta'] = kwargs['sintese_escuta_qualificada']
+
+        if 'providencias_recomendadas' in kwargs and 'sugestoes_encaminhamento' not in kwargs:
+            kwargs['sugestoes_encaminhamento'] = kwargs['providencias_recomendadas']
+        elif 'sugestoes_encaminhamento' in kwargs and 'providencias_recomendadas' not in kwargs:
+            kwargs['providencias_recomendadas'] = kwargs['sugestoes_encaminhamento']
+
+        if 'situacao_contextual' in kwargs and 'evidencias_observadas' not in kwargs:
+            kwargs['evidencias_observadas'] = kwargs['situacao_contextual']
+
+        super().__init__(**kwargs)
 
 
 class PlanoAcaoMensalMulti(db.Model):
@@ -981,32 +1026,70 @@ class PlanoAcaoMensalMulti(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False, index=True)
-    usuario_coordenador_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+    usuario_coordenador_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
+    coordenador_reuniao_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
 
-    titulo = db.Column(db.String(150), nullable=False)
-    mes_referencia = db.Column(db.String(30), nullable=False) # Janeiro, Fevereiro, ...
-    ano_referencia = db.Column(db.Integer, nullable=False, default=2026)
+    titulo = db.Column(db.String(150), nullable=True)
+    pauta_discutida = db.Column(db.Text, nullable=True)
+    mes_referencia = db.Column(db.String(30), nullable=True)
+    ano_referencia = db.Column(db.Integer, nullable=True, default=2026)
     data_reuniao = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     local_reuniao = db.Column(db.String(150), default='Secretaria Municipal de Educação')
 
-    # Profissionais Presentes (Nomes e Funções)
-    profissionais_presentes = db.Column(db.Text, nullable=False)
+    profissionais_presentes = db.Column(db.Text, nullable=True)
+    participantes_nomes = db.Column(db.Text, nullable=True)
 
-    # Casos Estudados e Discutidos (JSON estruturado com ID do aluno, nome, escola, síntese e direcionamento)
     casos_discutidos_json = db.Column(db.Text, nullable=True)
+    casos_discutidos = db.Column(db.Text, nullable=True)
 
-    # Planos de Ação por Especialidade (Diretrizes Solicitadas)
     acoes_psicologia = db.Column(db.Text, nullable=True)
     acoes_psicopedagogia = db.Column(db.Text, nullable=True)
     acoes_servico_social = db.Column(db.Text, nullable=True)
     
-    deliberacoes_gerais = db.Column(db.Text, nullable=True) # Prazos e articulação com escolas e gestão
+    deliberacoes_gerais = db.Column(db.Text, nullable=True)
+    encaminhamentos_gestao = db.Column(db.Text, nullable=True)
     metas_proximo_mes = db.Column(db.Text, nullable=True)
 
-    status = db.Column(db.String(40), default='Homologado') # 'Rascunho', 'Aprovado em Reunião', 'Apresentado à Gestão'
-    chave_documento = db.Column(db.String(64), unique=True, nullable=True)
+    status = db.Column(db.String(40), default='Homologado')
+    chave_documento = db.Column(db.String(64), nullable=True)
+    chave_autenticidade = db.Column(db.String(64), nullable=True)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Relacionamentos
-    coordenador = db.relationship('Usuario', backref=db.backref('planos_acao_coordenados', lazy=True))
+    coordenador = db.relationship('Usuario', foreign_keys=[usuario_coordenador_id], lazy=True)
+    coordenador_reuniao = db.relationship('Usuario', foreign_keys=[coordenador_reuniao_id], lazy=True)
     municipio = db.relationship('Municipio', lazy=True)
+
+    def __init__(self, **kwargs):
+        if 'usuario_coordenador_id' in kwargs and 'coordenador_reuniao_id' not in kwargs:
+            kwargs['coordenador_reuniao_id'] = kwargs['usuario_coordenador_id']
+        elif 'coordenador_reuniao_id' in kwargs and 'usuario_coordenador_id' not in kwargs:
+            kwargs['usuario_coordenador_id'] = kwargs['coordenador_reuniao_id']
+
+        if 'titulo' in kwargs and 'pauta_discutida' not in kwargs:
+            kwargs['pauta_discutida'] = kwargs['titulo']
+        elif 'pauta_discutida' in kwargs and 'titulo' not in kwargs:
+            kwargs['titulo'] = kwargs['pauta_discutida']
+
+        if 'profissionais_presentes' in kwargs and 'participantes_nomes' not in kwargs:
+            kwargs['participantes_nomes'] = kwargs['profissionais_presentes']
+        elif 'participantes_nomes' in kwargs and 'profissionais_presentes' not in kwargs:
+            kwargs['profissionais_presentes'] = kwargs['participantes_nomes']
+
+        if 'casos_discutidos_json' in kwargs and 'casos_discutidos' not in kwargs:
+            kwargs['casos_discutidos'] = kwargs['casos_discutidos_json']
+        elif 'casos_discutidos' in kwargs and 'casos_discutidos_json' not in kwargs:
+            kwargs['casos_discutidos_json'] = kwargs['casos_discutidos']
+
+        if 'deliberacoes_gerais' in kwargs and 'encaminhamentos_gestao' not in kwargs:
+            kwargs['encaminhamentos_gestao'] = kwargs['deliberacoes_gerais']
+        elif 'encaminhamentos_gestao' in kwargs and 'deliberacoes_gerais' not in kwargs:
+            kwargs['deliberacoes_gerais'] = kwargs['encaminhamentos_gestao']
+
+        if 'chave_documento' in kwargs and 'chave_autenticidade' not in kwargs:
+            kwargs['chave_autenticidade'] = kwargs['chave_documento']
+        elif 'chave_autenticidade' in kwargs and 'chave_documento' not in kwargs:
+            kwargs['chave_documento'] = kwargs['chave_autenticidade']
+
+        super().__init__(**kwargs)
