@@ -447,6 +447,35 @@ def sala_recursos():
     )
 
 
+def _garantir_tabela_atendimentos_aee():
+    """Garante colunas e relaxamento de constraints para atendimentos_aee no PostgreSQL."""
+    try:
+        from sqlalchemy import text
+        with db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+            ddls = [
+                "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS municipio_id INTEGER;",
+                "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;",
+                "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS o_que_foi_feito TEXT;",
+                "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS como_foi_feito TEXT;",
+                "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS recursos_utilizados VARCHAR(255);",
+                "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS justificativa_falta VARCHAR(255);",
+                "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
+                "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_nome VARCHAR(150);",
+                "ALTER TABLE atendimentos_aee ALTER COLUMN horario_inicio DROP NOT NULL;",
+                "ALTER TABLE atendimentos_aee ALTER COLUMN horario_fim DROP NOT NULL;",
+                "ALTER TABLE atendimentos_aee ALTER COLUMN plano_sessao DROP NOT NULL;",
+                "ALTER TABLE atendimentos_aee ALTER COLUMN evolucao_registro DROP NOT NULL;",
+                "ALTER TABLE atendimentos_aee ALTER COLUMN frequencia DROP NOT NULL;"
+            ]
+            for cmd in ddls:
+                try:
+                    conn.execute(text(cmd))
+                except Exception:
+                    pass
+    except Exception:
+        db.session.rollback()
+
+
 @aee_bp.route('/aluno/<int:aluno_id>/prontuario')
 @login_required
 def prontuario_aluno_aee(aluno_id):
@@ -455,6 +484,7 @@ def prontuario_aluno_aee(aluno_id):
     Apresenta dados pessoais completos, pais, endereço, escola, série, CID ou investigação,
     quantas sessões já foram realizadas e o histórico com o que foi feito e como foi feito.
     """
+    _garantir_tabela_atendimentos_aee()
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
     
     # Histórico de Atendimentos na Sala de Recursos
@@ -484,14 +514,16 @@ def prontuario_aluno_aee(aluno_id):
         total_realizadas=total_realizadas,
         total_faltas=total_faltas,
         taxa_presenca=taxa_presenca,
-        profissionais=profissionais
+        profissionais=profissionais,
+        now=datetime.utcnow()
     )
 
 
 @aee_bp.route('/aluno/<int:aluno_id>/sessao/nova', methods=['POST'])
 @login_required
 def lancar_sessao_aee(aluno_id):
-    """Registra uma nova sessão de atendimento na Sala de AEE."""
+    """Registra uma nova sessão de atendimento ou falta na Sala de AEE."""
+    _garantir_tabela_atendimentos_aee()
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
 
     data_str = request.form.get('data_atendimento')
@@ -500,7 +532,20 @@ def lancar_sessao_aee(aluno_id):
     except Exception:
         data_atendimento = datetime.utcnow().date()
 
-    compareceu = request.form.get('compareceu') == 'true' or request.form.get('compareceu') == '1' or 'compareceu' in request.form
+    val_comp = request.form.get('compareceu', 'true')
+    compareceu = (val_comp in ['true', '1', 'True', True])
+
+    h_ini_str = request.form.get('horario_inicio', '08:00')
+    h_fim_str = request.form.get('horario_fim', '08:50')
+    try:
+        h_ini = datetime.strptime(h_ini_str, '%H:%M').time() if h_ini_str else datetime.strptime('08:00', '%H:%M').time()
+    except Exception:
+        h_ini = datetime.strptime('08:00', '%H:%M').time()
+    try:
+        h_fim = datetime.strptime(h_fim_str, '%H:%M').time() if h_fim_str else datetime.strptime('08:50', '%H:%M').time()
+    except Exception:
+        h_fim = datetime.strptime('08:50', '%H:%M').time()
+
     o_que_foi_feito = request.form.get('o_que_foi_feito', '').strip()
     como_foi_feito = request.form.get('como_foi_feito', '').strip()
     recursos_utilizados = request.form.get('recursos_utilizados', '').strip()
@@ -513,25 +558,40 @@ def lancar_sessao_aee(aluno_id):
         if p_obj:
             prof_nome = p_obj.nome
 
-    nova_sessao = AtendimentoAee(
-        municipio_id=g.municipio.id,
-        aluno_id=aluno.id,
-        data_atendimento=data_atendimento,
-        compareceu=compareceu,
-        frequencia=compareceu,
-        o_que_foi_feito=o_que_foi_feito,
-        como_foi_feito=como_foi_feito,
-        recursos_utilizados=recursos_utilizados,
-        justificativa_falta=justificativa_falta,
-        plano_sessao=o_que_foi_feito,
-        evolucao_registro=como_foi_feito,
-        profissional_id=current_user.id,
-        profissional_nome=prof_nome
-    )
-    db.session.add(nova_sessao)
-    db.session.commit()
+    if not compareceu:
+        if not justificativa_falta:
+            justificativa_falta = 'Ausência registrada sem justificativa prévia.'
+        if not o_que_foi_feito:
+            o_que_foi_feito = f"Falta registrada: {justificativa_falta}"
+        if not como_foi_feito:
+            como_foi_feito = justificativa_falta
 
-    flash(f"Sessão de atendimento de {aluno.nome} registrada com sucesso!", "sucesso")
+    try:
+        nova_sessao = AtendimentoAee(
+            municipio_id=g.municipio.id,
+            aluno_id=aluno.id,
+            data_atendimento=data_atendimento,
+            horario_inicio=h_ini,
+            horario_fim=h_fim,
+            compareceu=compareceu,
+            frequencia=compareceu,
+            o_que_foi_feito=o_que_foi_feito,
+            como_foi_feito=como_foi_feito,
+            recursos_utilizados=recursos_utilizados,
+            justificativa_falta=justificativa_falta,
+            plano_sessao=o_que_foi_feito,
+            evolucao_registro=como_foi_feito,
+            profissional_id=profissional_id or current_user.id,
+            profissional_nome=prof_nome
+        )
+        db.session.add(nova_sessao)
+        db.session.commit()
+        tipo_msg = "Sessão de atendimento" if compareceu else "Falta do estudante"
+        flash(f"{tipo_msg} de {aluno.nome} registrada com sucesso no prontuário!", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Aviso ao registrar sessão no prontuário: {e}", "erro")
+
     return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
 

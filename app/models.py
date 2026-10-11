@@ -295,88 +295,67 @@ class AtendimentoAee(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False, index=True)
+    municipio_id = db.Column(db.Integer, nullable=True)
     
     data_atendimento = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     horario_inicio = db.Column(db.Time, nullable=True)
     horario_fim = db.Column(db.Time, nullable=True)
     
     # Controle de Presença / Frequência no banco real
-    frequencia = db.Column(db.Boolean, default=True, nullable=False)
+    frequencia = db.Column(db.Boolean, default=True, nullable=True)
+    compareceu = db.Column(db.Boolean, default=True, nullable=True)
     plano_sessao = db.Column(db.Text, nullable=True, default='')
     evolucao_registro = db.Column(db.Text, nullable=True, default='')
+    o_que_foi_feito = db.Column(db.Text, nullable=True, default='')
+    como_foi_feito = db.Column(db.Text, nullable=True, default='')
     recursos_utilizados = db.Column(db.String(255), nullable=True)
+    justificativa_falta = db.Column(db.String(255), nullable=True)
+    profissional_id = db.Column(db.Integer, nullable=True)
+    profissional_nome = db.Column(db.String(150), nullable=True, default='Especialista AEE')
     registrado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
     def __init__(self, **kwargs):
-        # Mapeamento transparente de kwargs novos para campos reais do PostgreSQL
-        if 'compareceu' in kwargs:
-            kwargs['frequencia'] = bool(kwargs.pop('compareceu'))
-        if 'o_que_foi_feito' in kwargs:
-            kwargs['plano_sessao'] = kwargs.pop('o_que_foi_feito') or ''
-        if 'como_foi_feito' in kwargs:
-            kwargs['evolucao_registro'] = kwargs.pop('como_foi_feito') or ''
-        self._municipio_id = kwargs.pop('municipio_id', None)
-        self._profissional_id = kwargs.pop('profissional_id', None)
-        self._profissional_nome = kwargs.pop('profissional_nome', 'Especialista AEE')
-        self._justificativa_falta = kwargs.pop('justificativa_falta', '')
-        self._observacoes_evolucao = kwargs.pop('observacoes_evolucao', '')
+        # Mapeamento e sincronização transparente de campos
+        comp = kwargs.get('compareceu', kwargs.get('frequencia', True))
+        is_pres = (comp in [True, 'true', 'True', 1, '1'])
+        kwargs['compareceu'] = is_pres
+        kwargs['frequencia'] = is_pres
+
+        txt_o_que = kwargs.get('o_que_foi_feito') or kwargs.get('plano_sessao') or ''
+        txt_como = kwargs.get('como_foi_feito') or kwargs.get('evolucao_registro') or ''
+        just = kwargs.get('justificativa_falta') or ''
+
+        if not is_pres:
+            if not just:
+                just = 'Falta registrada sem justificativa prévia.'
+            kwargs['justificativa_falta'] = just
+            if not txt_o_que:
+                txt_o_que = f"Falta registrada: {just}"
+            if not txt_como:
+                txt_como = just
+        else:
+            if not txt_o_que:
+                txt_o_que = 'Atendimento regular na Sala de Recursos.'
+            if not txt_como:
+                txt_como = 'Mediação pedagógica direta.'
+
+        kwargs['o_que_foi_feito'] = txt_o_que
+        kwargs['plano_sessao'] = txt_o_que
+        kwargs['como_foi_feito'] = txt_como
+        kwargs['evolucao_registro'] = txt_como
+
+        if not kwargs.get('horario_inicio'):
+            try:
+                kwargs['horario_inicio'] = datetime.strptime('08:00', '%H:%M').time()
+            except Exception:
+                pass
+        if not kwargs.get('horario_fim'):
+            try:
+                kwargs['horario_fim'] = datetime.strptime('08:50', '%H:%M').time()
+            except Exception:
+                pass
+
         super().__init__(**kwargs)
-
-    @property
-    def compareceu(self):
-        return self.frequencia
-
-    @compareceu.setter
-    def compareceu(self, val):
-        self.frequencia = bool(val)
-
-    @property
-    def o_que_foi_feito(self):
-        return self.plano_sessao or ''
-
-    @o_que_foi_feito.setter
-    def o_que_foi_feito(self, val):
-        self.plano_sessao = val or ''
-
-    @property
-    def como_foi_feito(self):
-        return self.evolucao_registro or ''
-
-    @como_foi_feito.setter
-    def como_foi_feito(self, val):
-        self.evolucao_registro = val or ''
-
-    @property
-    def justificativa_falta(self):
-        return getattr(self, '_justificativa_falta', '')
-
-    @justificativa_falta.setter
-    def justificativa_falta(self, val):
-        self._justificativa_falta = val
-
-    @property
-    def profissional_nome(self):
-        return getattr(self, '_profissional_nome', 'Especialista AEE')
-
-    @profissional_nome.setter
-    def profissional_nome(self, val):
-        self._profissional_nome = val
-
-    @property
-    def profissional_id(self):
-        return getattr(self, '_profissional_id', None)
-
-    @profissional_id.setter
-    def profissional_id(self, val):
-        self._profissional_id = val
-
-    @property
-    def municipio_id(self):
-        return getattr(self, '_municipio_id', None)
-
-    @municipio_id.setter
-    def municipio_id(self, val):
-        self._municipio_id = val
 
     @property
     def atividade_realizada(self):

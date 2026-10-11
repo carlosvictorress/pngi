@@ -227,9 +227,9 @@
                     class="text-slate-400 hover:text-slate-600 font-black text-xl leading-none">✕</button>
         </div>
 
-        <form action="{{ url_for('aee.lancar_sessao_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id) }}" method="POST" class="space-y-4">
+        <form id="form-lancar-sessao" action="{{ url_for('aee.lancar_sessao_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id) }}" method="POST" class="space-y-4">
             
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Data da Sessão *</label>
                     <input type="date" name="data_atendimento" value="{{ now.strftime('%Y-%m-%d') }}" required
@@ -247,6 +247,17 @@
                     <input type="time" name="horario_fim" value="08:50"
                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Especialista AEE</label>
+                    <select name="profissional_id"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500 font-sans">
+                        <option value="">{{ current_user.nome }}</option>
+                        {% for p in profissionais %}
+                        <option value="{{ p.id }}">{{ p.nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             </div>
 
             <!-- CONTROLE DE PRESENÇA -->
@@ -257,12 +268,12 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <label class="inline-flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="compareceu" value="true" checked class="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                        <input type="radio" name="compareceu" id="radio-compareceu-sim" value="true" checked class="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
                                onchange="toggleCamposPresenca(true)">
                         <span class="text-xs font-extrabold text-emerald-800">✅ Compareceu</span>
                     </label>
                     <label class="inline-flex items-center gap-2 cursor-pointer">
-                        <input type="radio" name="compareceu" value="false" class="w-4 h-4 text-rose-600 focus:ring-rose-500"
+                        <input type="radio" name="compareceu" id="radio-compareceu-nao" value="false" class="w-4 h-4 text-rose-600 focus:ring-rose-500"
                                onchange="toggleCamposPresenca(false)">
                         <span class="text-xs font-extrabold text-rose-800">❌ Faltou</span>
                     </label>
@@ -271,7 +282,7 @@
 
             <div id="campo-justificativa" class="space-y-1 hidden">
                 <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Justificativa da Falta</label>
-                <input type="text" name="justificativa_falta" placeholder="Ex: Atestado médico, chuva forte, viagem familiar..."
+                <input type="text" name="justificativa_falta" id="input-justificativa" placeholder="Ex: Atestado médico, chuva forte, viagem familiar..."
                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
@@ -281,7 +292,7 @@
                     <label class="text-[10px] font-bold uppercase tracking-wider text-blue-800 flex items-center gap-1.5">
                         <span>🎯</span> O QUE FOI FEITO NA SESSÃO * (Atividades e Conteúdos)
                     </label>
-                    <textarea name="o_que_foi_feito" rows="3" required placeholder="Descreva quais atividades, conteúdos, habilidades ou desafios foram trabalhados com o estudante..."
+                    <textarea name="o_que_foi_feito" id="campo-o-que-foi-feito" rows="3" placeholder="Descreva quais atividades, conteúdos, habilidades ou desafios foram trabalhados com o estudante..."
                               class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
                 </div>
 
@@ -290,7 +301,7 @@
                     <label class="text-[10px] font-bold uppercase tracking-wider text-indigo-800 flex items-center gap-1.5">
                         <span>🛠️</span> COMO FOI FEITO * (Metodologia, Estratégias e Recursos)
                     </label>
-                    <textarea name="como_foi_feito" rows="3" required placeholder="Descreva como a atividade foi conduzida: que metodologia foi utilizada, tipos de mediação, apoio visual, tempo de resposta, estratégias de engajamento..."
+                    <textarea name="como_foi_feito" id="campo-como-foi-feito" rows="3" placeholder="Descreva como a atividade foi conduzida: que metodologia foi utilizada, tipos de mediação, apoio visual, tempo de resposta, estratégias de engajamento..."
                               class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
                 </div>
 
@@ -306,7 +317,7 @@
                         class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
                     Cancelar
                 </button>
-                <button type="submit"
+                <button type="submit" id="btn-salvar-sessao"
                         class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-sm">
                     Salvar Sessão no Prontuário
                 </button>
@@ -441,5 +452,32 @@ function toggleCamposPresenca(compareceu) {
         campoJust.classList.remove('hidden');
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const formSessao = document.getElementById('form-lancar-sessao');
+    if (formSessao) {
+        formSessao.addEventListener('submit', function(e) {
+            const radioCompareceu = document.querySelector('input[name="compareceu"]:checked');
+            const isPresente = radioCompareceu ? (radioCompareceu.value === 'true') : true;
+
+            if (isPresente) {
+                const oQue = document.getElementById('campo-o-que-foi-feito').value.trim();
+                const como = document.getElementById('campo-como-foi-feito').value.trim();
+                if (!oQue) {
+                    e.preventDefault();
+                    alert('Por favor, descreva "O que foi feito na sessão" antes de salvar.');
+                    document.getElementById('campo-o-que-foi-feito').focus();
+                    return false;
+                }
+                if (!como) {
+                    e.preventDefault();
+                    alert('Por favor, descreva "Como foi feito na sessão" antes de salvar.');
+                    document.getElementById('campo-como-foi-feito').focus();
+                    return false;
+                }
+            }
+        });
+    }
+});
 </script>
 {% endblock %}

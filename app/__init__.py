@@ -197,7 +197,22 @@ def create_app():
                     "ALTER TABLE lista_espera_aee ALTER COLUMN data_nascimento DROP NOT NULL;",
                     "ALTER TABLE lista_espera_aee ALTER COLUMN telefone DROP NOT NULL;",
                     "ALTER TABLE lista_espera_aee ALTER COLUMN prioridade DROP NOT NULL;",
-                    "ALTER TABLE lista_espera_aee ALTER COLUMN status DROP NOT NULL;"
+                    "ALTER TABLE lista_espera_aee ALTER COLUMN status DROP NOT NULL;",
+
+                    # 5. atendimentos_aee (Sessões e Faltas na Sala de Recursos SRM)
+                    "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS municipio_id INTEGER;",
+                    "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;",
+                    "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS o_que_foi_feito TEXT;",
+                    "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS como_foi_feito TEXT;",
+                    "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS recursos_utilizados VARCHAR(255);",
+                    "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS justificativa_falta VARCHAR(255);",
+                    "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
+                    "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_nome VARCHAR(150);",
+                    "ALTER TABLE atendimentos_aee ALTER COLUMN horario_inicio DROP NOT NULL;",
+                    "ALTER TABLE atendimentos_aee ALTER COLUMN horario_fim DROP NOT NULL;",
+                    "ALTER TABLE atendimentos_aee ALTER COLUMN plano_sessao DROP NOT NULL;",
+                    "ALTER TABLE atendimentos_aee ALTER COLUMN evolucao_registro DROP NOT NULL;",
+                    "ALTER TABLE atendimentos_aee ALTER COLUMN frequencia DROP NOT NULL;"
                 ]
                 for ddl in ddl_comandos:
                     try:
