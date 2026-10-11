@@ -47,7 +47,8 @@ def create_app():
         os.getenv('DATABASE_PUBLIC_URL') or
         os.getenv('POSTGRES_URL') or
         os.getenv('POSTGRESQL_URL') or
-        os.getenv('PG_URL')
+        os.getenv('PG_URL') or
+        os.getenv('URL_DO_BANCO_DE_DADOS')
     )
 
     # Se estiver no Railway e a URL for localhost ou vazia, tenta montar a partir das variáveis individuais do Postgres
