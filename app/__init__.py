@@ -62,7 +62,8 @@ def create_app():
         db_url = db_url.replace("postgres://", "postgresql://", 1)
 
     if not db_url:
-        print("[AVISO] Nenhuma variável DATABASE_URL encontrada. Verifique as configurações de variáveis de ambiente no painel de deploy.")
+        print("[AVISO] Nenhuma variável DATABASE_URL encontrada no ambiente. Ativando fallback temporário SQLite (sqlite:///inclusao.db). Configure DATABASE_URL no Railway para conectar ao PostgreSQL.")
+        db_url = "sqlite:///inclusao.db"
         
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -79,6 +80,11 @@ def create_app():
     with app.app_context():
         from app import models
         from app.models import Escola
+        if db_url.startswith("sqlite"):
+            try:
+                db.create_all()
+            except Exception as e:
+                print(f"[AVISO] Erro ao inicializar SQLite: {e}")
 
     # Registro de Blueprints - Nova Arquitetura SaaS Blindada
     from app.blueprints.auth.routes import auth_bp

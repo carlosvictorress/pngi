@@ -7,7 +7,11 @@ publico_bp = Blueprint('publico', __name__)
 @publico_bp.route('/')
 def landing_page():
     """Renderiza a Landing Page institucional mestre na raiz absoluta do SaaS."""
-    municipios = Municipio.query.order_by(Municipio.nome).all()
+    try:
+        municipios = Municipio.query.order_by(Municipio.nome).all()
+    except Exception as e:
+        print(f"[AVISO] Não foi possível carregar municípios: {e}")
+        municipios = []
     return render_template('publico/landing.html', municipios=municipios)
 
 @publico_bp.route('/solicitar-implantacao', methods=['POST'])
