@@ -45,7 +45,9 @@ def create_app():
         os.getenv('DATABASE_URL') or
         os.getenv('DATABASE_PRIVATE_URL') or
         os.getenv('DATABASE_PUBLIC_URL') or
-        os.getenv('POSTGRES_URL')
+        os.getenv('POSTGRES_URL') or
+        os.getenv('POSTGRESQL_URL') or
+        os.getenv('PG_URL')
     )
 
     # Se estiver no Railway e a URL for localhost ou vazia, tenta montar a partir das variáveis individuais do Postgres
@@ -76,15 +78,31 @@ def create_app():
     # 🚀 GESTOOR 360: Registro do Filtro Global do Jinja2 para decodificação de matrizes JSON
     app.jinja_env.filters['from_json'] = json.loads
 
-    # IMPORTANTE: Força o Flask a carregar as classes dos modelos
+    # IMPORTANTE: Força o Flask a carregar as classes dos modelos e sincronizar tabelas
     with app.app_context():
         from app import models
         from app.models import Escola
-        if db_url.startswith("sqlite"):
-            try:
-                db.create_all()
-            except Exception as e:
-                print(f"[AVISO] Erro ao inicializar SQLite: {e}")
+        try:
+            db.create_all()
+            if db.engine.name == 'postgresql':
+                from sqlalchemy import text
+                with db.engine.connect() as conn:
+                    conn.execute(text("ALTER TABLE alunos ADD COLUMN IF NOT EXISTS endereco VARCHAR(255);"))
+                    conn.execute(text("ALTER TABLE alunos ADD COLUMN IF NOT EXISTS bairro VARCHAR(120);"))
+                    conn.execute(text("ALTER TABLE alunos ADD COLUMN IF NOT EXISTS em_investigacao BOOLEAN DEFAULT FALSE;"))
+                    conn.execute(text("ALTER TABLE alunos ADD COLUMN IF NOT EXISTS hipotese_diagnostica VARCHAR(255);"))
+                    
+                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS municipio_id INTEGER;"))
+                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;"))
+                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS o_que_foi_feito TEXT;"))
+                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS como_foi_feito TEXT;"))
+                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS recursos_utilizados VARCHAR(255);"))
+                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS justificativa_falta VARCHAR(255);"))
+                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_id INTEGER;"))
+                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_nome VARCHAR(150);"))
+                    conn.commit()
+        except Exception as e:
+            print(f"[INFO] Sincronização inicial de tabelas: {e}")
 
     # Registro de Blueprints - Nova Arquitetura SaaS Blindada
     from app.blueprints.auth.routes import auth_bp
