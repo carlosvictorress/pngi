@@ -281,6 +281,57 @@
                             <input type="url" name="brasao_url" placeholder="https://..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:bg-white focus:border-gov-blue focus:outline-none">
                         </div>
 
+                        <!-- MÓDULOS CONTRATADOS / IMPLANTAÇÃO -->
+                        <div class="pt-3 border-t border-slate-200 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-extrabold text-gov-navy text-[11px] uppercase tracking-wider">📦 Módulos Contratados</span>
+                                <span class="text-[9px] bg-blue-100 text-gov-blue px-2 py-0.5 rounded font-bold">Personalizável</span>
+                            </div>
+                            <p class="text-[10px] text-slate-500">Selecione quais módulos estarão habilitados para este município:</p>
+                            
+                            <div class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                                <label class="flex items-start gap-2.5 cursor-pointer">
+                                    <input type="checkbox" name="modulo_pei" value="1" checked class="mt-0.5 rounded text-gov-blue focus:ring-gov-blue h-4 w-4">
+                                    <div class="text-[11px]">
+                                        <span class="font-bold text-slate-800">🧠 PEI Inteligente com IA</span>
+                                        <span class="block text-[10px] text-slate-500">Planos com IA, metas curriculares e adaptações.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-2.5 cursor-pointer">
+                                    <input type="checkbox" name="modulo_aee" value="1" checked class="mt-0.5 rounded text-gov-blue focus:ring-gov-blue h-4 w-4">
+                                    <div class="text-[11px]">
+                                        <span class="font-bold text-slate-800">🎒 Sala de Recursos / AEE (SRM)</span>
+                                        <span class="block text-[10px] text-slate-500">Atendimentos SRM, fila de espera e prontuário evolutivo.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-2.5 cursor-pointer">
+                                    <input type="checkbox" name="modulo_equipe_multi" value="1" checked class="mt-0.5 rounded text-gov-blue focus:ring-gov-blue h-4 w-4">
+                                    <div class="text-[11px]">
+                                        <span class="font-bold text-slate-800">👥 Equipe Multiprofissional (SOAP & IA)</span>
+                                        <span class="block text-[10px] text-slate-500">Evoluções SOAP, escuta com IA e planos mensais.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-2.5 cursor-pointer">
+                                    <input type="checkbox" name="modulo_transporte" value="1" checked class="mt-0.5 rounded text-gov-blue focus:ring-gov-blue h-4 w-4">
+                                    <div class="text-[11px]">
+                                        <span class="font-bold text-slate-800">🚌 Transporte Escolar Acessível</span>
+                                        <span class="block text-[10px] text-slate-500">Rotas acessíveis, veículos adaptados e logística PCD.</span>
+                                    </div>
+                                </label>
+
+                                <label class="flex items-start gap-2.5 cursor-pointer">
+                                    <input type="checkbox" name="modulo_blindagem_juridica" value="1" checked class="mt-0.5 rounded text-gov-blue focus:ring-gov-blue h-4 w-4">
+                                    <div class="text-[11px]">
+                                        <span class="font-bold text-slate-800">🛡️ Blindagem Jurídica & Ministério Público</span>
+                                        <span class="block text-[10px] text-slate-500">Monitoramento de TACs, conformidade LBI e relatórios ao MP.</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- CADASTRO INTEGRADO DA SECRETARIA DE EDUCAÇÃO -->
                         <div class="pt-3 border-t border-slate-200 space-y-3">
                             <div class="flex items-center justify-between">
@@ -330,10 +381,18 @@
                                 <div class="text-[11px] text-slate-500 font-mono">
                                     URL: <span class="text-gov-blue font-bold">/{{ m.slug }}</span> | Limite: {{ m.limite_alunos }} alunos
                                 </div>
+                                <div class="flex flex-wrap items-center gap-1.5 pt-1.5">
+                                    <span class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mr-0.5">Módulos:</span>
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-extrabold {% if m.modulo_pei %}bg-blue-50 text-blue-700 border border-blue-200{% else %}bg-slate-100 text-slate-400 line-through{% endif %}">PEI</span>
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-extrabold {% if m.modulo_aee %}bg-emerald-50 text-emerald-700 border border-emerald-200{% else %}bg-slate-100 text-slate-400 line-through{% endif %}">AEE/SRM</span>
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-extrabold {% if m.modulo_equipe_multi %}bg-purple-50 text-purple-700 border border-purple-200{% else %}bg-slate-100 text-slate-400 line-through{% endif %}">Equipe Multi</span>
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-extrabold {% if m.modulo_transporte %}bg-amber-50 text-amber-700 border border-amber-200{% else %}bg-slate-100 text-slate-400 line-through{% endif %}">Transporte</span>
+                                    <span class="px-2 py-0.5 rounded text-[9px] font-extrabold {% if m.modulo_blindagem_juridica %}bg-rose-50 text-rose-700 border border-rose-200{% else %}bg-slate-100 text-slate-400 line-through{% endif %}">Blindagem MP</span>
+                                </div>
                             </div>
 
                             <div class="flex flex-wrap items-center gap-2">
-                                <button onclick="openEditMunModal('{{ m.id }}', '{{ m.nome }}', '{{ m.estado }}', '{{ m.slug }}', '{{ m.limite_alunos }}', '{{ m.brasao_url or '' }}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
+                                <button onclick="openEditMunModal('{{ m.id }}', '{{ m.nome|escape }}', '{{ m.estado }}', '{{ m.slug }}', '{{ m.limite_alunos }}', '{{ m.brasao_url or '' }}', {{ 'true' if m.modulo_pei else 'false' }}, {{ 'true' if m.modulo_aee else 'false' }}, {{ 'true' if m.modulo_equipe_multi else 'false' }}, {{ 'true' if m.modulo_transporte else 'false' }}, {{ 'true' if m.modulo_blindagem_juridica else 'false' }})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-all">
                                     ✏️ Editar
                                 </button>
 
@@ -596,6 +655,31 @@
                     <label class="block mb-1 font-bold text-slate-700">URL do Brasão</label>
                     <input type="url" id="edit-mun-brasao" name="brasao_url" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900">
                 </div>
+                <div class="pt-2 border-t border-slate-200 space-y-2">
+                    <label class="block font-bold text-slate-700 text-[11px] uppercase tracking-wider">📦 Módulos Ativos no Município</label>
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="edit-mun-modulo-pei" name="modulo_pei" value="1" class="rounded text-gov-blue h-4 w-4">
+                            <span class="font-bold text-slate-800 text-[11px]">🧠 PEI Inteligente com IA</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="edit-mun-modulo-aee" name="modulo_aee" value="1" class="rounded text-gov-blue h-4 w-4">
+                            <span class="font-bold text-slate-800 text-[11px]">🎒 Sala de Recursos / AEE (SRM)</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="edit-mun-modulo-multi" name="modulo_equipe_multi" value="1" class="rounded text-gov-blue h-4 w-4">
+                            <span class="font-bold text-slate-800 text-[11px]">👥 Equipe Multiprofissional (SOAP & IA)</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="edit-mun-modulo-transporte" name="modulo_transporte" value="1" class="rounded text-gov-blue h-4 w-4">
+                            <span class="font-bold text-slate-800 text-[11px]">🚌 Transporte Escolar Acessível</span>
+                        </label>
+                        <label class="flex items-center gap-2.5 cursor-pointer">
+                            <input type="checkbox" id="edit-mun-modulo-blindagem" name="modulo_blindagem_juridica" value="1" class="rounded text-gov-blue h-4 w-4">
+                            <span class="font-bold text-slate-800 text-[11px]">🛡️ Blindagem Jurídica & Ministério Público</span>
+                        </label>
+                    </div>
+                </div>
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="closeEditMunModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-bold">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-gov-blue text-white rounded-lg font-bold shadow-sm">Salvar Alterações</button>
@@ -686,13 +770,18 @@
             activeBtn.classList.remove('text-slate-600');
         }
 
-        function openEditMunModal(id, nome, estado, slug, limite, brasao) {
+        function openEditMunModal(id, nome, estado, slug, limite, brasao, modPei, modAee, modMulti, modTransp, modBlind) {
             document.getElementById('form-edit-mun').action = '/auth/admin-global/municipio/' + id + '/editar';
             document.getElementById('edit-mun-nome').value = nome;
             document.getElementById('edit-mun-estado').value = estado;
             document.getElementById('edit-mun-slug').value = slug;
             document.getElementById('edit-mun-limite').value = limite;
             document.getElementById('edit-mun-brasao').value = brasao;
+            document.getElementById('edit-mun-modulo-pei').checked = (modPei === true || modPei === 'true' || modPei === 1 || modPei === '1');
+            document.getElementById('edit-mun-modulo-aee').checked = (modAee === true || modAee === 'true' || modAee === 1 || modAee === '1');
+            document.getElementById('edit-mun-modulo-multi').checked = (modMulti === true || modMulti === 'true' || modMulti === 1 || modMulti === '1');
+            document.getElementById('edit-mun-modulo-transporte').checked = (modTransp === true || modTransp === 'true' || modTransp === 1 || modTransp === '1');
+            document.getElementById('edit-mun-modulo-blindagem').checked = (modBlind === true || modBlind === 'true' || modBlind === 1 || modBlind === '1');
             document.getElementById('modal-edit-mun').classList.remove('hidden');
         }
         function closeEditMunModal() {

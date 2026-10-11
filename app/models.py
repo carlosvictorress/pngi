@@ -26,9 +26,20 @@ class Municipio(db.Model):
     limite_alunos = db.Column(db.Integer, default=500) # Para planos de cobrança
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # Módulos Funcionais Contratados / Ativos na Instância Municipal
+    modulo_pei = db.Column(db.Boolean, default=True, server_default='true', nullable=False)
+    modulo_aee = db.Column(db.Boolean, default=True, server_default='true', nullable=False)
+    modulo_equipe_multi = db.Column(db.Boolean, default=True, server_default='true', nullable=False)
+    modulo_transporte = db.Column(db.Boolean, default=True, server_default='true', nullable=False)
+    modulo_blindagem_juridica = db.Column(db.Boolean, default=True, server_default='true', nullable=False)
+
     # Relacionamentos Globais do Município
     usuarios = db.relationship('Usuario', backref='municipio', lazy=True, cascade='all, delete-orphan')
     alunos = db.relationship('Aluno', foreign_keys='Aluno.municipio_id', backref='municipio', lazy=True, cascade='all, delete-orphan')
+
+    def tem_modulo(self, nome_modulo):
+        attr = f"modulo_{nome_modulo}" if not str(nome_modulo).startswith('modulo_') else str(nome_modulo)
+        return getattr(self, attr, True)
 
     def __repr__(self):
         return f"<Municipio {self.nome}-{self.estado}>"

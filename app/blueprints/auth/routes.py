@@ -100,12 +100,23 @@ def superadmin_dashboard():
             elif email_secretario and Usuario.query.filter_by(email=email_secretario).first():
                 flash(f"O e-mail da secretaria '{email_secretario}' já está cadastrado em outra conta!", "erro")
             else:
+                mod_pei = bool(request.form.get('modulo_pei'))
+                mod_aee = bool(request.form.get('modulo_aee'))
+                mod_multi = bool(request.form.get('modulo_equipe_multi'))
+                mod_transporte = bool(request.form.get('modulo_transporte'))
+                mod_blindagem = bool(request.form.get('modulo_blindagem_juridica'))
+
                 novo_mun = Municipio(
                     nome=nome, 
                     estado=estado, 
                     slug=slug, 
                     limite_alunos=int(limite),
-                    brasao_url=brasao_url if brasao_url else None
+                    brasao_url=brasao_url if brasao_url else None,
+                    modulo_pei=mod_pei,
+                    modulo_aee=mod_aee,
+                    modulo_equipe_multi=mod_multi,
+                    modulo_transporte=mod_transporte,
+                    modulo_blindagem_juridica=mod_blindagem
                 )
                 db.session.add(novo_mun)
                 db.session.flush()
@@ -218,6 +229,11 @@ def editar_municipio(mun_id):
         municipio.slug = slug
         municipio.limite_alunos = int(limite)
         municipio.brasao_url = brasao_url if brasao_url else None
+        municipio.modulo_pei = bool(request.form.get('modulo_pei'))
+        municipio.modulo_aee = bool(request.form.get('modulo_aee'))
+        municipio.modulo_equipe_multi = bool(request.form.get('modulo_equipe_multi'))
+        municipio.modulo_transporte = bool(request.form.get('modulo_transporte'))
+        municipio.modulo_blindagem_juridica = bool(request.form.get('modulo_blindagem_juridica'))
         db.session.commit()
         flash(f"Município '{municipio.nome}' atualizado com sucesso!", "sucesso")
         

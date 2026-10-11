@@ -59,9 +59,9 @@
             {% endif %}
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             
-            <!-- ALUNOS PCD -->
+            <!-- ALUNOS PCD (Central) -->
             <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] uppercase font-semibold text-apple-light tracking-wider">Alunos Inclusivos</span>
@@ -74,24 +74,7 @@
                 </div>
             </div>
 
-            <!-- EQUIPE MULTIDISCIPLINAR -->
-            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] uppercase font-semibold text-purple-600 tracking-wider">Equipe Multidisciplinar</span>
-                    <div class="text-3xl font-light mt-1 text-purple-700">
-                        {{ total_equipe }}
-                    </div>
-                </div>
-                <div class="mt-4">
-                    {% if current_user.perfil in ['secretaria', 'superadmin'] %}
-                        <a href="/{{ municipio.slug }}/usuarios" class="text-xs text-purple-700 hover:underline font-medium">Ver Profissionais &rarr;</a>
-                    {% else %}
-                        <span class="text-[10px] text-apple-light italic">Visualização da Secretaria</span>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- ESCOLAS -->
+            <!-- ESCOLAS (Infraestrutura) -->
             <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
                     <span class="text-[10px] uppercase font-semibold text-apple-light tracking-wider">Escolas Monitoradas</span>
@@ -102,16 +85,78 @@
                 </div>
             </div>
 
-            <!-- PEIS EMITIDOS -->
+            <!-- EQUIPE MULTIDISCIPLINAR (Se ativo) -->
+            {% if not municipio or municipio.modulo_equipe_multi %}
             <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                    <span class="text-[10px] uppercase font-semibold text-apple-light tracking-wider">PEIs Emitidos</span>
+                    <span class="text-[10px] uppercase font-semibold text-purple-600 tracking-wider">Equipe Multi (SOAP)</span>
+                    <div class="text-3xl font-light mt-1 text-purple-700">
+                        {{ total_equipe }}
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                    <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=municipio.slug) }}" class="text-xs text-purple-700 hover:underline font-medium">Atendimento SOAP &rarr;</a>
+                    {% if current_user.perfil in ['secretaria', 'superadmin'] %}
+                        <a href="/{{ municipio.slug }}/usuarios" class="text-[10px] text-slate-400 hover:underline">Equipe</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- PEIS EMITIDOS (Se ativo) -->
+            {% if not municipio or municipio.modulo_pei %}
+            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                    <span class="text-[10px] uppercase font-semibold text-blue-600 tracking-wider">PEI Inteligente (IA)</span>
                     <div class="text-3xl font-light mt-1 text-apple-dark">{{ total_peis }}</div>
                 </div>
                 <div class="mt-4">
                     <a href="/{{ municipio.slug }}/pei/" class="text-xs text-apple-blue hover:underline font-medium">Planos PEI &rarr;</a>
                 </div>
             </div>
+            {% endif %}
+
+            <!-- SALA DE RECURSOS / AEE (Se ativo) -->
+            {% if not municipio or municipio.modulo_aee %}
+            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                    <span class="text-[10px] uppercase font-semibold text-emerald-600 tracking-wider">Sala de Recursos (SRM)</span>
+                    <div class="text-sm font-semibold text-slate-800 mt-2">Atendimentos AEE</div>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Prontuário e Fila de Espera</p>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url_for('aee.sala_recursos', municipio_slug=municipio.slug) }}" class="text-xs text-emerald-700 hover:underline font-medium">Acessar SRM &rarr;</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- TRANSPORTE INCLUSIVO (Se ativo) -->
+            {% if not municipio or municipio.modulo_transporte %}
+            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                    <span class="text-[10px] uppercase font-semibold text-amber-600 tracking-wider">Transporte Inclusivo</span>
+                    <div class="text-sm font-semibold text-slate-800 mt-2">Logística & Rotas</div>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Veículos adaptados e monitores</p>
+                </div>
+                <div class="mt-4">
+                    <a href="/{{ municipio.slug }}/transporte/" class="text-xs text-amber-700 hover:underline font-medium">Rotas & Veículos &rarr;</a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- BLINDAGEM JURÍDICA (Se ativo e perfil autorizado) -->
+            {% if (not municipio or municipio.modulo_blindagem_juridica) and current_user.perfil in ['secretaria', 'superadmin'] %}
+            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                    <span class="text-[10px] uppercase font-semibold text-amber-700 tracking-wider">Blindagem Jurídica</span>
+                    <div class="text-sm font-semibold text-slate-800 mt-2">Conformidade Legal</div>
+                    <p class="text-[10px] text-slate-400 mt-0.5">Gestão de TACs e Notificações MP</p>
+                </div>
+                <div class="mt-4">
+                    <a href="{{ url_for('core.dashboard_blindagem', municipio_slug=municipio.slug) }}" class="text-xs text-amber-700 hover:underline font-medium">Monitorar TACs &rarr;</a>
+                </div>
+            </div>
+            {% endif %}
 
         </div>
 

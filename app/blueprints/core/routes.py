@@ -39,10 +39,43 @@ def carregar_contexto_municipio():
     # CONTROLE DE ACESSO INTEGRADO (Bypass do SuperAdmin)
     if current_user.is_authenticated:
         if current_user.perfil == 'superadmin':
-            return 
-            
-        if current_user.municipio_id != g.municipio.id:
+            pass
+        elif current_user.municipio_id != g.municipio.id:
             abort(403, description="Acesso negado: Você não pertence a esta instância municipal.")
+
+    # PROTEÇÃO CONTRA ACESSO A MÓDULOS NÃO CONTRATADOS / DESATIVADOS
+    caminho = request.path.rstrip('/')
+    slug_prefix = f"/{g.municipio_slug}"
+
+    if caminho == f"{slug_prefix}/pei" or caminho.startswith(f"{slug_prefix}/pei/"):
+        if not getattr(g.municipio, 'modulo_pei', True):
+            from flask import flash
+            flash(f"O módulo 'PEI Inteligente' não está habilitado para {g.municipio.nome}.", "warning")
+            return redirect(url_for('core.index', municipio_slug=g.municipio_slug))
+
+    elif caminho == f"{slug_prefix}/aee" or caminho.startswith(f"{slug_prefix}/aee/"):
+        if not getattr(g.municipio, 'modulo_aee', True):
+            from flask import flash
+            flash(f"O módulo 'Sala de Recursos / AEE' não está habilitado para {g.municipio.nome}.", "warning")
+            return redirect(url_for('core.index', municipio_slug=g.municipio_slug))
+
+    elif caminho == f"{slug_prefix}/equipe-multi" or caminho.startswith(f"{slug_prefix}/equipe-multi/"):
+        if not getattr(g.municipio, 'modulo_equipe_multi', True):
+            from flask import flash
+            flash(f"O módulo 'Equipe Multiprofissional' não está habilitado para {g.municipio.nome}.", "warning")
+            return redirect(url_for('core.index', municipio_slug=g.municipio_slug))
+
+    elif caminho == f"{slug_prefix}/transporte" or caminho.startswith(f"{slug_prefix}/transporte/"):
+        if not getattr(g.municipio, 'modulo_transporte', True):
+            from flask import flash
+            flash(f"O módulo 'Transporte Inclusivo' não está habilitado para {g.municipio.nome}.", "warning")
+            return redirect(url_for('core.index', municipio_slug=g.municipio_slug))
+
+    elif caminho == f"{slug_prefix}/blindagem-juridica" or caminho.startswith(f"{slug_prefix}/blindagem-juridica/"):
+        if not getattr(g.municipio, 'modulo_blindagem_juridica', True):
+            from flask import flash
+            flash(f"O módulo 'Blindagem Jurídica & MP' não está habilitado para {g.municipio.nome}.", "warning")
+            return redirect(url_for('core.index', municipio_slug=g.municipio_slug))
 
 # -------------------------------------------------------------------------
 # INDEX / DASHBOARD DO MUNICÍPIO INDIVIDUAL

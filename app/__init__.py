@@ -212,13 +212,28 @@ def create_app():
                     "ALTER TABLE atendimentos_aee ALTER COLUMN horario_fim DROP NOT NULL;",
                     "ALTER TABLE atendimentos_aee ALTER COLUMN plano_sessao DROP NOT NULL;",
                     "ALTER TABLE atendimentos_aee ALTER COLUMN evolucao_registro DROP NOT NULL;",
-                    "ALTER TABLE atendimentos_aee ALTER COLUMN frequencia DROP NOT NULL;"
+                    "ALTER TABLE atendimentos_aee ALTER COLUMN frequencia DROP NOT NULL;",
+
+                    # 6. municipios (Módulos contratados por município)
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_pei BOOLEAN DEFAULT TRUE;",
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_aee BOOLEAN DEFAULT TRUE;",
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_equipe_multi BOOLEAN DEFAULT TRUE;",
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_transporte BOOLEAN DEFAULT TRUE;",
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_blindagem_juridica BOOLEAN DEFAULT TRUE;"
                 ]
                 for ddl in ddl_comandos:
                     try:
                         conn.execute(text(ddl))
                     except Exception:
                         pass
+
+                # Suporte para SQLite local
+                if conn.dialect.name == 'sqlite':
+                    for col in ['modulo_pei', 'modulo_aee', 'modulo_equipe_multi', 'modulo_transporte', 'modulo_blindagem_juridica']:
+                        try:
+                            conn.execute(text(f"ALTER TABLE municipios ADD COLUMN {col} BOOLEAN DEFAULT 1;"))
+                        except Exception:
+                            pass
         except Exception as e:
             print(f"[INFO] DDL schema notice: {e}")
 
