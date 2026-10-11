@@ -40,43 +40,58 @@ def create_app():
     # Configurações do Core
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'chave-temporaria-de-seguranca')
     
-    # Tratamento da URL do banco de dados (Railway/PostgreSQL compatibility)
+    # Tratamento robusto da URL do banco de dados (Compatibilidade nativa Railway / PostgreSQL)
+    import re
     db_url = (
         os.getenv('DATABASE_URL') or
-        os.getenv('DATABASE_PRIVATE_URL') or
         os.getenv('DATABASE_PUBLIC_URL') or
+        os.getenv('DATABASE_PRIVATE_URL') or
         os.getenv('POSTGRES_URL') or
         os.getenv('POSTGRESQL_URL') or
         os.getenv('PG_URL') or
         os.getenv('URL_DO_BANCO_DE_DADOS')
     )
 
-    # Se estiver no Railway e a URL for localhost ou vazia, tenta montar a partir das variáveis individuais do Postgres
-    is_railway = bool(os.getenv('RAILWAY_ENVIRONMENT') or os.getenv('RAILWAY_SERVICE_ID'))
-    if (not db_url or (is_railway and ('localhost' in db_url or '127.0.0.1' in db_url))) and os.getenv('PGHOST'):
-        pghost = os.getenv('PGHOST')
+    # Varredura inteligente de variáveis de ambiente injetadas pelo Railway
+    if not db_url:
+        for k, v in os.environ.items():
+            if isinstance(v, str) and (v.startswith('postgresql://') or v.startswith('postgres://')):
+                db_url = v
+                break
+
+    # Se ainda não encontrou ou contém referência não resolvida do Railway, tenta montar a partir das variáveis individuais
+    if not db_url or '${{' in str(db_url):
+        pghost = os.getenv('PGHOST') or os.getenv('POSTGRES_HOST')
+        if pghost:
+            pgport = os.getenv('PGPORT') or os.getenv('POSTGRES_PORT', '5432')
+            pguser = os.getenv('PGUSER') or os.getenv('POSTGRES_USER', 'postgres')
+            pgpass = os.getenv('PGPASSWORD') or os.getenv('POSTGRES_PASSWORD', '')
+            pgdb = os.getenv('PGDATABASE') or os.getenv('POSTGRES_DB', 'railway')
+            db_url = f"postgresql://{pguser}:{pgpass}@{pghost}:{pgport}/{pgdb}"
+
+    # Sanitização de portas e protocolos
+    if db_url:
+        db_url = re.sub(r':porta\b', ':5432', db_url, flags=re.IGNORECASE)
+        if db_url.startswith("postgres://"):
+            db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+    is_railway = bool(os.getenv('RAILWAY_ENVIRONMENT') or os.getenv('RAILWAY_SERVICE_ID') or os.getenv('RAILWAY_PROJECT_ID'))
+    if not db_url and is_railway:
+        # No Railway, se nenhuma URL explícita foi injetada, conecta à rede interna do Postgres
+        pghost = os.getenv('PGHOST', 'postgres.railway.internal')
         pgport = os.getenv('PGPORT', '5432')
         pguser = os.getenv('PGUSER', 'postgres')
         pgpass = os.getenv('PGPASSWORD', '')
         pgdb = os.getenv('PGDATABASE', 'railway')
         db_url = f"postgresql://{pguser}:{pgpass}@{pghost}:{pgport}/{pgdb}"
 
-    if db_url and db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql://", 1)
-
-    # Validação e saneamento de integridade da URL do banco de dados
-    if db_url and not db_url.startswith("sqlite"):
-        try:
-            import sqlalchemy as sa
-            sa.engine.make_url(db_url)
-        except Exception as e:
-            print(f"[AVISO] URL de banco de dados inválida ({e}). Ativando fallback temporário SQLite.")
-            db_url = None
-
+    # Fallback exclusivo para desenvolvimento local offline na máquina do desenvolvedor
     if not db_url:
-        print("[AVISO] Nenhuma variável DATABASE_URL válida encontrada no ambiente. Ativando fallback temporário SQLite (sqlite:///inclusao.db). Configure DATABASE_URL no Railway para conectar ao PostgreSQL.")
-        db_url = "sqlite:///inclusao.db"
-        
+        if not is_railway:
+            db_url = "sqlite:///inclusao.db"
+        else:
+            db_url = "postgresql://postgres:postgres@localhost:5432/railway"
+
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -89,11 +104,11 @@ def create_app():
     app.jinja_env.filters['from_json'] = json.loads
 
     def sincronizar_schema_automatico():
-        """Garante que todas as tabelas e novas colunas dos novos módulos existam no banco de dados."""
+        """Garante que todas as tabelas e novas colunas dos novos módulos existam no banco de dados com autocommit isolado."""
         try:
             from sqlalchemy import text
-            with db.engine.connect() as conn:
-                if db.engine.name == 'postgresql':
+            if db.engine.name == 'postgresql':
+                with db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
                     comandos_colunas = [
                         "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS endereco VARCHAR(255);",
                         "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS bairro VARCHAR(120);",
@@ -111,9 +126,8 @@ def create_app():
                     for cmd in comandos_colunas:
                         try:
                             conn.execute(text(cmd))
-                            conn.commit()
-                        except Exception:
-                            conn.rollback()
+                        except Exception as ex_col:
+                            print(f"[DDL-COL] Aviso ao alterar coluna: {ex_col}")
 
                     tabelas_ddl = [
                         """
@@ -209,28 +223,21 @@ def create_app():
                     for tbl_cmd in tabelas_ddl:
                         try:
                             conn.execute(text(tbl_cmd))
-                            conn.commit()
-                        except Exception:
-                            conn.rollback()
+                        except Exception as ex_tbl:
+                            print(f"[DDL-TBL] Aviso ao criar tabela: {ex_tbl}")
 
             try:
                 db.create_all()
-            except Exception:
-                pass
+            except Exception as ex_all:
+                print(f"[DDL-CREATE-ALL] Aviso: {ex_all}")
         except Exception as e:
             print(f"[INFO] Auto-sync notice: {e}")
 
-    # IMPORTANTE: Força o Flask a carregar as classes dos modelos e sincronizar tabelas
+    # Força o Flask a carregar as classes dos modelos e sincronizar tabelas no startup
     with app.app_context():
         from app import models
         from app.models import Escola
         sincronizar_schema_automatico()
-
-    @app.before_request
-    def before_request_sync():
-        if not getattr(app, '_schema_initialized', False):
-            app._schema_initialized = True
-            sincronizar_schema_automatico()
 
     # Registro de Blueprints - Nova Arquitetura SaaS Blindada
     from app.blueprints.auth.routes import auth_bp
