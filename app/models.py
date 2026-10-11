@@ -893,6 +893,10 @@ class ListaEsperaAEE(db.Model):
             kwargs['serie_ano'] = kwargs['ano_serie']
         elif 'serie_ano' in kwargs and 'ano_serie' not in kwargs:
             kwargs['ano_serie'] = kwargs['serie_ano']
+        if not kwargs.get('data_nascimento'):
+            kwargs['data_nascimento'] = 'Não informada'
+        if not kwargs.get('telefone'):
+            kwargs['telefone'] = '(00) 00000-0000'
         super().__init__(**kwargs)
 
 
@@ -944,6 +948,10 @@ class AtendimentoMultiSOAP(db.Model):
             kwargs['profissional_id'] = kwargs['usuario_id']
         elif 'profissional_id' in kwargs and 'usuario_id' not in kwargs:
             kwargs['usuario_id'] = kwargs['profissional_id']
+        if not kwargs.get('especialidade'):
+            kwargs['especialidade'] = 'psicologo'
+        if 'compareceu' not in kwargs:
+            kwargs['compareceu'] = True
         super().__init__(**kwargs)
 
 
@@ -1001,6 +1009,9 @@ class RelatorioEscutaEncaminhamento(db.Model):
         elif 'profissional_id' in kwargs and 'usuario_id' not in kwargs:
             kwargs['usuario_id'] = kwargs['profissional_id']
 
+        if not kwargs.get('especialidade_emissor'):
+            kwargs['especialidade_emissor'] = kwargs.get('especialidade') or 'Equipe Multidisciplinar'
+
         if 'sintese_escuta' in kwargs and 'sintese_escuta_qualificada' not in kwargs:
             kwargs['sintese_escuta_qualificada'] = kwargs['sintese_escuta']
         elif 'sintese_escuta_qualificada' in kwargs and 'sintese_escuta' not in kwargs:
@@ -1013,6 +1024,15 @@ class RelatorioEscutaEncaminhamento(db.Model):
 
         if 'situacao_contextual' in kwargs and 'evidencias_observadas' not in kwargs:
             kwargs['evidencias_observadas'] = kwargs['situacao_contextual']
+
+        if not kwargs.get('acoes_ja_realizadas_escola'):
+            kwargs['acoes_ja_realizadas_escola'] = kwargs.get('situacao_contextual') or 'Acompanhamento pedagógico regular.'
+
+        if not kwargs.get('sintese_escuta_qualificada'):
+            kwargs['sintese_escuta_qualificada'] = kwargs.get('sintese_escuta') or 'Escuta técnica realizada.'
+
+        if not kwargs.get('sugestoes_encaminhamento'):
+            kwargs['sugestoes_encaminhamento'] = kwargs.get('providencias_recomendadas') or 'Encaminhamento para avaliação pela rede intersetorial.'
 
         super().__init__(**kwargs)
 
@@ -1091,5 +1111,14 @@ class PlanoAcaoMensalMulti(db.Model):
             kwargs['chave_autenticidade'] = kwargs['chave_documento']
         elif 'chave_autenticidade' in kwargs and 'chave_documento' not in kwargs:
             kwargs['chave_documento'] = kwargs['chave_autenticidade']
+
+        if not kwargs.get('participantes_nomes'):
+            kwargs['participantes_nomes'] = 'Equipe Multiprofissional'
+        if not kwargs.get('pauta_discutida'):
+            kwargs['pauta_discutida'] = kwargs.get('titulo') or 'Reunião Técnica Mensal'
+        if not kwargs.get('casos_discutidos'):
+            kwargs['casos_discutidos'] = 'Alinhamento geral de casos da rede municipal'
+        if not kwargs.get('encaminhamentos_gestao'):
+            kwargs['encaminhamentos_gestao'] = kwargs.get('deliberacoes_gerais') or 'Encaminhamentos pactuados em ata.'
 
         super().__init__(**kwargs)

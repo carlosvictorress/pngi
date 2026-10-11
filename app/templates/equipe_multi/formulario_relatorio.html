@@ -65,7 +65,7 @@
                 1. DESTINO DO ENCAMINHAMENTO & ESTUDANTE
             </h2>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div class="space-y-1">
                     <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Tipo de Documento *</label>
                     <select name="tipo_documento" id="select-tipo-doc"
@@ -73,6 +73,17 @@
                         <option value="Relatório de Escuta Qualificada">Relatório de Escuta Qualificada</option>
                         <option value="Guia de Encaminhamento Intersetorial">Guia de Encaminhamento Intersetorial</option>
                         <option value="Parecer Técnico Multiprofissional">Parecer Técnico Multiprofissional</option>
+                    </select>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Especialidade Emissora *</label>
+                    <select name="especialidade" id="select-especialidade"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="Psicologia" {% if current_user.perfil == 'psicologo' %}selected{% endif %}>Psicologia</option>
+                        <option value="Psicopedagogia" {% if current_user.perfil == 'psicopedagogo' %}selected{% endif %}>Psicopedagogia</option>
+                        <option value="Serviço Social" {% if current_user.perfil == 'assistente_social' %}selected{% endif %}>Serviço Social</option>
+                        <option value="Equipe Multidisciplinar" {% if not current_user.perfil in ['psicologo', 'psicopedagogo', 'assistente_social'] %}selected{% endif %}>Equipe Multidisciplinar</option>
                     </select>
                 </div>
 
@@ -180,6 +191,7 @@ async function acionarIA() {
     const motivo = document.getElementById('input-motivo-demanda').value;
     const orgao = document.getElementById('input-orgao-destino').value;
     const tipoDoc = document.getElementById('select-tipo-doc').value;
+    const espec = document.getElementById('select-especialidade') ? document.getElementById('select-especialidade').value : '';
     const btn = document.getElementById('btn-gerar-ia');
     const textoBtn = document.getElementById('texto-btn-ia');
 
@@ -200,7 +212,8 @@ async function acionarIA() {
                 aluno_id: parseInt(alunoId),
                 motivo_demanda: motivo || "Acompanhamento multiprofissional escolar",
                 orgao_destino: orgao || "Rede Municipal Intersetorial",
-                tipo_documento: tipoDoc
+                tipo_documento: tipoDoc,
+                especialidade: espec
             })
         });
 

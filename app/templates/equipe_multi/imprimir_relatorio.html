@@ -138,9 +138,11 @@
         <!-- CAMPO DE ASSINATURA TÉCNICA -->
         <div class="pt-14 text-center space-y-2">
             <div class="w-72 border-b border-slate-800 mx-auto"></div>
-            <div class="font-extrabold text-xs text-slate-900">{{ relatorio.profissional.nome }}</div>
+            <div class="font-extrabold text-xs text-slate-900">
+                {{ relatorio.profissional.nome if relatorio.profissional else (relatorio.usuario.nome if relatorio.usuario else 'Profissional Responsável') }}
+            </div>
             <div class="text-[10px] text-slate-500 uppercase tracking-widest font-semibold">
-                {{ relatorio.profissional.perfil|upper }} • EQUIPE MULTIDISCIPLINAR MUNICIPAL
+                {{ (relatorio.especialidade_emissor or (relatorio.profissional.perfil if relatorio.profissional else (relatorio.usuario.perfil if relatorio.usuario else 'Equipe Multidisciplinar')))|upper }} • EQUIPE MULTIDISCIPLINAR MUNICIPAL
             </div>
             <div class="text-[9px] text-slate-400 font-mono">
                 Secretaria Municipal de Educação de {{ g.municipio.nome }} — Autenticado sob chave: {{ relatorio.chave_autenticidade }}

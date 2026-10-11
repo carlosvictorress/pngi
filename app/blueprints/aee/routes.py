@@ -586,7 +586,13 @@ def _garantir_tabela_espera():
                 "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS observacoes_triagem TEXT;",
                 "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS data_atendimento TIMESTAMP;",
                 "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
-                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+                "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                # Relaxamento seguro de NOT NULL para lista de espera
+                "ALTER TABLE lista_espera_aee ALTER COLUMN data_nascimento DROP NOT NULL;",
+                "ALTER TABLE lista_espera_aee ALTER COLUMN telefone DROP NOT NULL;",
+                "ALTER TABLE lista_espera_aee ALTER COLUMN prioridade DROP NOT NULL;",
+                "ALTER TABLE lista_espera_aee ALTER COLUMN status DROP NOT NULL;"
             ]
             for cmd in ddls:
                 try:
@@ -624,12 +630,13 @@ def lista_espera():
                 novo_candidato = ListaEsperaAEE(
                     municipio_id=g.municipio.id,
                     nome_completo=nome,
-                    data_nascimento=data_nasc,
+                    data_nascimento=data_nasc or 'Não informada',
                     cpf=cpf,
                     telefone=telefone,
                     nome_responsavel=nome_resp,
                     escola_origem=escola_origem,
                     ano_serie=ano_serie,
+                    serie_ano=ano_serie,
                     endereco=endereco,
                     diagnostico_hipotese=diag,
                     em_investigacao=em_invest,

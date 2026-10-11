@@ -58,6 +58,16 @@ def _garantir_tabelas_multi():
                 "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS data_emissao DATE DEFAULT CURRENT_DATE;",
                 "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
 
+                # Relaxamento seguro de NOT NULL para relatorios
+                "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN especialidade_emissor DROP NOT NULL;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN sintese_escuta_qualificada DROP NOT NULL;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN sugestoes_encaminhamento DROP NOT NULL;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN acoes_ja_realizadas_escola DROP NOT NULL;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN profissional_id DROP NOT NULL;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN tipo_documento DROP NOT NULL;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN motivo_demanda TYPE TEXT;",
+                "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN motivo_demanda DROP NOT NULL;",
+
                 "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS usuario_id INTEGER;",
                 "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
                 "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;",
@@ -66,6 +76,12 @@ def _garantir_tabelas_multi():
                 "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS status VARCHAR(30) DEFAULT 'Finalizado';",
                 "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
                 "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                # Relaxamento seguro de NOT NULL para atendimentos
+                "ALTER TABLE atendimentos_multi_soap ALTER COLUMN profissional_id DROP NOT NULL;",
+                "ALTER TABLE atendimentos_multi_soap ALTER COLUMN especialidade DROP NOT NULL;",
+                "ALTER TABLE atendimentos_multi_soap ALTER COLUMN compareceu DROP NOT NULL;",
+                "ALTER TABLE atendimentos_multi_soap ALTER COLUMN data_atendimento DROP NOT NULL;",
 
                 "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS usuario_coordenador_id INTEGER;",
                 "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS coordenador_reuniao_id INTEGER;",
@@ -82,7 +98,18 @@ def _garantir_tabelas_multi():
                 "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS chave_documento VARCHAR(64);",
                 "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS chave_autenticidade VARCHAR(64);",
                 "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
-                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+                "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                # Conversão e relaxamento seguro de planos de acao
+                "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN mes_referencia TYPE VARCHAR(50) USING mes_referencia::VARCHAR;",
+                "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN mes_referencia DROP NOT NULL;",
+                "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN ano_referencia DROP NOT NULL;",
+                "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN coordenador_reuniao_id DROP NOT NULL;",
+                "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN participantes_nomes DROP NOT NULL;",
+                "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN pauta_discutida DROP NOT NULL;",
+                "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN casos_discutidos DROP NOT NULL;",
+                "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN encaminhamentos_gestao DROP NOT NULL;",
+                "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN status DROP NOT NULL;"
             ]
             for cmd in ddls:
                 try:
@@ -353,12 +380,14 @@ def novo_relatorio_escuta():
     if request.method == 'POST':
         aluno_id = request.form.get('aluno_id', type=int)
         tipo_doc = request.form.get('tipo_documento', 'Relatório de Escuta Qualificada')
+        especialidade_emissor = request.form.get('especialidade') or request.form.get('especialidade_emissor') or (current_user.perfil.title() if getattr(current_user, 'perfil', None) else 'Equipe Multidisciplinar')
         orgao_destino = request.form.get('orgao_destino', 'CAPS Infantil').strip()
         motivo = request.form.get('motivo_demanda', '').strip()
         sintese = request.form.get('sintese_escuta', '').strip()
         contexto = request.form.get('situacao_contextual', '').strip()
         hipotese = request.form.get('hipotese_ou_vulnerabilidade', '').strip()
         providencias = request.form.get('providencias_recomendadas', '').strip()
+        acoes_escola = request.form.get('acoes_ja_realizadas_escola', '').strip() or contexto or 'Acompanhamento pedagógico regular.'
         urgencia = request.form.get('urgencia', 'Média')
         gerado_ia = request.form.get('gerado_com_ia') == 'true' or request.form.get('gerado_com_ia') == '1'
 
@@ -372,13 +401,19 @@ def novo_relatorio_escuta():
                     municipio_id=g.municipio.id,
                     aluno_id=aluno_id,
                     usuario_id=current_user.id,
+                    profissional_id=current_user.id,
+                    especialidade_emissor=especialidade_emissor,
                     tipo_documento=tipo_doc,
                     orgao_destino=orgao_destino,
                     motivo_demanda=motivo,
                     sintese_escuta=sintese,
+                    sintese_escuta_qualificada=sintese,
                     situacao_contextual=contexto,
+                    evidencias_observadas=contexto,
+                    acoes_ja_realizadas_escola=acoes_escola,
                     hipotese_ou_vulnerabilidade=hipotese,
                     providencias_recomendadas=providencias,
+                    sugestoes_encaminhamento=providencias,
                     urgencia=urgencia,
                     gerado_com_ia=gerado_ia,
                     ia_prompt_ou_modelo='ORBI Intelligence v1 (SECADI/SUAS)' if gerado_ia else None,
@@ -479,20 +514,26 @@ def novo_plano_acao():
                 novo_plano = PlanoAcaoMensalMulti(
                     municipio_id=g.municipio.id,
                     usuario_coordenador_id=current_user.id,
+                    coordenador_reuniao_id=current_user.id,
                     titulo=titulo,
+                    pauta_discutida=titulo,
                     mes_referencia=mes,
                     ano_referencia=ano,
                     data_reuniao=data_reuniao,
                     local_reuniao=local,
                     profissionais_presentes=presentes,
+                    participantes_nomes=presentes,
                     casos_discutidos_json=casos_json_raw,
+                    casos_discutidos=casos_json_raw or 'Discussão geral de casos da rede',
                     acoes_psicologia=acoes_psi,
                     acoes_psicopedagogia=acoes_psicoped,
                     acoes_servico_social=acoes_social,
                     deliberacoes_gerais=deliberacoes,
+                    encaminhamentos_gestao=deliberacoes or 'Encaminhamentos pactuados em ata.',
                     metas_proximo_mes=metas_proximo,
                     status='Aprovado em Reunião',
-                    chave_documento=chave_doc
+                    chave_documento=chave_doc,
+                    chave_autenticidade=chave_doc
                 )
                 db.session.add(novo_plano)
                 db.session.commit()

@@ -125,6 +125,16 @@ def create_app():
                     "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS data_emissao DATE DEFAULT CURRENT_DATE;",
                     "ALTER TABLE relatorios_escuta_encaminhamentos ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
 
+                    # Relaxamento seguro de NOT NULL para relatorios
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN especialidade_emissor DROP NOT NULL;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN sintese_escuta_qualificada DROP NOT NULL;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN sugestoes_encaminhamento DROP NOT NULL;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN acoes_ja_realizadas_escola DROP NOT NULL;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN profissional_id DROP NOT NULL;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN tipo_documento DROP NOT NULL;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN motivo_demanda TYPE TEXT;",
+                    "ALTER TABLE relatorios_escuta_encaminhamentos ALTER COLUMN motivo_demanda DROP NOT NULL;",
+
                     # 2. atendimentos_multi_soap
                     "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS usuario_id INTEGER;",
                     "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
@@ -134,6 +144,12 @@ def create_app():
                     "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS status VARCHAR(30) DEFAULT 'Finalizado';",
                     "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS data_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
                     "ALTER TABLE atendimentos_multi_soap ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                    # Relaxamento seguro de NOT NULL para atendimentos
+                    "ALTER TABLE atendimentos_multi_soap ALTER COLUMN profissional_id DROP NOT NULL;",
+                    "ALTER TABLE atendimentos_multi_soap ALTER COLUMN especialidade DROP NOT NULL;",
+                    "ALTER TABLE atendimentos_multi_soap ALTER COLUMN compareceu DROP NOT NULL;",
+                    "ALTER TABLE atendimentos_multi_soap ALTER COLUMN data_atendimento DROP NOT NULL;",
 
                     # 3. planos_acao_mensais_multi
                     "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS usuario_coordenador_id INTEGER;",
@@ -153,6 +169,17 @@ def create_app():
                     "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
                     "ALTER TABLE planos_acao_mensais_multi ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
 
+                    # Conversão e relaxamento seguro de planos de acao
+                    "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN mes_referencia TYPE VARCHAR(50) USING mes_referencia::VARCHAR;",
+                    "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN mes_referencia DROP NOT NULL;",
+                    "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN ano_referencia DROP NOT NULL;",
+                    "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN coordenador_reuniao_id DROP NOT NULL;",
+                    "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN participantes_nomes DROP NOT NULL;",
+                    "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN pauta_discutida DROP NOT NULL;",
+                    "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN casos_discutidos DROP NOT NULL;",
+                    "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN encaminhamentos_gestao DROP NOT NULL;",
+                    "ALTER TABLE planos_acao_mensais_multi ALTER COLUMN status DROP NOT NULL;",
+
                     # 4. lista_espera_aee
                     "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS ano_serie VARCHAR(50);",
                     "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS serie_ano VARCHAR(50);",
@@ -164,7 +191,13 @@ def create_app():
                     "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS observacoes_triagem TEXT;",
                     "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS data_atendimento TIMESTAMP;",
                     "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
-                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;"
+                    "ALTER TABLE lista_espera_aee ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+
+                    # Relaxamento seguro de NOT NULL para lista de espera
+                    "ALTER TABLE lista_espera_aee ALTER COLUMN data_nascimento DROP NOT NULL;",
+                    "ALTER TABLE lista_espera_aee ALTER COLUMN telefone DROP NOT NULL;",
+                    "ALTER TABLE lista_espera_aee ALTER COLUMN prioridade DROP NOT NULL;",
+                    "ALTER TABLE lista_espera_aee ALTER COLUMN status DROP NOT NULL;"
                 ]
                 for ddl in ddl_comandos:
                     try:
