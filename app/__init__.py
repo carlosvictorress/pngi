@@ -63,8 +63,17 @@ def create_app():
     if db_url and db_url.startswith("postgres://"):
         db_url = db_url.replace("postgres://", "postgresql://", 1)
 
+    # Validação e saneamento de integridade da URL do banco de dados
+    if db_url and not db_url.startswith("sqlite"):
+        try:
+            import sqlalchemy as sa
+            sa.engine.make_url(db_url)
+        except Exception as e:
+            print(f"[AVISO] URL de banco de dados inválida ({e}). Ativando fallback temporário SQLite.")
+            db_url = None
+
     if not db_url:
-        print("[AVISO] Nenhuma variável DATABASE_URL encontrada no ambiente. Ativando fallback temporário SQLite (sqlite:///inclusao.db). Configure DATABASE_URL no Railway para conectar ao PostgreSQL.")
+        print("[AVISO] Nenhuma variável DATABASE_URL válida encontrada no ambiente. Ativando fallback temporário SQLite (sqlite:///inclusao.db). Configure DATABASE_URL no Railway para conectar ao PostgreSQL.")
         db_url = "sqlite:///inclusao.db"
         
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
