@@ -88,31 +88,149 @@ def create_app():
     # 🚀 GESTOOR 360: Registro do Filtro Global do Jinja2 para decodificação de matrizes JSON
     app.jinja_env.filters['from_json'] = json.loads
 
+    def sincronizar_schema_automatico():
+        """Garante que todas as tabelas e novas colunas dos novos módulos existam no banco de dados."""
+        try:
+            from sqlalchemy import text
+            with db.engine.connect() as conn:
+                if db.engine.name == 'postgresql':
+                    comandos_colunas = [
+                        "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS endereco VARCHAR(255);",
+                        "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS bairro VARCHAR(120);",
+                        "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS em_investigacao BOOLEAN DEFAULT FALSE;",
+                        "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS hipotese_diagnostica VARCHAR(255);",
+                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS municipio_id INTEGER;",
+                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;",
+                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS o_que_foi_feito TEXT;",
+                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS como_foi_feito TEXT;",
+                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS recursos_utilizados VARCHAR(255);",
+                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS justificativa_falta VARCHAR(255);",
+                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
+                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_nome VARCHAR(150);",
+                    ]
+                    for cmd in comandos_colunas:
+                        try:
+                            conn.execute(text(cmd))
+                            conn.commit()
+                        except Exception:
+                            conn.rollback()
+
+                    tabelas_ddl = [
+                        """
+                        CREATE TABLE IF NOT EXISTS lista_espera_aee (
+                            id SERIAL PRIMARY KEY,
+                            municipio_id INTEGER NOT NULL REFERENCES municipios(id),
+                            aluno_id INTEGER REFERENCES alunos(id),
+                            nome_completo VARCHAR(150) NOT NULL,
+                            data_nascimento VARCHAR(20),
+                            cpf VARCHAR(20),
+                            telefone VARCHAR(30) NOT NULL,
+                            nome_responsavel VARCHAR(150),
+                            escola_origem VARCHAR(150),
+                            ano_serie VARCHAR(50),
+                            endereco VARCHAR(255),
+                            diagnostico_hipotese VARCHAR(255),
+                            em_investigacao BOOLEAN DEFAULT FALSE,
+                            prioridade VARCHAR(30) DEFAULT 'Média',
+                            status VARCHAR(40) DEFAULT 'Aguardando Vaga',
+                            turno_pretendido VARCHAR(30) DEFAULT 'Contraturno',
+                            observacoes_triagem TEXT,
+                            data_solicitacao DATE DEFAULT CURRENT_DATE,
+                            data_atendimento TIMESTAMP,
+                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+                        """,
+                        """
+                        CREATE TABLE IF NOT EXISTS atendimentos_multi_soap (
+                            id SERIAL PRIMARY KEY,
+                            municipio_id INTEGER NOT NULL REFERENCES municipios(id),
+                            aluno_id INTEGER NOT NULL REFERENCES alunos(id),
+                            usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+                            especialidade VARCHAR(50) NOT NULL,
+                            data_atendimento DATE DEFAULT CURRENT_DATE,
+                            horario_inicio VARCHAR(10),
+                            horario_fim VARCHAR(10),
+                            tipo_sessao VARCHAR(50) DEFAULT 'Individual',
+                            soap_subjetivo TEXT,
+                            soap_objetivo TEXT,
+                            soap_avaliacao TEXT,
+                            soap_plano TEXT,
+                            encaminhamento_sugerido VARCHAR(150),
+                            sigilo_etico BOOLEAN DEFAULT FALSE,
+                            status VARCHAR(30) DEFAULT 'Finalizado',
+                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+                        """,
+                        """
+                        CREATE TABLE IF NOT EXISTS relatorios_escuta_encaminhamentos (
+                            id SERIAL PRIMARY KEY,
+                            municipio_id INTEGER NOT NULL REFERENCES municipios(id),
+                            aluno_id INTEGER NOT NULL REFERENCES alunos(id),
+                            usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
+                            tipo_documento VARCHAR(80) NOT NULL,
+                            orgao_destino VARCHAR(150) NOT NULL,
+                            motivo_demanda TEXT NOT NULL,
+                            sintese_escuta TEXT NOT NULL,
+                            situacao_contextual TEXT,
+                            hipotese_ou_vulnerabilidade TEXT,
+                            providencias_recomendadas TEXT NOT NULL,
+                            urgencia VARCHAR(20) DEFAULT 'Média',
+                            gerado_com_ia BOOLEAN DEFAULT FALSE,
+                            ia_prompt_ou_modelo VARCHAR(100),
+                            chave_autenticidade VARCHAR(64) UNIQUE,
+                            status VARCHAR(30) DEFAULT 'Emitido',
+                            data_emissao DATE DEFAULT CURRENT_DATE,
+                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+                        """,
+                        """
+                        CREATE TABLE IF NOT EXISTS planos_acao_mensais_multi (
+                            id SERIAL PRIMARY KEY,
+                            municipio_id INTEGER NOT NULL REFERENCES municipios(id),
+                            usuario_coordenador_id INTEGER NOT NULL REFERENCES usuarios(id),
+                            titulo VARCHAR(150) NOT NULL,
+                            mes_referencia VARCHAR(30) NOT NULL,
+                            ano_referencia INTEGER DEFAULT 2026,
+                            data_reuniao DATE DEFAULT CURRENT_DATE,
+                            local_reuniao VARCHAR(150) DEFAULT 'Secretaria Municipal de Educação',
+                            profissionais_presentes TEXT NOT NULL,
+                            casos_discutidos_json TEXT,
+                            acoes_psicologia TEXT,
+                            acoes_psicopedagogia TEXT,
+                            acoes_servico_social TEXT,
+                            deliberacoes_gerais TEXT,
+                            metas_proximo_mes TEXT,
+                            status VARCHAR(40) DEFAULT 'Homologado',
+                            chave_documento VARCHAR(64) UNIQUE,
+                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                        );
+                        """
+                    ]
+                    for tbl_cmd in tabelas_ddl:
+                        try:
+                            conn.execute(text(tbl_cmd))
+                            conn.commit()
+                        except Exception:
+                            conn.rollback()
+
+            try:
+                db.create_all()
+            except Exception:
+                pass
+        except Exception as e:
+            print(f"[INFO] Auto-sync notice: {e}")
+
     # IMPORTANTE: Força o Flask a carregar as classes dos modelos e sincronizar tabelas
     with app.app_context():
         from app import models
         from app.models import Escola
-        try:
-            db.create_all()
-            if db.engine.name == 'postgresql':
-                from sqlalchemy import text
-                with db.engine.connect() as conn:
-                    conn.execute(text("ALTER TABLE alunos ADD COLUMN IF NOT EXISTS endereco VARCHAR(255);"))
-                    conn.execute(text("ALTER TABLE alunos ADD COLUMN IF NOT EXISTS bairro VARCHAR(120);"))
-                    conn.execute(text("ALTER TABLE alunos ADD COLUMN IF NOT EXISTS em_investigacao BOOLEAN DEFAULT FALSE;"))
-                    conn.execute(text("ALTER TABLE alunos ADD COLUMN IF NOT EXISTS hipotese_diagnostica VARCHAR(255);"))
-                    
-                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS municipio_id INTEGER;"))
-                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;"))
-                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS o_que_foi_feito TEXT;"))
-                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS como_foi_feito TEXT;"))
-                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS recursos_utilizados VARCHAR(255);"))
-                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS justificativa_falta VARCHAR(255);"))
-                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_id INTEGER;"))
-                    conn.execute(text("ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_nome VARCHAR(150);"))
-                    conn.commit()
-        except Exception as e:
-            print(f"[INFO] Sincronização inicial de tabelas: {e}")
+        sincronizar_schema_automatico()
+
+    @app.before_request
+    def before_request_sync():
+        if not getattr(app, '_schema_initialized', False):
+            app._schema_initialized = True
+            sincronizar_schema_automatico()
 
     # Registro de Blueprints - Nova Arquitetura SaaS Blindada
     from app.blueprints.auth.routes import auth_bp

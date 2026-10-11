@@ -30,26 +30,32 @@ def get_municipio_slug(endpoint, values):
 @login_required
 def dashboard():
     """Painel Integrado da Equipe Multidisciplinar (Psicologia, Psicopedagogia e Serviço Social)."""
-    # Métricas Gerais
-    total_atendimentos = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id).count()
-    total_psicologia = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id, especialidade='psicologo').count()
-    total_psicopedagogia = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id, especialidade='psicopedagogo').count()
-    total_servico_social = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id, especialidade='assistente_social').count()
-    
-    total_relatorios = RelatorioEscutaEncaminhamento.query.filter_by(municipio_id=g.municipio.id).count()
-    total_planos_acao = PlanoAcaoMensalMulti.query.filter_by(municipio_id=g.municipio.id).count()
+    try:
+        total_atendimentos = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id).count()
+        total_psicologia = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id, especialidade='psicologo').count()
+        total_psicopedagogia = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id, especialidade='psicopedagogo').count()
+        total_servico_social = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id, especialidade='assistente_social').count()
+        
+        total_relatorios = RelatorioEscutaEncaminhamento.query.filter_by(municipio_id=g.municipio.id).count()
+        total_planos_acao = PlanoAcaoMensalMulti.query.filter_by(municipio_id=g.municipio.id).count()
 
-    # Últimos Atendimentos
-    ultimos_atendimentos = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id)\
-        .order_by(AtendimentoMultiSOAP.data_atendimento.desc(), AtendimentoMultiSOAP.id.desc()).limit(6).all()
+        # Últimos Atendimentos
+        ultimos_atendimentos = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id)\
+            .order_by(AtendimentoMultiSOAP.data_atendimento.desc(), AtendimentoMultiSOAP.id.desc()).limit(6).all()
 
-    # Últimos Planos de Ação Mensais
-    ultimos_planos = PlanoAcaoMensalMulti.query.filter_by(municipio_id=g.municipio.id)\
-        .order_by(PlanoAcaoMensalMulti.ano_referencia.desc(), PlanoAcaoMensalMulti.data_reuniao.desc()).limit(3).all()
+        # Últimos Planos de Ação Mensais
+        ultimos_planos = PlanoAcaoMensalMulti.query.filter_by(municipio_id=g.municipio.id)\
+            .order_by(PlanoAcaoMensalMulti.ano_referencia.desc(), PlanoAcaoMensalMulti.data_reuniao.desc()).limit(3).all()
 
-    # Total de estudantes únicos acompanhados pela equipe multi
-    alunos_ids = db.session.query(AtendimentoMultiSOAP.aluno_id).filter_by(municipio_id=g.municipio.id).distinct().all()
-    total_estudantes_atendidos = len(alunos_ids)
+        # Total de estudantes únicos acompanhados pela equipe multi
+        alunos_ids = db.session.query(AtendimentoMultiSOAP.aluno_id).filter_by(municipio_id=g.municipio.id).distinct().all()
+        total_estudantes_atendidos = len(alunos_ids)
+    except Exception as e:
+        db.session.rollback()
+        print(f"[AVISO] Falha no dashboard da equipe multi: {e}")
+        total_atendimentos = total_psicologia = total_psicopedagogia = total_servico_social = total_relatorios = total_planos_acao = total_estudantes_atendidos = 0
+        ultimos_atendimentos = []
+        ultimos_planos = []
 
     return render_template(
         'equipe_multi/dashboard.html',
@@ -76,21 +82,31 @@ def listar_atendimentos():
     aluno_id = request.args.get('aluno_id', type=int)
     busca = request.args.get('busca', '').strip()
 
-    query = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id)
+    try:
+        query = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id)
 
-    if especialidade:
-        query = query.filter(AtendimentoMultiSOAP.especialidade == especialidade)
-    if aluno_id:
-        query = query.filter(AtendimentoMultiSOAP.aluno_id == aluno_id)
-    if busca:
-        query = query.join(Aluno).filter(
-            (Aluno.nome.ilike(f"%{busca}%")) | 
-            (Aluno.cpf.ilike(f"%{busca}%")) |
-            (AtendimentoMultiSOAP.soap_subjetivo.ilike(f"%{busca}%"))
-        )
+        if especialidade:
+            query = query.filter(AtendimentoMultiSOAP.especialidade == especialidade)
+        if aluno_id:
+            query = query.filter(AtendimentoMultiSOAP.aluno_id == aluno_id)
+        if busca:
+            query = query.join(Aluno).filter(
+                (Aluno.nome.ilike(f"%{busca}%")) | 
+                (Aluno.cpf.ilike(f"%{busca}%")) |
+                (AtendimentoMultiSOAP.soap_subjetivo.ilike(f"%{busca}%"))
+            )
 
-    atendimentos = query.order_by(AtendimentoMultiSOAP.data_atendimento.desc(), AtendimentoMultiSOAP.id.desc()).all()
-    alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
+        atendimentos = query.order_by(AtendimentoMultiSOAP.data_atendimento.desc(), AtendimentoMultiSOAP.id.desc()).all()
+    except Exception as e:
+        db.session.rollback()
+        print(f"[AVISO] Falha ao listar atendimentos SOAP: {e}")
+        atendimentos = []
+
+    try:
+        alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
+    except Exception:
+        db.session.rollback()
+        alunos = []
 
     return render_template(
         'equipe_multi/atendimentos.html',

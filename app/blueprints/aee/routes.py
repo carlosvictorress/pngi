@@ -370,23 +370,36 @@ def sala_recursos():
     escola_id = request.args.get('escola_id', type=int)
     filtro_diag = request.args.get('filtro_diag', '') # 'cid', 'investigacao', 'todos'
 
-    query = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True)
+    try:
+        query = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True)
 
-    if busca:
-        query = query.filter(
-            (Aluno.nome.ilike(f"%{busca}%")) | 
-            (Aluno.cpf.ilike(f"%{busca}%")) | 
-            (Aluno.matricula.ilike(f"%{busca}%"))
-        )
-    if escola_id:
-        query = query.filter(Aluno.escola_id == escola_id)
-    if filtro_diag == 'cid':
-        query = query.filter(Aluno.cid.isnot(None), Aluno.cid != '')
-    elif filtro_diag == 'investigacao':
-        query = query.filter(Aluno.em_investigacao == True)
+        if busca:
+            query = query.filter(
+                (Aluno.nome.ilike(f"%{busca}%")) | 
+                (Aluno.cpf.ilike(f"%{busca}%")) | 
+                (Aluno.matricula.ilike(f"%{busca}%"))
+            )
+        if escola_id:
+            query = query.filter(Aluno.escola_id == escola_id)
+        if filtro_diag == 'cid':
+            query = query.filter(Aluno.cid.isnot(None), Aluno.cid != '')
+        elif filtro_diag == 'investigacao':
+            try:
+                query = query.filter(Aluno.em_investigacao == True)
+            except Exception:
+                pass
 
-    alunos = query.order_by(Aluno.nome).all()
-    escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
+        alunos = query.order_by(Aluno.nome).all()
+    except Exception as e:
+        db.session.rollback()
+        print(f"[AVISO] Falha ao carregar alunos na sala de recursos: {e}")
+        alunos = []
+
+    try:
+        escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
+    except Exception:
+        db.session.rollback()
+        escolas = []
 
     # Cálculo dos dados de acompanhamento para cada aluno
     dados_alunos = []
@@ -394,12 +407,17 @@ def sala_recursos():
     total_investigacao = 0
 
     for al in alunos:
-        sessoes = AtendimentoAee.query.filter_by(aluno_id=al.id).order_by(AtendimentoAee.data_atendimento.desc()).all()
-        sessoes_realizadas = [s for s in sessoes if s.compareceu or s.frequencia]
-        faltas = [s for s in sessoes if not (s.compareceu or s.frequencia)]
+        try:
+            sessoes = AtendimentoAee.query.filter_by(aluno_id=al.id).order_by(AtendimentoAee.data_atendimento.desc()).all()
+        except Exception:
+            db.session.rollback()
+            sessoes = []
+        
+        sessoes_realizadas = [s for s in sessoes if getattr(s, 'compareceu', False) or getattr(s, 'frequencia', False)]
+        faltas = [s for s in sessoes if not (getattr(s, 'compareceu', False) or getattr(s, 'frequencia', False))]
         
         total_sessoes_geral += len(sessoes_realizadas)
-        if al.em_investigacao:
+        if getattr(al, 'em_investigacao', False):
             total_investigacao += 1
 
         dados_alunos.append({
@@ -412,7 +430,11 @@ def sala_recursos():
         })
 
     # Estatísticas da Fila de Espera
-    total_espera = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Aguardando Vaga').count()
+    try:
+        total_espera = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Aguardando Vaga').count()
+    except Exception:
+        db.session.rollback()
+        total_espera = 0
 
     return render_template(
         'aee/sala_recursos.html',
@@ -439,15 +461,24 @@ def prontuario_aluno_aee(aluno_id):
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
     
     # Histórico de Atendimentos na Sala de Recursos
-    sessoes = AtendimentoAee.query.filter_by(aluno_id=aluno.id).order_by(AtendimentoAee.data_atendimento.desc(), AtendimentoAee.id.desc()).all()
-    sessoes_realizadas = [s for s in sessoes if s.compareceu or s.frequencia]
-    faltas = [s for s in sessoes if not (s.compareceu or s.frequencia)]
+    try:
+        sessoes = AtendimentoAee.query.filter_by(aluno_id=aluno.id).order_by(AtendimentoAee.data_atendimento.desc(), AtendimentoAee.id.desc()).all()
+    except Exception:
+        db.session.rollback()
+        sessoes = []
+        
+    sessoes_realizadas = [s for s in sessoes if getattr(s, 'compareceu', False) or getattr(s, 'frequencia', False)]
+    faltas = [s for s in sessoes if not (getattr(s, 'compareceu', False) or getattr(s, 'frequencia', False))]
     
     total_realizadas = len(sessoes_realizadas)
     total_faltas = len(faltas)
     taxa_presenca = int((total_realizadas / len(sessoes) * 100)) if sessoes else 100
 
-    profissionais = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
+    try:
+        profissionais = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
+    except Exception:
+        db.session.rollback()
+        profissionais = []
 
     return render_template(
         'aee/prontuario_aluno.html',
