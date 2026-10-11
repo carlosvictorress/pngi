@@ -90,8 +90,6 @@ class Aluno(db.Model):
     # Filiação e Indicadores Sociais
     nome_mae = db.Column(db.String(100), nullable=True)
     nome_pai = db.Column(db.String(100), nullable=True)
-    endereco = db.Column(db.String(255), nullable=True) # Endereço residencial do estudante
-    bairro = db.Column(db.String(100), nullable=True)   # Bairro residencial
     recebe_bpc = db.Column(db.Boolean, default=False, nullable=True)
 
     # Vínculo Escolar & Censo Regulamentar
@@ -110,8 +108,6 @@ class Aluno(db.Model):
     
     # Mapeamento Clínico & Atendimento Especializado (AEE)
     cid = db.Column(db.String(15), nullable=True)
-    em_investigacao = db.Column(db.Boolean, default=False, nullable=True) # Diagnóstico em investigação
-    hipotese_diagnostica = db.Column(db.String(255), nullable=True)       # Hipótese ou suspeita clínica
     tipo_deficiencia = db.Column(db.String(100), nullable=False)
     possui_tea = db.Column(db.Boolean, default=False, nullable=False)
     possui_superdotacao = db.Column(db.Boolean, default=False, nullable=False)
@@ -141,6 +137,39 @@ class Aluno(db.Model):
     data_transferencia = db.Column(db.DateTime, nullable=True)
 
     municipio_origem = db.relationship('Municipio', foreign_keys=[municipio_origem_id], lazy=True)
+
+    # Propriedades compatíveis com novas telas sem forçar colunas não migradas no banco
+    @property
+    def endereco(self):
+        return getattr(self, '_endereco', None) or (self.dados_transporte.ponto_embarque if self.dados_transporte else None) or ''
+    
+    @endereco.setter
+    def endereco(self, val):
+        self._endereco = val
+
+    @property
+    def bairro(self):
+        return getattr(self, '_bairro', None) or ''
+    
+    @bairro.setter
+    def bairro(self, val):
+        self._bairro = val
+
+    @property
+    def em_investigacao(self):
+        return getattr(self, '_em_investigacao', not bool(self.cid))
+
+    @em_investigacao.setter
+    def em_investigacao(self, val):
+        self._em_investigacao = bool(val)
+
+    @property
+    def hipotese_diagnostica(self):
+        return getattr(self, '_hipotese_diagnostica', None) or self.tipo_deficiencia or ''
+
+    @hipotese_diagnostica.setter
+    def hipotese_diagnostica(self, val):
+        self._hipotese_diagnostica = val
 
     # Relacionamentos Mapeados do Ecossistema Gestoor 360
     escola = db.relationship('Escola', backref=db.backref('alunos_matriculados', lazy=True))
@@ -260,35 +289,94 @@ class Pei(db.Model):
 class AtendimentoAee(db.Model):
     """
     Módulo Sala de AEE: Registro de atendimentos e sessões na Sala de Recursos.
+    Totalmente alinhado ao esquema de banco original existente em produção.
     """
     __tablename__ = 'atendimentos_aee'
 
     id = db.Column(db.Integer, primary_key=True)
-    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=True, index=True)
     aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False, index=True)
-    profissional_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True)
-    profissional_nome = db.Column(db.String(150), nullable=True)
     
     data_atendimento = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     horario_inicio = db.Column(db.Time, nullable=True)
     horario_fim = db.Column(db.Time, nullable=True)
     
-    # Controle de Presença / Frequência
+    # Controle de Presença / Frequência no banco real
     frequencia = db.Column(db.Boolean, default=True, nullable=False)
-    compareceu = db.Column(db.Boolean, default=True, nullable=False) # Se compareceu à sessão
-    justificativa_falta = db.Column(db.String(255), nullable=True)
-
-    # Registro Detalhado: O que foi feito e Como foi feito
-    o_que_foi_feito = db.Column(db.Text, nullable=True)  # Conteúdos, atividades e objetivos trabalhados
-    como_foi_feito = db.Column(db.Text, nullable=True)   # Metodologias, estratégias, mediação e recursos
-    recursos_utilizados = db.Column(db.String(255), nullable=True)
-    observacoes_evolucao = db.Column(db.Text, nullable=True)
-
-    # Campos legados (compatibilidade)
     plano_sessao = db.Column(db.Text, nullable=True, default='')
     evolucao_registro = db.Column(db.Text, nullable=True, default='')
-    
+    recursos_utilizados = db.Column(db.String(255), nullable=True)
     registrado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __init__(self, **kwargs):
+        # Mapeamento transparente de kwargs novos para campos reais do PostgreSQL
+        if 'compareceu' in kwargs:
+            kwargs['frequencia'] = bool(kwargs.pop('compareceu'))
+        if 'o_que_foi_feito' in kwargs:
+            kwargs['plano_sessao'] = kwargs.pop('o_que_foi_feito') or ''
+        if 'como_foi_feito' in kwargs:
+            kwargs['evolucao_registro'] = kwargs.pop('como_foi_feito') or ''
+        self._municipio_id = kwargs.pop('municipio_id', None)
+        self._profissional_id = kwargs.pop('profissional_id', None)
+        self._profissional_nome = kwargs.pop('profissional_nome', 'Especialista AEE')
+        self._justificativa_falta = kwargs.pop('justificativa_falta', '')
+        self._observacoes_evolucao = kwargs.pop('observacoes_evolucao', '')
+        super().__init__(**kwargs)
+
+    @property
+    def compareceu(self):
+        return self.frequencia
+
+    @compareceu.setter
+    def compareceu(self, val):
+        self.frequencia = bool(val)
+
+    @property
+    def o_que_foi_feito(self):
+        return self.plano_sessao or ''
+
+    @o_que_foi_feito.setter
+    def o_que_foi_feito(self, val):
+        self.plano_sessao = val or ''
+
+    @property
+    def como_foi_feito(self):
+        return self.evolucao_registro or ''
+
+    @como_foi_feito.setter
+    def como_foi_feito(self, val):
+        self.evolucao_registro = val or ''
+
+    @property
+    def justificativa_falta(self):
+        return getattr(self, '_justificativa_falta', '')
+
+    @justificativa_falta.setter
+    def justificativa_falta(self, val):
+        self._justificativa_falta = val
+
+    @property
+    def profissional_nome(self):
+        return getattr(self, '_profissional_nome', 'Especialista AEE')
+
+    @profissional_nome.setter
+    def profissional_nome(self, val):
+        self._profissional_nome = val
+
+    @property
+    def profissional_id(self):
+        return getattr(self, '_profissional_id', None)
+
+    @profissional_id.setter
+    def profissional_id(self, val):
+        self._profissional_id = val
+
+    @property
+    def municipio_id(self):
+        return getattr(self, '_municipio_id', None)
+
+    @municipio_id.setter
+    def municipio_id(self, val):
+        self._municipio_id = val
 
     @property
     def atividade_realizada(self):

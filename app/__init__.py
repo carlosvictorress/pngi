@@ -40,11 +40,11 @@ def create_app():
     # Configurações do Core
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'chave-temporaria-de-seguranca')
     
-    # Tratamento robusto da URL do banco de dados (Compatibilidade nativa Railway / PostgreSQL)
+    # 1. Tratamento robusto da URL do banco de dados (Compatibilidade nativa Railway / PostgreSQL)
     import re
     db_url = (
-        os.getenv('DATABASE_URL') or
         os.getenv('DATABASE_PUBLIC_URL') or
+        os.getenv('DATABASE_URL') or
         os.getenv('DATABASE_PRIVATE_URL') or
         os.getenv('POSTGRES_URL') or
         os.getenv('POSTGRESQL_URL') or
@@ -52,14 +52,14 @@ def create_app():
         os.getenv('URL_DO_BANCO_DE_DADOS')
     )
 
-    # Varredura inteligente de variáveis de ambiente injetadas pelo Railway
+    # 2. Varredura inteligente de variáveis de ambiente do Railway
     if not db_url:
         for k, v in os.environ.items():
             if isinstance(v, str) and (v.startswith('postgresql://') or v.startswith('postgres://')):
                 db_url = v
                 break
 
-    # Se ainda não encontrou ou contém referência não resolvida do Railway, tenta montar a partir das variáveis individuais
+    # 3. Se ainda não encontrou ou contém referência não resolvida do Railway, tenta montar a partir das variáveis individuais
     if not db_url or '${{' in str(db_url):
         pghost = os.getenv('PGHOST') or os.getenv('POSTGRES_HOST')
         if pghost:
@@ -69,28 +69,15 @@ def create_app():
             pgdb = os.getenv('PGDATABASE') or os.getenv('POSTGRES_DB', 'railway')
             db_url = f"postgresql://{pguser}:{pgpass}@{pghost}:{pgport}/{pgdb}"
 
-    # Sanitização de portas e protocolos
+    # 4. Sanitização de portas e protocolos
     if db_url:
         db_url = re.sub(r':porta\b', ':5432', db_url, flags=re.IGNORECASE)
         if db_url.startswith("postgres://"):
             db_url = db_url.replace("postgres://", "postgresql://", 1)
 
-    is_railway = bool(os.getenv('RAILWAY_ENVIRONMENT') or os.getenv('RAILWAY_SERVICE_ID') or os.getenv('RAILWAY_PROJECT_ID'))
-    if not db_url and is_railway:
-        # No Railway, se nenhuma URL explícita foi injetada, conecta à rede interna do Postgres
-        pghost = os.getenv('PGHOST', 'postgres.railway.internal')
-        pgport = os.getenv('PGPORT', '5432')
-        pguser = os.getenv('PGUSER', 'postgres')
-        pgpass = os.getenv('PGPASSWORD', '')
-        pgdb = os.getenv('PGDATABASE', 'railway')
-        db_url = f"postgresql://{pguser}:{pgpass}@{pghost}:{pgport}/{pgdb}"
-
-    # Fallback exclusivo para desenvolvimento local offline na máquina do desenvolvedor
+    # 5. Se não houver nenhuma URL do banco de dados configurada, fallback local
     if not db_url:
-        if not is_railway:
-            db_url = "sqlite:///inclusao.db"
-        else:
-            db_url = "postgresql://postgres:postgres@localhost:5432/railway"
+        db_url = "sqlite:///inclusao.db"
 
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -104,134 +91,11 @@ def create_app():
     app.jinja_env.filters['from_json'] = json.loads
 
     def sincronizar_schema_automatico():
-        """Garante que todas as tabelas e novas colunas dos novos módulos existam no banco de dados com autocommit isolado."""
+        """Garante a criação segura das novas tabelas no banco de dados sem alterar tabelas existentes."""
         try:
-            from sqlalchemy import text
-            if db.engine.name == 'postgresql':
-                with db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
-                    comandos_colunas = [
-                        "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS endereco VARCHAR(255);",
-                        "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS bairro VARCHAR(120);",
-                        "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS em_investigacao BOOLEAN DEFAULT FALSE;",
-                        "ALTER TABLE alunos ADD COLUMN IF NOT EXISTS hipotese_diagnostica VARCHAR(255);",
-                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS municipio_id INTEGER;",
-                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;",
-                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS o_que_foi_feito TEXT;",
-                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS como_foi_feito TEXT;",
-                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS recursos_utilizados VARCHAR(255);",
-                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS justificativa_falta VARCHAR(255);",
-                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_id INTEGER;",
-                        "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS profissional_nome VARCHAR(150);",
-                    ]
-                    for cmd in comandos_colunas:
-                        try:
-                            conn.execute(text(cmd))
-                        except Exception as ex_col:
-                            print(f"[DDL-COL] Aviso ao alterar coluna: {ex_col}")
-
-                    tabelas_ddl = [
-                        """
-                        CREATE TABLE IF NOT EXISTS lista_espera_aee (
-                            id SERIAL PRIMARY KEY,
-                            municipio_id INTEGER NOT NULL REFERENCES municipios(id),
-                            aluno_id INTEGER REFERENCES alunos(id),
-                            nome_completo VARCHAR(150) NOT NULL,
-                            data_nascimento VARCHAR(20),
-                            cpf VARCHAR(20),
-                            telefone VARCHAR(30) NOT NULL,
-                            nome_responsavel VARCHAR(150),
-                            escola_origem VARCHAR(150),
-                            ano_serie VARCHAR(50),
-                            endereco VARCHAR(255),
-                            diagnostico_hipotese VARCHAR(255),
-                            em_investigacao BOOLEAN DEFAULT FALSE,
-                            prioridade VARCHAR(30) DEFAULT 'Média',
-                            status VARCHAR(40) DEFAULT 'Aguardando Vaga',
-                            turno_pretendido VARCHAR(30) DEFAULT 'Contraturno',
-                            observacoes_triagem TEXT,
-                            data_solicitacao DATE DEFAULT CURRENT_DATE,
-                            data_atendimento TIMESTAMP,
-                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                        );
-                        """,
-                        """
-                        CREATE TABLE IF NOT EXISTS atendimentos_multi_soap (
-                            id SERIAL PRIMARY KEY,
-                            municipio_id INTEGER NOT NULL REFERENCES municipios(id),
-                            aluno_id INTEGER NOT NULL REFERENCES alunos(id),
-                            usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
-                            especialidade VARCHAR(50) NOT NULL,
-                            data_atendimento DATE DEFAULT CURRENT_DATE,
-                            horario_inicio VARCHAR(10),
-                            horario_fim VARCHAR(10),
-                            tipo_sessao VARCHAR(50) DEFAULT 'Individual',
-                            soap_subjetivo TEXT,
-                            soap_objetivo TEXT,
-                            soap_avaliacao TEXT,
-                            soap_plano TEXT,
-                            encaminhamento_sugerido VARCHAR(150),
-                            sigilo_etico BOOLEAN DEFAULT FALSE,
-                            status VARCHAR(30) DEFAULT 'Finalizado',
-                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                        );
-                        """,
-                        """
-                        CREATE TABLE IF NOT EXISTS relatorios_escuta_encaminhamentos (
-                            id SERIAL PRIMARY KEY,
-                            municipio_id INTEGER NOT NULL REFERENCES municipios(id),
-                            aluno_id INTEGER NOT NULL REFERENCES alunos(id),
-                            usuario_id INTEGER NOT NULL REFERENCES usuarios(id),
-                            tipo_documento VARCHAR(80) NOT NULL,
-                            orgao_destino VARCHAR(150) NOT NULL,
-                            motivo_demanda TEXT NOT NULL,
-                            sintese_escuta TEXT NOT NULL,
-                            situacao_contextual TEXT,
-                            hipotese_ou_vulnerabilidade TEXT,
-                            providencias_recomendadas TEXT NOT NULL,
-                            urgencia VARCHAR(20) DEFAULT 'Média',
-                            gerado_com_ia BOOLEAN DEFAULT FALSE,
-                            ia_prompt_ou_modelo VARCHAR(100),
-                            chave_autenticidade VARCHAR(64) UNIQUE,
-                            status VARCHAR(30) DEFAULT 'Emitido',
-                            data_emissao DATE DEFAULT CURRENT_DATE,
-                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                        );
-                        """,
-                        """
-                        CREATE TABLE IF NOT EXISTS planos_acao_mensais_multi (
-                            id SERIAL PRIMARY KEY,
-                            municipio_id INTEGER NOT NULL REFERENCES municipios(id),
-                            usuario_coordenador_id INTEGER NOT NULL REFERENCES usuarios(id),
-                            titulo VARCHAR(150) NOT NULL,
-                            mes_referencia VARCHAR(30) NOT NULL,
-                            ano_referencia INTEGER DEFAULT 2026,
-                            data_reuniao DATE DEFAULT CURRENT_DATE,
-                            local_reuniao VARCHAR(150) DEFAULT 'Secretaria Municipal de Educação',
-                            profissionais_presentes TEXT NOT NULL,
-                            casos_discutidos_json TEXT,
-                            acoes_psicologia TEXT,
-                            acoes_psicopedagogia TEXT,
-                            acoes_servico_social TEXT,
-                            deliberacoes_gerais TEXT,
-                            metas_proximo_mes TEXT,
-                            status VARCHAR(40) DEFAULT 'Homologado',
-                            chave_documento VARCHAR(64) UNIQUE,
-                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                        );
-                        """
-                    ]
-                    for tbl_cmd in tabelas_ddl:
-                        try:
-                            conn.execute(text(tbl_cmd))
-                        except Exception as ex_tbl:
-                            print(f"[DDL-TBL] Aviso ao criar tabela: {ex_tbl}")
-
-            try:
-                db.create_all()
-            except Exception as ex_all:
-                print(f"[DDL-CREATE-ALL] Aviso: {ex_all}")
+            db.create_all()
         except Exception as e:
-            print(f"[INFO] Auto-sync notice: {e}")
+            print(f"[INFO] DB check notice: {e}")
 
     # Força o Flask a carregar as classes dos modelos e sincronizar tabelas no startup
     with app.app_context():

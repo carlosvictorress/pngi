@@ -23,6 +23,15 @@ def get_municipio_slug(endpoint, values):
         abort(404)
 
 
+def _garantir_tabelas_multi():
+    """Garante que as tabelas do módulo equipe multi existam no PostgreSQL."""
+    try:
+        AtendimentoMultiSOAP.__table__.create(db.engine, checkfirst=True)
+        RelatorioEscutaEncaminhamento.__table__.create(db.engine, checkfirst=True)
+        PlanoAcaoMensalMulti.__table__.create(db.engine, checkfirst=True)
+    except Exception:
+        db.session.rollback()
+
 # =========================================================================
 # 1. DASHBOARD PRINCIPAL DA EQUIPE MULTIDISCIPLINAR
 # =========================================================================
@@ -30,6 +39,7 @@ def get_municipio_slug(endpoint, values):
 @login_required
 def dashboard():
     """Painel Integrado da Equipe Multidisciplinar (Psicologia, Psicopedagogia e Serviço Social)."""
+    _garantir_tabelas_multi()
     try:
         total_atendimentos = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id).count()
         total_psicologia = AtendimentoMultiSOAP.query.filter_by(municipio_id=g.municipio.id, especialidade='psicologo').count()
@@ -78,6 +88,7 @@ def dashboard():
 @login_required
 def listar_atendimentos():
     """Listagem de Atendimentos SOAP com filtros por área, busca e aluno."""
+    _garantir_tabelas_multi()
     especialidade = request.args.get('especialidade', '')
     aluno_id = request.args.get('aluno_id', type=int)
     busca = request.args.get('busca', '').strip()
@@ -114,7 +125,8 @@ def listar_atendimentos():
         alunos=alunos,
         especialidade_filtro=especialidade,
         aluno_filtro=aluno_id,
-        busca=busca
+        busca=busca,
+        now=datetime.utcnow()
     )
 
 
@@ -122,6 +134,7 @@ def listar_atendimentos():
 @login_required
 def novo_atendimento_soap():
     """Formulário para Registro de Atendimento com metodologia SOAP Especializada."""
+    _garantir_tabelas_multi()
     aluno_pre = request.args.get('aluno_id', type=int)
     aluno_selecionado = Aluno.query.filter_by(id=aluno_pre, municipio_id=g.municipio.id).first() if aluno_pre else None
 
@@ -148,33 +161,43 @@ def novo_atendimento_soap():
             except Exception:
                 data_atend = datetime.utcnow().date()
 
-            novo_soap = AtendimentoMultiSOAP(
-                municipio_id=g.municipio.id,
-                aluno_id=aluno_id,
-                usuario_id=current_user.id,
-                especialidade=especialidade,
-                data_atendimento=data_atend,
-                horario_inicio=horario_inicio,
-                horario_fim=horario_fim,
-                tipo_sessao=tipo_sessao,
-                soap_subjetivo=soap_s,
-                soap_objetivo=soap_o,
-                soap_avaliacao=soap_a,
-                soap_plano=soap_p,
-                encaminhamento_sugerido=encaminhamento,
-                sigilo_etico=sigilo,
-                status='Finalizado'
-            )
-            db.session.add(novo_soap)
-            db.session.commit()
-            flash("Atendimento SOAP registrado com sucesso na ficha multiprofissional do estudante!", "sucesso")
-            return redirect(url_for('equipe_multi.listar_atendimentos', municipio_slug=g.municipio.slug))
+            try:
+                novo_soap = AtendimentoMultiSOAP(
+                    municipio_id=g.municipio.id,
+                    aluno_id=aluno_id,
+                    usuario_id=current_user.id,
+                    especialidade=especialidade,
+                    data_atendimento=data_atend,
+                    horario_inicio=horario_inicio,
+                    horario_fim=horario_fim,
+                    tipo_sessao=tipo_sessao,
+                    soap_subjetivo=soap_s,
+                    soap_objetivo=soap_o,
+                    soap_avaliacao=soap_a,
+                    soap_plano=soap_p,
+                    encaminhamento_sugerido=encaminhamento,
+                    sigilo_etico=sigilo,
+                    status='Finalizado'
+                )
+                db.session.add(novo_soap)
+                db.session.commit()
+                flash("Atendimento SOAP registrado com sucesso na ficha multiprofissional do estudante!", "sucesso")
+                return redirect(url_for('equipe_multi.listar_atendimentos', municipio_slug=g.municipio.slug))
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Aviso ao salvar atendimento SOAP: {e}", "erro")
 
-    alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
+    try:
+        alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
+    except Exception:
+        db.session.rollback()
+        alunos = []
+
     return render_template(
         'equipe_multi/formulario_soap.html',
         alunos=alunos,
-        aluno_selecionado=aluno_selecionado
+        aluno_selecionado=aluno_selecionado,
+        now=datetime.utcnow()
     )
 
 
@@ -182,8 +205,9 @@ def novo_atendimento_soap():
 @login_required
 def imprimir_atendimento_soap(id):
     """Visualização e impressão timbrada do registro SOAP institucional."""
+    _garantir_tabelas_multi()
     atendimento = AtendimentoMultiSOAP.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
-    return render_template('equipe_multi/imprimir_soap.html', atendimento=atendimento)
+    return render_template('equipe_multi/imprimir_soap.html', atendimento=atendimento, now=datetime.utcnow())
 
 
 # =========================================================================
@@ -193,29 +217,41 @@ def imprimir_atendimento_soap(id):
 @login_required
 def listar_relatorios():
     """Listagem de Relatórios de Escuta Qualificada e Encaminhamentos emitidos."""
+    _garantir_tabelas_multi()
     tipo = request.args.get('tipo', '')
     busca = request.args.get('busca', '').strip()
 
-    query = RelatorioEscutaEncaminhamento.query.filter_by(municipio_id=g.municipio.id)
+    try:
+        query = RelatorioEscutaEncaminhamento.query.filter_by(municipio_id=g.municipio.id)
 
-    if tipo:
-        query = query.filter(RelatorioEscutaEncaminhamento.tipo_documento == tipo)
-    if busca:
-        query = query.join(Aluno).filter(
-            (Aluno.nome.ilike(f"%{busca}%")) |
-            (RelatorioEscutaEncaminhamento.orgao_destino.ilike(f"%{busca}%")) |
-            (RelatorioEscutaEncaminhamento.chave_autenticidade.ilike(f"%{busca}%"))
-        )
+        if tipo:
+            query = query.filter(RelatorioEscutaEncaminhamento.tipo_documento == tipo)
+        if busca:
+            query = query.join(Aluno).filter(
+                (Aluno.nome.ilike(f"%{busca}%")) |
+                (RelatorioEscutaEncaminhamento.orgao_destino.ilike(f"%{busca}%")) |
+                (RelatorioEscutaEncaminhamento.chave_autenticidade.ilike(f"%{busca}%"))
+            )
 
-    relatorios = query.order_by(RelatorioEscutaEncaminhamento.data_emissao.desc(), RelatorioEscutaEncaminhamento.id.desc()).all()
-    alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
+        relatorios = query.order_by(RelatorioEscutaEncaminhamento.data_emissao.desc(), RelatorioEscutaEncaminhamento.id.desc()).all()
+    except Exception as e:
+        db.session.rollback()
+        print(f"[AVISO] Falha ao carregar relatórios de escuta: {e}")
+        relatorios = []
+
+    try:
+        alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
+    except Exception:
+        db.session.rollback()
+        alunos = []
 
     return render_template(
         'equipe_multi/relatorios.html',
         relatorios=relatorios,
         alunos=alunos,
         tipo_filtro=tipo,
-        busca=busca
+        busca=busca,
+        now=datetime.utcnow()
     )
 
 
@@ -250,6 +286,7 @@ def api_gerar_ia():
 @login_required
 def novo_relatorio_escuta():
     """Emissão de Relatório de Escuta Qualificada ou Encaminhamento Intersetorial."""
+    _garantir_tabelas_multi()
     aluno_pre = request.args.get('aluno_id', type=int)
     aluno_selecionado = Aluno.query.filter_by(id=aluno_pre, municipio_id=g.municipio.id).first() if aluno_pre else None
 
@@ -270,34 +307,44 @@ def novo_relatorio_escuta():
         else:
             chave_aut = f"REL-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
             
-            novo_rel = RelatorioEscutaEncaminhamento(
-                municipio_id=g.municipio.id,
-                aluno_id=aluno_id,
-                usuario_id=current_user.id,
-                tipo_documento=tipo_doc,
-                orgao_destino=orgao_destino,
-                motivo_demanda=motivo,
-                sintese_escuta=sintese,
-                situacao_contextual=contexto,
-                hipotese_ou_vulnerabilidade=hipotese,
-                providencias_recomendadas=providencias,
-                urgencia=urgencia,
-                gerado_com_ia=gerado_ia,
-                ia_prompt_ou_modelo='ORBI Intelligence v1 (SECADI/SUAS)' if gerado_ia else None,
-                chave_autenticidade=chave_aut,
-                status='Emitido',
-                data_emissao=datetime.utcnow().date()
-            )
-            db.session.add(novo_rel)
-            db.session.commit()
-            flash(f"Documento institucional gerado com sucesso! Chave de validação: {chave_aut}", "sucesso")
-            return redirect(url_for('equipe_multi.listar_relatorios', municipio_slug=g.municipio.slug))
+            try:
+                novo_rel = RelatorioEscutaEncaminhamento(
+                    municipio_id=g.municipio.id,
+                    aluno_id=aluno_id,
+                    usuario_id=current_user.id,
+                    tipo_documento=tipo_doc,
+                    orgao_destino=orgao_destino,
+                    motivo_demanda=motivo,
+                    sintese_escuta=sintese,
+                    situacao_contextual=contexto,
+                    hipotese_ou_vulnerabilidade=hipotese,
+                    providencias_recomendadas=providencias,
+                    urgencia=urgencia,
+                    gerado_com_ia=gerado_ia,
+                    ia_prompt_ou_modelo='ORBI Intelligence v1 (SECADI/SUAS)' if gerado_ia else None,
+                    chave_autenticidade=chave_aut,
+                    status='Emitido',
+                    data_emissao=datetime.utcnow().date()
+                )
+                db.session.add(novo_rel)
+                db.session.commit()
+                flash(f"Documento institucional gerado com sucesso! Chave de validação: {chave_aut}", "sucesso")
+                return redirect(url_for('equipe_multi.listar_relatorios', municipio_slug=g.municipio.slug))
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Aviso ao registrar relatório: {e}", "erro")
 
-    alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
+    try:
+        alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
+    except Exception:
+        db.session.rollback()
+        alunos = []
+
     return render_template(
         'equipe_multi/formulario_relatorio.html',
         alunos=alunos,
-        aluno_selecionado=aluno_selecionado
+        aluno_selecionado=aluno_selecionado,
+        now=datetime.utcnow()
     )
 
 
@@ -305,8 +352,9 @@ def novo_relatorio_escuta():
 @login_required
 def imprimir_relatorio_escuta(id):
     """Página timbrada oficial para impressão do Relatório de Escuta / Encaminhamento."""
+    _garantir_tabelas_multi()
     relatorio = RelatorioEscutaEncaminhamento.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
-    return render_template('equipe_multi/imprimir_relatorio.html', relatorio=relatorio)
+    return render_template('equipe_multi/imprimir_relatorio.html', relatorio=relatorio, now=datetime.utcnow())
 
 
 # =========================================================================
@@ -316,14 +364,21 @@ def imprimir_relatorio_escuta(id):
 @login_required
 def listar_planos_acao():
     """Listagem de Reuniões Mensais de Estudo de Casos e Planos de Ação."""
+    _garantir_tabelas_multi()
     ano = request.args.get('ano', type=int) or datetime.utcnow().year
-    planos = PlanoAcaoMensalMulti.query.filter_by(municipio_id=g.municipio.id, ano_referencia=ano)\
-        .order_by(PlanoAcaoMensalMulti.data_reuniao.desc()).all()
+    try:
+        planos = PlanoAcaoMensalMulti.query.filter_by(municipio_id=g.municipio.id, ano_referencia=ano)\
+            .order_by(PlanoAcaoMensalMulti.data_reuniao.desc()).all()
+    except Exception as e:
+        db.session.rollback()
+        print(f"[AVISO] Falha ao carregar planos de ação: {e}")
+        planos = []
 
     return render_template(
         'equipe_multi/planos_acao.html',
         planos=planos,
-        ano_selecionado=ano
+        ano_selecionado=ano,
+        now=datetime.utcnow()
     )
 
 
@@ -331,6 +386,7 @@ def listar_planos_acao():
 @login_required
 def novo_plano_acao():
     """Registro da Reunião Mensal Multidisciplinar e Plano de Ação Estratégico."""
+    _garantir_tabelas_multi()
     if request.method == 'POST':
         titulo = request.form.get('titulo', '').strip()
         mes = request.form.get('mes_referencia', 'Outubro')
@@ -359,41 +415,55 @@ def novo_plano_acao():
 
             chave_doc = f"PLANO-MULTI-{ano}-{uuid.uuid4().hex[:6].upper()}"
 
-            novo_plano = PlanoAcaoMensalMulti(
-                municipio_id=g.municipio.id,
-                usuario_coordenador_id=current_user.id,
-                titulo=titulo,
-                mes_referencia=mes,
-                ano_referencia=ano,
-                data_reuniao=data_reuniao,
-                local_reuniao=local,
-                profissionais_presentes=presentes,
-                casos_discutidos_json=casos_json_raw,
-                acoes_psicologia=acoes_psi,
-                acoes_psicopedagogia=acoes_psicoped,
-                acoes_servico_social=acoes_social,
-                deliberacoes_gerais=deliberacoes,
-                metas_proximo_mes=metas_proximo,
-                status='Aprovado em Reunião',
-                chave_documento=chave_doc
-            )
-            db.session.add(novo_plano)
-            db.session.commit()
-            flash(f"Plano de Ação Mensal '{titulo}' homologado com sucesso!", "sucesso")
-            return redirect(url_for('equipe_multi.listar_planos_acao', municipio_slug=g.municipio.slug))
+            try:
+                novo_plano = PlanoAcaoMensalMulti(
+                    municipio_id=g.municipio.id,
+                    usuario_coordenador_id=current_user.id,
+                    titulo=titulo,
+                    mes_referencia=mes,
+                    ano_referencia=ano,
+                    data_reuniao=data_reuniao,
+                    local_reuniao=local,
+                    profissionais_presentes=presentes,
+                    casos_discutidos_json=casos_json_raw,
+                    acoes_psicologia=acoes_psi,
+                    acoes_psicopedagogia=acoes_psicoped,
+                    acoes_servico_social=acoes_social,
+                    deliberacoes_gerais=deliberacoes,
+                    metas_proximo_mes=metas_proximo,
+                    status='Aprovado em Reunião',
+                    chave_documento=chave_doc
+                )
+                db.session.add(novo_plano)
+                db.session.commit()
+                flash(f"Plano de Ação Mensal '{titulo}' homologado com sucesso!", "sucesso")
+                return redirect(url_for('equipe_multi.listar_planos_acao', municipio_slug=g.municipio.slug))
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Aviso ao registrar plano de ação: {e}", "erro")
 
-    alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
-    profissionais = Usuario.query.filter(
-        Usuario.municipio_id == g.municipio.id,
-        Usuario.perfil.in_(['psicologo', 'psicopedagogo', 'assistente_social', 'aee', 'secretaria'])
-    ).all()
+    try:
+        alunos = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(Aluno.nome).all()
+    except Exception:
+        db.session.rollback()
+        alunos = []
+
+    try:
+        profissionais = Usuario.query.filter(
+            Usuario.municipio_id == g.municipio.id,
+            Usuario.perfil.in_(['psicologo', 'psicopedagogo', 'assistente_social', 'aee', 'secretaria'])
+        ).all()
+    except Exception:
+        db.session.rollback()
+        profissionais = []
 
     return render_template(
         'equipe_multi/formulario_plano.html',
         alunos=alunos,
         profissionais=profissionais,
         mes_atual=datetime.utcnow().strftime('%B'),
-        ano_atual=datetime.utcnow().year
+        ano_atual=datetime.utcnow().year,
+        now=datetime.utcnow()
     )
 
 
@@ -401,6 +471,7 @@ def novo_plano_acao():
 @login_required
 def detalhes_plano_acao(id):
     """Exibição detalhada do Plano de Ação Mensal e Ata Técnica."""
+    _garantir_tabelas_multi()
     plano = PlanoAcaoMensalMulti.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
     
     # Decodifica os casos discutidos se salvos em JSON
@@ -414,7 +485,8 @@ def detalhes_plano_acao(id):
     return render_template(
         'equipe_multi/detalhes_plano.html',
         plano=plano,
-        casos=casos
+        casos=casos,
+        now=datetime.utcnow()
     )
 
 
@@ -425,6 +497,7 @@ def imprimir_plano_acao(id):
     DOCUMENTO OFICIAL TIMBRADO PARA APRESENTAÇÃO À GESTÃO ESCOLAR / SECRETARIA.
     Contém a ata, estudo de casos, metas setoriais e folha de assinaturas da equipe.
     """
+    _garantir_tabelas_multi()
     plano = PlanoAcaoMensalMulti.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
     
     casos = []
@@ -437,5 +510,6 @@ def imprimir_plano_acao(id):
     return render_template(
         'equipe_multi/imprimir_plano.html',
         plano=plano,
-        casos=casos
+        casos=casos,
+        now=datetime.utcnow()
     )

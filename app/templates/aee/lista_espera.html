@@ -160,7 +160,7 @@
 
                         <td class="py-3.5 px-4 font-mono">
                             <div class="font-bold text-slate-800">{{ c.telefone }}</div>
-                            <a href="https://wa.me/55{{ c.telefone|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}" target="_blank"
+                            <a href="https://wa.me/55{{ (c.telefone or '')|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}" target="_blank"
                                class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 mt-0.5">
                                 <span>💬</span> Enviar WhatsApp
                             </a>

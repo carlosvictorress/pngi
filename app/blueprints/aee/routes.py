@@ -384,10 +384,7 @@ def sala_recursos():
         if filtro_diag == 'cid':
             query = query.filter(Aluno.cid.isnot(None), Aluno.cid != '')
         elif filtro_diag == 'investigacao':
-            try:
-                query = query.filter(Aluno.em_investigacao == True)
-            except Exception:
-                pass
+            query = query.filter((Aluno.cid.is_(None)) | (Aluno.cid == ''))
 
         alunos = query.order_by(Aluno.nome).all()
     except Exception as e:
@@ -569,10 +566,18 @@ def atualizar_dados_aee(aluno_id):
 # =========================================================================
 # 8. MÓDULO LISTA DE ESPERA DA SALA DE RECURSOS / AEE
 # =========================================================================
+def _garantir_tabela_espera():
+    try:
+        ListaEsperaAEE.__table__.create(db.engine, checkfirst=True)
+    except Exception:
+        db.session.rollback()
+
 @aee_bp.route('/lista-espera', methods=['GET', 'POST'])
 @login_required
 def lista_espera():
     """Gerenciamento da Fila e Lista de Espera da Sala de Recursos Multifuncionais / AEE."""
+    _garantir_tabela_espera()
+
     if request.method == 'POST':
         nome = request.form.get('nome_completo', '').strip()
         data_nasc = request.form.get('data_nascimento', '').strip()
@@ -591,56 +596,68 @@ def lista_espera():
         if not nome or not telefone:
             flash("Nome completo e telefone para contato são obrigatórios!", "erro")
         else:
-            novo_candidato = ListaEsperaAEE(
-                municipio_id=g.municipio.id,
-                nome_completo=nome,
-                data_nascimento=data_nasc,
-                cpf=cpf,
-                telefone=telefone,
-                nome_responsavel=nome_resp,
-                escola_origem=escola_origem,
-                ano_serie=ano_serie,
-                endereco=endereco,
-                diagnostico_hipotese=diag,
-                em_investigacao=em_invest,
-                prioridade=prioridade,
-                turno_pretendido=turno,
-                observacoes_triagem=obs,
-                status='Aguardando Vaga'
-            )
-            db.session.add(novo_candidato)
-            db.session.commit()
-            flash(f"Estudante '{nome}' inserido com sucesso na lista de espera do AEE!", "sucesso")
-            return redirect(url_for('aee.lista_espera', municipio_slug=g.municipio.slug))
+            try:
+                novo_candidato = ListaEsperaAEE(
+                    municipio_id=g.municipio.id,
+                    nome_completo=nome,
+                    data_nascimento=data_nasc,
+                    cpf=cpf,
+                    telefone=telefone,
+                    nome_responsavel=nome_resp,
+                    escola_origem=escola_origem,
+                    ano_serie=ano_serie,
+                    endereco=endereco,
+                    diagnostico_hipotese=diag,
+                    em_investigacao=em_invest,
+                    prioridade=prioridade,
+                    turno_pretendido=turno,
+                    observacoes_triagem=obs,
+                    status='Aguardando Vaga'
+                )
+                db.session.add(novo_candidato)
+                db.session.commit()
+                flash(f"Estudante '{nome}' inserido com sucesso na lista de espera do AEE!", "sucesso")
+                return redirect(url_for('aee.lista_espera', municipio_slug=g.municipio.slug))
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Aviso ao registrar na lista de espera: {e}", "erro")
 
     filtro_status = request.args.get('status', '')
     filtro_prioridade = request.args.get('prioridade', '')
     busca = request.args.get('busca', '').strip()
 
-    query = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id)
+    try:
+        query = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id)
 
-    if filtro_status:
-        query = query.filter(ListaEsperaAEE.status == filtro_status)
-    if filtro_prioridade:
-        query = query.filter(ListaEsperaAEE.prioridade == filtro_prioridade)
-    if busca:
-        query = query.filter(
-            (ListaEsperaAEE.nome_completo.ilike(f"%{busca}%")) | 
-            (ListaEsperaAEE.cpf.ilike(f"%{busca}%")) | 
-            (ListaEsperaAEE.telefone.ilike(f"%{busca}%"))
-        )
+        if filtro_status:
+            query = query.filter(ListaEsperaAEE.status == filtro_status)
+        if filtro_prioridade:
+            query = query.filter(ListaEsperaAEE.prioridade == filtro_prioridade)
+        if busca:
+            query = query.filter(
+                (ListaEsperaAEE.nome_completo.ilike(f"%{busca}%")) | 
+                (ListaEsperaAEE.cpf.ilike(f"%{busca}%")) | 
+                (ListaEsperaAEE.telefone.ilike(f"%{busca}%"))
+            )
 
-    # Ordenação por prioridade (Alta primeiro) e data
-    candidatos = query.order_by(
-        db.case((ListaEsperaAEE.prioridade == 'Alta / Urgente', 1), (ListaEsperaAEE.prioridade == 'Média', 2), else_=3),
-        ListaEsperaAEE.data_solicitacao.asc()
-    ).all()
+        candidatos = query.order_by(
+            db.case((ListaEsperaAEE.prioridade == 'Alta / Urgente', 1), (ListaEsperaAEE.prioridade == 'Média', 2), else_=3),
+            ListaEsperaAEE.data_solicitacao.asc()
+        ).all()
 
-    total_espera = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Aguardando Vaga').count()
-    total_chamados = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Chamado/Convocado').count()
-    total_matriculados = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Matriculado no AEE').count()
+        total_espera = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Aguardando Vaga').count()
+        total_chamados = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Chamado/Convocado').count()
+        total_matriculados = ListaEsperaAEE.query.filter_by(municipio_id=g.municipio.id, status='Matriculado no AEE').count()
+    except Exception as e:
+        db.session.rollback()
+        candidatos = []
+        total_espera = total_chamados = total_matriculados = 0
 
-    escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
+    try:
+        escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
+    except Exception:
+        db.session.rollback()
+        escolas = []
 
     return render_template(
         'aee/lista_espera.html',
@@ -659,12 +676,16 @@ def lista_espera():
 @login_required
 def alterar_status_espera(id):
     """Atualiza o status de um candidato na lista de espera (ex: Chamado, Em Triagem, etc.)."""
-    candidato = ListaEsperaAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
-    novo_status = request.form.get('novo_status')
-    if novo_status:
-        candidato.status = novo_status
-        db.session.commit()
-        flash(f"Status de '{candidato.nome_completo}' alterado para '{novo_status}'!", "sucesso")
+    try:
+        candidato = ListaEsperaAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
+        novo_status = request.form.get('novo_status')
+        if novo_status:
+            candidato.status = novo_status
+            db.session.commit()
+            flash(f"Status de '{candidato.nome_completo}' alterado para '{novo_status}'!", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Aviso ao alterar status: {e}", "erro")
     return redirect(url_for('aee.lista_espera', municipio_slug=g.municipio.slug))
 
 
@@ -672,9 +693,13 @@ def alterar_status_espera(id):
 @login_required
 def excluir_espera(id):
     """Remove um registro da lista de espera."""
-    candidato = ListaEsperaAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
-    nome = candidato.nome_completo
-    db.session.delete(candidato)
-    db.session.commit()
-    flash(f"Registro de '{nome}' removido da lista de espera.", "sucesso")
+    try:
+        candidato = ListaEsperaAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first_or_404()
+        nome = candidato.nome_completo
+        db.session.delete(candidato)
+        db.session.commit()
+        flash(f"Registro de '{nome}' removido da lista de espera.", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Aviso ao remover da lista: {e}", "erro")
     return redirect(url_for('aee.lista_espera', municipio_slug=g.municipio.slug))
