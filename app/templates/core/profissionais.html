@@ -144,11 +144,12 @@
                             </div>
                             <div class="min-w-0">
                                 <h3 class="text-sm font-bold text-slate-900 truncate" title="{{ p.nome }}">{{ p.nome }}</h3>
+                                {% set cargo_lower = (p.cargo or '')|lower %}
                                 <span class="inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full mt-0.5
-                                    {% if 'AEE' in (p.cargo or '')|upper %} bg-emerald-50 text-emerald-800 border border-emerald-200
-                                    {% elif any(k in (p.cargo or '')|lower for k in ['psicolog', 'psicopedagog', 'social', 'fono', 'terapeut']) %} bg-purple-50 text-purple-800 border border-purple-200
-                                    {% elif any(k in (p.cargo or '')|lower for k in ['apoio', 'cuidador']) %} bg-amber-50 text-amber-800 border border-amber-200
-                                    {% elif any(k in (p.cargo or '')|lower for k in ['libras', 'braille']) %} bg-cyan-50 text-cyan-800 border border-cyan-200
+                                    {% if 'aee' in cargo_lower %} bg-emerald-50 text-emerald-800 border border-emerald-200
+                                    {% elif 'psicolog' in cargo_lower or 'psicopedagog' in cargo_lower or 'social' in cargo_lower or 'fono' in cargo_lower or 'terapeut' in cargo_lower %} bg-purple-50 text-purple-800 border border-purple-200
+                                    {% elif 'apoio' in cargo_lower or 'cuidador' in cargo_lower or 'auxiliar' in cargo_lower %} bg-amber-50 text-amber-800 border border-amber-200
+                                    {% elif 'libras' in cargo_lower or 'braille' in cargo_lower or 'intérprete' in cargo_lower or 'interprete' in cargo_lower %} bg-cyan-50 text-cyan-800 border border-cyan-200
                                     {% else %} bg-slate-100 text-slate-700 border border-slate-200 {% endif %}">
                                     {{ p.cargo or 'Especialista' }}
                                 </span>
@@ -213,12 +214,26 @@
                 <!-- AÇÕES DO PROFISSIONAL -->
                 <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs">
                     <div class="flex items-center gap-1.5">
-                        <button onclick="openModalEditarProfissional('{{ p.id }}', '{{ p.nome|escape }}', '{{ p.cargo|escape }}', '{{ (p.escola_polo or '')|escape }}', '{{ p.cpf or '' }}', '{{ p.telefone or '' }}', '{{ p.email or '' }}', {{ 'true' if p.usuario_id or p.usuario else 'false' }}, '{% if p.usuario %}{{ p.usuario.perfil }}{% endif %}')"
+                        <button type="button"
+                                data-id="{{ p.id }}"
+                                data-nome="{{ p.nome or '' }}"
+                                data-cargo="{{ p.cargo or '' }}"
+                                data-escola-polo="{{ p.escola_polo or '' }}"
+                                data-cpf="{{ p.cpf or '' }}"
+                                data-telefone="{{ p.telefone or '' }}"
+                                data-email="{{ p.email or '' }}"
+                                data-tem-login="{{ 'true' if p.usuario_id or p.usuario else 'false' }}"
+                                data-perfil="{% if p.usuario %}{{ p.usuario.perfil }}{% endif %}"
+                                onclick="carregarEditarProfissional(this)"
                                 class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-lg text-[11px] transition-all flex items-center gap-1">
                             ✏️ Editar
                         </button>
 
-                        <button onclick="openModalResetarSenha('{{ p.id }}', '{{ p.nome|escape }}', '{{ p.email or '' }}')"
+                        <button type="button"
+                                data-id="{{ p.id }}"
+                                data-nome="{{ p.nome or '' }}"
+                                data-email="{{ p.email or '' }}"
+                                onclick="carregarResetarSenha(this)"
                                 class="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-bold px-2.5 py-1.5 rounded-lg text-[11px] transition-all flex items-center gap-1"
                                 title="Redefinir senha de acesso">
                             🔑 Senha
@@ -570,6 +585,26 @@
     }
     function closeModalNovoProfissional() {
         document.getElementById('modal-novo-profissional').classList.add('hidden');
+    }
+
+    function carregarEditarProfissional(btn) {
+        const id = btn.getAttribute('data-id');
+        const nome = btn.getAttribute('data-nome');
+        const cargo = btn.getAttribute('data-cargo');
+        const escolaPolo = btn.getAttribute('data-escola-polo');
+        const cpf = btn.getAttribute('data-cpf');
+        const telefone = btn.getAttribute('data-telefone');
+        const email = btn.getAttribute('data-email');
+        const temLogin = btn.getAttribute('data-tem-login') === 'true';
+        const perfil = btn.getAttribute('data-perfil');
+        openModalEditarProfissional(id, nome, cargo, escolaPolo, cpf, telefone, email, temLogin, perfil);
+    }
+
+    function carregarResetarSenha(btn) {
+        const id = btn.getAttribute('data-id');
+        const nome = btn.getAttribute('data-nome');
+        const email = btn.getAttribute('data-email');
+        openModalResetarSenha(id, nome, email);
     }
 
     function openModalEditarProfissional(id, nome, cargo, escolaPolo, cpf, telefone, email, temLogin, perfil) {

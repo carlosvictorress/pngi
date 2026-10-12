@@ -246,11 +246,7 @@ def gerenciar_profissionais():
         now=datetime.utcnow()
     )
 
-# Alias para compatibilidade com chamadas legadas
-@core_bp.route('/usuarios')
-@login_required
-def gerenciar_usuarios():
-    return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
+
 
 @core_bp.route('/profissionais/<int:id>/editar', methods=['POST'])
 @core_bp.route('/usuarios/<int:id>/editar', methods=['POST'])
