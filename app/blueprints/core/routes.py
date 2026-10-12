@@ -1,6 +1,8 @@
-from flask import Blueprint, render_template, request, redirect, url_for, g, abort
+from datetime import datetime
+from flask import Blueprint, render_template, request, redirect, url_for, g, abort, flash
 from flask_login import login_required, current_user
-from app.models import Municipio, Aluno 
+from app import db
+from app.models import Municipio, Aluno, ProfissionalAEE, Usuario, Escola, Pei
 
 core_bp = Blueprint('core', __name__)
 
