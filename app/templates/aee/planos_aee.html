@@ -8,8 +8,11 @@
 
     <!-- SUB-BARRA DE NAVEGAÇÃO UNIFICADA DO AEE -->
     <div class="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex flex-wrap items-center gap-2 text-xs font-bold">
-        <a href="{{ url_for('aee.painel_aee', municipio_slug=g.municipio.slug) }}" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
-            <span>👥</span> Equipe Multidisciplinar
+        <a href="{{ url_for('aee.sala_recursos', municipio_slug=g.municipio.slug) }}" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
+            <span>🎒</span> Sala de Recursos
+        </a>
+        <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug) }}" class="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-all flex items-center gap-2">
+            <span>👥</span> Quadro de Profissionais
         </a>
         <a href="{{ url_for('aee.planos_aee', municipio_slug=g.municipio.slug) }}" class="px-4 py-2 rounded-xl bg-slate-900 text-white shadow-sm flex items-center gap-2">
             <span>📝</span> Planos Pedagógicos (PAEE/PDI)

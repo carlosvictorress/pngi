@@ -62,6 +62,12 @@ class Usuario(db.Model, UserMixin):
     # Perfis: 'superadmin', 'secretaria', 'diretor', 'professor', 'aee', 'transporte', 'familia'
     perfil = db.Column(db.String(30), nullable=False, default='professor')
     
+    # Dados cadastrais complementares e lotação escolar
+    cpf = db.Column(db.String(14), nullable=True)
+    telefone = db.Column(db.String(20), nullable=True)
+    cargo = db.Column(db.String(100), nullable=True)
+    escola_polo = db.Column(db.String(100), nullable=True)
+    
     senha_provisoria = db.Column(db.Boolean, default=False, nullable=False)
     ativo = db.Column(db.Boolean, default=True, nullable=False)
     criado_em = db.Column(db.DateTime, default=datetime.utcnow)
@@ -436,17 +442,19 @@ class ProfissionalAEE(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=True) # Vínculo com login de usuário
     nome = db.Column(db.String(150), nullable=False)
-    cpf = db.Column(db.String(14), nullable=False)
-    cargo = db.Column(db.String(50), nullable=False) 
-    escola_polo = db.Column(db.String(100), nullable=False)
-    telefone = db.Column(db.String(20))
-    email = db.Column(db.String(100))
+    cpf = db.Column(db.String(14), nullable=True)
+    cargo = db.Column(db.String(100), nullable=True, default='Professor AEE') 
+    escola_polo = db.Column(db.String(100), nullable=True, default='Sede / Secretaria')
+    telefone = db.Column(db.String(20), nullable=True)
+    email = db.Column(db.String(100), nullable=True)
     status = db.Column(db.String(20), default='Ativo')
     
     ativo = db.Column(db.Boolean, default=True, server_default='true', nullable=False)
 
     municipio = db.relationship('Municipio', backref=db.backref('profissionais', lazy=True))  
+    usuario = db.relationship('Usuario', backref=db.backref('registro_profissional', uselist=False, lazy=True))  
 
 class PlanoAEE(db.Model):
     __tablename__ = 'planos_aee'

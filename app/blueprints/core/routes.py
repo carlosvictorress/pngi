@@ -104,164 +104,350 @@ def index():
     )
 
 # -------------------------------------------------------------------------
-# GESTÃO LOCAL DA EQUIPE MULTIDISCIPLINAR (SECRETARIA MUNICIPAL)
+# QUADRO UNIFICADO DE PROFISSIONAIS & EQUIPE (SECRETARIA MUNICIPAL)
 # -------------------------------------------------------------------------
+MAPA_CARGO_PERFIL = {
+    'Professor(a) de AEE (SRM)': 'aee',
+    'Psicólogo(a) Escolar': 'psicologo',
+    'Psicopedagogo(a)': 'psicopedagogo',
+    'Assistente Social': 'assistente_social',
+    'Fonoaudiólogo(a)': 'fonoaudiologo',
+    'Terapeuta Ocupacional': 'terapeuta_ocupacional',
+    'Tradutor e Intérprete de Libras': 'professor_libras',
+    'Especialista em Braille': 'professor_braille',
+    'Guia-Intérprete': 'professor_libras',
+    'Profissional de Apoio Escolar / Cuidador': 'cuidador',
+    'Auxiliar de Inclusão': 'cuidador',
+    'Professor(a) de Sala Regular': 'professor',
+    'Diretor(a) / Coordenador(a) Escolar': 'diretor',
+    'Secretaria Municipal de Educação': 'secretaria',
+    'Monitor / Gestor de Transporte': 'transporte',
+}
+
+@core_bp.route('/profissionais', methods=['GET', 'POST'])
 @core_bp.route('/usuarios', methods=['GET', 'POST'])
 @login_required
-def gerenciar_usuarios():
-    """Painel de gestão dos profissionais multidisciplinares da prefeitura."""
+def gerenciar_profissionais():
+    """Painel único centralizado de gestão de todos os profissionais e especialistas do município."""
     if not g.municipio:
         abort(404)
         
     if current_user.perfil not in ['secretaria', 'superadmin']:
-        abort(403, description="Apenas a Secretaria de Educação pode gerenciar a equipe multidisciplinar.")
+        abort(403, description="Apenas a Secretaria de Educação pode gerenciar o quadro de profissionais.")
 
-    from app.models import Usuario
+    from app.models import ProfissionalAEE, Usuario, Escola
     from app import db
     from flask import flash
 
     if request.method == 'POST':
         action = request.form.get('action')
 
-        if action == 'cadastrar_usuario':
+        if action in ['cadastrar_profissional', 'cadastrar_usuario']:
             nome = request.form.get('nome', '').strip()
-            email = request.form.get('email', '').strip()
-            senha = request.form.get('senha', 'admin@2026')
-            perfil = request.form.get('perfil', 'professor')
+            cargo = request.form.get('cargo', '').strip() or 'Professor(a) de AEE (SRM)'
+            escola_polo = request.form.get('escola_polo', '').strip() or 'Sede da Secretaria de Educação'
+            cpf = request.form.get('cpf', '').strip()
+            telefone = request.form.get('telefone', '').strip()
+            email = request.form.get('email', '').strip().lower()
+            habilitar_login = request.form.get('habilitar_login') in ['on', 'true', '1', True]
+            senha = request.form.get('senha', 'Mudar@123').strip() or 'Mudar@123'
+            perfil = request.form.get('perfil', '').strip() or MAPA_CARGO_PERFIL.get(cargo, 'professor')
 
-            if Usuario.query.filter_by(email=email).first():
-                flash(f"O e-mail '{email}' já está cadastrado no sistema!", "erro")
+            if habilitar_login and email and Usuario.query.filter_by(email=email).first():
+                flash(f"O e-mail '{email}' já está em uso por outro usuário!", "erro")
             else:
-                novo_usuario = Usuario(
+                novo_prof = ProfissionalAEE(
+                    municipio_id=g.municipio.id,
                     nome=nome,
-                    email=email,
-                    perfil=perfil,
-                    municipio_id=g.municipio.id
+                    cpf=cpf,
+                    cargo=cargo,
+                    escola_polo=escola_polo,
+                    telefone=telefone,
+                    email=email if email else None,
+                    ativo=True,
+                    status='Ativo'
                 )
-                novo_usuario.set_senha(senha)
-                db.session.add(novo_usuario)
+                db.session.add(novo_prof)
+                db.session.flush()
+
+                if habilitar_login and email:
+                    novo_user = Usuario(
+                        municipio_id=g.municipio.id,
+                        nome=nome,
+                        email=email,
+                        perfil=perfil,
+                        cpf=cpf,
+                        telefone=telefone,
+                        cargo=cargo,
+                        escola_polo=escola_polo,
+                        senha_provisoria=True,
+                        ativo=True
+                    )
+                    novo_user.set_senha(senha)
+                    db.session.add(novo_user)
+                    db.session.flush()
+                    novo_prof.usuario_id = novo_user.id
+
                 db.session.commit()
-                flash(f"Profissional '{nome}' cadastrado com sucesso!", "sucesso")
+                flash(f"Profissional '{nome}' cadastrado com sucesso no quadro da rede municipal!", "sucesso")
 
-        return redirect(url_for('core.gerenciar_usuarios', municipio_slug=g.municipio.slug))
+        return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
 
-    filtro_perfil = request.args.get('filtro_perfil', '')
-    busca_usuario = request.args.get('busca_usuario', '').strip()
+    filtro_categoria = request.args.get('categoria', 'todos')
+    busca = request.args.get('busca', '').strip()
 
-    query_usuarios = Usuario.query.filter_by(municipio_id=g.municipio.id)
-
-    if filtro_perfil:
-        query_usuarios = query_usuarios.filter(Usuario.perfil == filtro_perfil)
-    if busca_usuario:
-        query_usuarios = query_usuarios.filter(
-            (Usuario.nome.ilike(f"%{busca_usuario}%")) | (Usuario.email.ilike(f"%{busca_usuario}%"))
+    query_prof = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id)
+    if busca:
+        query_prof = query_prof.filter(
+            (ProfissionalAEE.nome.ilike(f"%{busca}%")) |
+            (ProfissionalAEE.cpf.ilike(f"%{busca}%")) |
+            (ProfissionalAEE.cargo.ilike(f"%{busca}%")) |
+            (ProfissionalAEE.email.ilike(f"%{busca}%")) |
+            (ProfissionalAEE.escola_polo.ilike(f"%{busca}%"))
         )
 
-    usuarios = query_usuarios.order_by(Usuario.nome).all()
+    profissionais = query_prof.order_by(ProfissionalAEE.nome).all()
+
+    # Contadores e categorização do quadro municipal
+    total_geral = len(profissionais)
+    prof_aee = [p for p in profissionais if p.cargo and 'AEE' in p.cargo.upper()]
+    prof_multi = [p for p in profissionais if p.cargo and any(k in p.cargo.lower() for k in ['psicolog', 'psicopedagog', 'social', 'fono', 'terapeut'])]
+    prof_apoio = [p for p in profissionais if p.cargo and any(k in p.cargo.lower() for k in ['apoio', 'cuidador', 'auxiliar'])]
+    prof_libras = [p for p in profissionais if p.cargo and any(k in p.cargo.lower() for k in ['libras', 'braille', 'intérprete', 'interprete'])]
+    prof_gestao = [p for p in profissionais if p.cargo and any(k in p.cargo.lower() for k in ['regular', 'sala', 'diretor', 'secretaria', 'coordenad', 'transporte'])]
+
+    profissionais_filtrados = profissionais
+    if filtro_categoria == 'aee':
+        profissionais_filtrados = prof_aee
+    elif filtro_categoria == 'multi':
+        profissionais_filtrados = prof_multi
+    elif filtro_categoria == 'apoio':
+        profissionais_filtrados = prof_apoio
+    elif filtro_categoria == 'libras':
+        profissionais_filtrados = prof_libras
+    elif filtro_categoria == 'gestao':
+        profissionais_filtrados = prof_gestao
+
+    escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
 
     return render_template(
-        'core/usuarios.html',
+        'core/profissionais.html',
         municipio=g.municipio,
-        usuarios=usuarios,
-        filtro_perfil=filtro_perfil,
-        busca_usuario=busca_usuario
+        profissionais=profissionais_filtrados,
+        total_geral=total_geral,
+        total_aee=len(prof_aee),
+        total_multi=len(prof_multi),
+        total_apoio=len(prof_apoio),
+        total_libras=len(prof_libras),
+        total_gestao=len(prof_gestao),
+        escolas=escolas,
+        filtro_categoria=filtro_categoria,
+        busca=busca,
+        now=datetime.utcnow()
     )
 
-@core_bp.route('/usuarios/<int:user_id>/editar', methods=['POST'])
+# Alias para compatibilidade com chamadas legadas
+@core_bp.route('/usuarios')
 @login_required
-def editar_usuario_local(user_id):
+def gerenciar_usuarios():
+    return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
+
+@core_bp.route('/profissionais/<int:id>/editar', methods=['POST'])
+@core_bp.route('/usuarios/<int:id>/editar', methods=['POST'])
+@login_required
+def editar_profissional(id):
     if current_user.perfil not in ['secretaria', 'superadmin']:
         abort(403)
-
-    from app.models import Usuario
+    from app.models import ProfissionalAEE, Usuario
     from app import db
     from flask import flash
 
-    usuario = Usuario.query.get_or_404(user_id)
-    if usuario.municipio_id != g.municipio.id and current_user.perfil != 'superadmin':
-        abort(403)
+    prof = ProfissionalAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first()
+    if not prof:
+        user_backup = Usuario.query.filter_by(id=id, municipio_id=g.municipio.id).first()
+        if user_backup:
+            prof = ProfissionalAEE.query.filter_by(usuario_id=user_backup.id).first()
+            if not prof:
+                prof = ProfissionalAEE(
+                    municipio_id=g.municipio.id,
+                    usuario_id=user_backup.id,
+                    nome=user_backup.nome,
+                    email=user_backup.email,
+                    cargo=user_backup.cargo or 'Professor(a) de AEE (SRM)',
+                    escola_polo=user_backup.escola_polo or 'Sede / Secretaria',
+                    cpf=user_backup.cpf,
+                    telefone=user_backup.telefone,
+                    ativo=user_backup.ativo
+                )
+                db.session.add(prof)
+                db.session.flush()
+    if not prof:
+        abort(404)
 
     nome = request.form.get('nome', '').strip()
-    email = request.form.get('email', '').strip()
-    perfil = request.form.get('perfil')
+    cargo = request.form.get('cargo', '').strip() or prof.cargo
+    escola_polo = request.form.get('escola_polo', '').strip() or 'Sede da Secretaria de Educação'
+    cpf = request.form.get('cpf', '').strip()
+    telefone = request.form.get('telefone', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    habilitar_login = request.form.get('habilitar_login') in ['on', 'true', '1', True]
+    nova_senha = request.form.get('nova_senha', '').strip()
+    perfil = request.form.get('perfil') or MAPA_CARGO_PERFIL.get(cargo, 'professor')
 
-    email_existente = Usuario.query.filter(Usuario.email == email, Usuario.id != user_id).first()
-    if email_existente:
-        flash(f"O e-mail '{email}' pertence a outro usuário.", "erro")
-    else:
-        usuario.nome = nome
-        usuario.email = email
-        usuario.perfil = perfil
-        db.session.commit()
-        flash(f"Cadastro do profissional '{usuario.nome}' atualizado!", "sucesso")
+    prof.nome = nome
+    prof.cargo = cargo
+    prof.escola_polo = escola_polo
+    prof.cpf = cpf
+    prof.telefone = telefone
+    prof.email = email if email else None
 
-    return redirect(url_for('core.gerenciar_usuarios', municipio_slug=g.municipio.slug))
+    if prof.usuario_id:
+        user = Usuario.query.get(prof.usuario_id)
+        if user:
+            if email and email != user.email:
+                outro = Usuario.query.filter(Usuario.email == email, Usuario.id != user.id).first()
+                if outro:
+                    flash(f"O e-mail '{email}' pertence a outro usuário.", "erro")
+                    return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
+            user.nome = nome
+            if email: user.email = email
+            user.perfil = perfil
+            user.cpf = cpf
+            user.telefone = telefone
+            user.cargo = cargo
+            user.escola_polo = escola_polo
+            if nova_senha:
+                user.set_senha(nova_senha)
+    elif habilitar_login and email:
+        outro = Usuario.query.filter_by(email=email).first()
+        if outro and outro.municipio_id == g.municipio.id:
+            prof.usuario_id = outro.id
+            outro.nome = nome
+            outro.perfil = perfil
+            outro.cpf = cpf
+            outro.telefone = telefone
+            outro.cargo = cargo
+            outro.escola_polo = escola_polo
+            if nova_senha:
+                outro.set_senha(nova_senha)
+        elif not outro:
+            novo_u = Usuario(
+                municipio_id=g.municipio.id,
+                nome=nome,
+                email=email,
+                perfil=perfil,
+                cpf=cpf,
+                telefone=telefone,
+                cargo=cargo,
+                escola_polo=escola_polo,
+                senha_provisoria=True,
+                ativo=prof.ativo
+            )
+            novo_u.set_senha(nova_senha if nova_senha else 'Mudar@123')
+            db.session.add(novo_u)
+            db.session.flush()
+            prof.usuario_id = novo_u.id
 
-@core_bp.route('/usuarios/<int:user_id>/resetar-senha', methods=['POST'])
+    db.session.commit()
+    flash(f"Cadastro do profissional '{nome}' atualizado com sucesso!", "sucesso")
+    return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
+
+@core_bp.route('/profissionais/<int:id>/resetar-senha', methods=['POST'])
+@core_bp.route('/usuarios/<int:id>/resetar-senha', methods=['POST'])
 @login_required
-def resetar_senha_usuario_local(user_id):
+def resetar_senha_profissional(id):
     if current_user.perfil not in ['secretaria', 'superadmin']:
         abort(403)
-
-    from app.models import Usuario
+    from app.models import ProfissionalAEE, Usuario
     from app import db
     from flask import flash
 
-    usuario = Usuario.query.get_or_404(user_id)
-    if usuario.municipio_id != g.municipio.id and current_user.perfil != 'superadmin':
-        abort(403)
-
+    prof = ProfissionalAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first()
     nova_senha = request.form.get('nova_senha', '').strip()
     if not nova_senha:
         flash("Informe a nova senha!", "erro")
-    else:
-        usuario.set_senha(nova_senha)
+        return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
+
+    if prof and prof.usuario_id:
+        user = Usuario.query.get(prof.usuario_id)
+        if user:
+            user.set_senha(nova_senha)
+            user.senha_provisoria = True
+            db.session.commit()
+            flash(f"Senha de '{prof.nome}' redefinida com sucesso!", "sucesso")
+            return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
+    elif prof and prof.email:
+        perfil = MAPA_CARGO_PERFIL.get(prof.cargo, 'professor')
+        novo_u = Usuario(
+            municipio_id=g.municipio.id,
+            nome=prof.nome,
+            email=prof.email,
+            perfil=perfil,
+            cpf=prof.cpf,
+            telefone=prof.telefone,
+            cargo=prof.cargo,
+            escola_polo=prof.escola_polo,
+            senha_provisoria=True,
+            ativo=prof.ativo
+        )
+        novo_u.set_senha(nova_senha)
+        db.session.add(novo_u)
+        db.session.flush()
+        prof.usuario_id = novo_u.id
         db.session.commit()
-        flash(f"Senha do profissional '{usuario.nome}' redefinida!", "sucesso")
+        flash(f"Conta de acesso criada e senha definida para '{prof.nome}'!", "sucesso")
+        return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
 
-    return redirect(url_for('core.gerenciar_usuarios', municipio_slug=g.municipio.slug))
+    flash("Este profissional não possui e-mail cadastrado para login. Edite o cadastro e informe um e-mail.", "erro")
+    return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
 
-@core_bp.route('/usuarios/<int:user_id>/toggle-status')
+@core_bp.route('/profissionais/<int:id>/toggle-status')
+@core_bp.route('/usuarios/<int:id>/toggle-status')
 @login_required
-def toggle_status_usuario_local(user_id):
+def toggle_status_profissional(id):
     if current_user.perfil not in ['secretaria', 'superadmin']:
         abort(403)
-
-    from app.models import Usuario
+    from app.models import ProfissionalAEE, Usuario
     from app import db
     from flask import flash
 
-    usuario = Usuario.query.get_or_404(user_id)
-    if usuario.municipio_id != g.municipio.id and current_user.perfil != 'superadmin':
-        abort(403)
+    prof = ProfissionalAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first()
+    if prof:
+        prof.ativo = not prof.ativo
+        prof.status = 'Ativo' if prof.ativo else 'Suspenso'
+        if prof.usuario_id:
+            u = Usuario.query.get(prof.usuario_id)
+            if u:
+                u.ativo = prof.ativo
+        db.session.commit()
+        status_txt = "ativado" if prof.ativo else "suspenso"
+        flash(f"Profissional '{prof.nome}' foi {status_txt}!", "sucesso")
+    return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
 
-    usuario.ativo = not usuario.ativo
-    db.session.commit()
-    status_str = "ativado" if usuario.ativo else "bloqueado"
-    flash(f"Acesso de '{usuario.nome}' foi {status_str}!", "sucesso")
-
-    return redirect(url_for('core.gerenciar_usuarios', municipio_slug=g.municipio.slug))
-
-@core_bp.route('/usuarios/<int:user_id>/excluir')
+@core_bp.route('/profissionais/<int:id>/excluir', methods=['POST', 'GET'])
+@core_bp.route('/usuarios/<int:id>/excluir', methods=['POST', 'GET'])
 @login_required
-def excluir_usuario_local(user_id):
+def excluir_profissional(id):
     if current_user.perfil not in ['secretaria', 'superadmin']:
         abort(403)
-
-    from app.models import Usuario
+    from app.models import ProfissionalAEE, Usuario
     from app import db
     from flask import flash
 
-    usuario = Usuario.query.get_or_404(user_id)
-    if usuario.municipio_id != g.municipio.id and current_user.perfil != 'superadmin':
-        abort(403)
-
-    nome_u = usuario.nome
-    db.session.delete(usuario)
-    db.session.commit()
-    flash(f"Profissional '{nome_u}' removido do cadastro municipal.", "sucesso")
-
-    return redirect(url_for('core.gerenciar_usuarios', municipio_slug=g.municipio.slug))
+    prof = ProfissionalAEE.query.filter_by(id=id, municipio_id=g.municipio.id).first()
+    if prof:
+        nome_p = prof.nome
+        if prof.usuario_id and prof.usuario_id == current_user.id:
+            flash("Você não pode excluir sua própria conta de usuário logada!", "erro")
+            return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
+        if prof.usuario_id:
+            u = Usuario.query.get(prof.usuario_id)
+            if u and u.perfil != 'superadmin':
+                db.session.delete(u)
+        db.session.delete(prof)
+        db.session.commit()
+        flash(f"Profissional '{nome_p}' removido do quadro municipal com sucesso.", "sucesso")
+    return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
 
 # -------------------------------------------------------------------------
 # PORTAL DA FAMÍLIA / RESPONSÁVEL (Art. 28 LBI)

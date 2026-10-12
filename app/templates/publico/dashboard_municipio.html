@@ -53,8 +53,8 @@
             </div>
 
             {% if current_user.perfil in ['secretaria', 'superadmin'] %}
-            <a href="/{{ municipio.slug }}/usuarios" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all">
-                👥 Gerenciar Equipe Multidisciplinar
+            <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=municipio.slug) }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all">
+                👥 Quadro de Profissionais & Especialistas
             </a>
             {% endif %}
         </div>
@@ -85,11 +85,11 @@
                 </div>
             </div>
 
-            <!-- EQUIPE MULTIDISCIPLINAR (Se ativo) -->
+            <!-- ATENDIMENTOS SOAP / EQUIPE MULTI (Se ativo) -->
             {% if not municipio or municipio.modulo_equipe_multi %}
             <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                    <span class="text-[10px] uppercase font-semibold text-purple-600 tracking-wider">Equipe Multi (SOAP)</span>
+                    <span class="text-[10px] uppercase font-semibold text-purple-600 tracking-wider">Atendimentos SOAP (Multi)</span>
                     <div class="text-3xl font-light mt-1 text-purple-700">
                         {{ total_equipe }}
                     </div>
@@ -97,7 +97,7 @@
                 <div class="mt-4 flex items-center justify-between">
                     <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=municipio.slug) }}" class="text-xs text-purple-700 hover:underline font-medium">Atendimento SOAP &rarr;</a>
                     {% if current_user.perfil in ['secretaria', 'superadmin'] %}
-                        <a href="/{{ municipio.slug }}/usuarios" class="text-[10px] text-slate-400 hover:underline">Equipe</a>
+                        <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=municipio.slug) }}" class="text-[10px] text-slate-400 hover:underline">Quadro Geral</a>
                     {% endif %}
                 </div>
             </div>

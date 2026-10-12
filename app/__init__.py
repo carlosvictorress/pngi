@@ -219,7 +219,17 @@ def create_app():
                     "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_aee BOOLEAN DEFAULT TRUE;",
                     "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_equipe_multi BOOLEAN DEFAULT TRUE;",
                     "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_transporte BOOLEAN DEFAULT TRUE;",
-                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_blindagem_juridica BOOLEAN DEFAULT TRUE;"
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_blindagem_juridica BOOLEAN DEFAULT TRUE;",
+
+                    # 7. Unificação e Sincronização de Profissionais
+                    "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cpf VARCHAR(14);",
+                    "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS telefone VARCHAR(20);",
+                    "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS cargo VARCHAR(100);",
+                    "ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS escola_polo VARCHAR(100);",
+                    "ALTER TABLE profissionais_aee ADD COLUMN IF NOT EXISTS usuario_id INTEGER;",
+                    "ALTER TABLE profissionais_aee ALTER COLUMN cpf DROP NOT NULL;",
+                    "ALTER TABLE profissionais_aee ALTER COLUMN escola_polo DROP NOT NULL;",
+                    "ALTER TABLE profissionais_aee ALTER COLUMN cargo DROP NOT NULL;"
                 ]
                 for ddl in ddl_comandos:
                     try:
@@ -234,6 +244,64 @@ def create_app():
                             conn.execute(text(f"ALTER TABLE municipios ADD COLUMN {col} BOOLEAN DEFAULT 1;"))
                         except Exception:
                             pass
+                    for col in ['cpf', 'telefone', 'cargo', 'escola_polo']:
+                        try:
+                            conn.execute(text(f"ALTER TABLE usuarios ADD COLUMN {col} VARCHAR(100);"))
+                        except Exception:
+                            pass
+                    try:
+                        conn.execute(text("ALTER TABLE profissionais_aee ADD COLUMN usuario_id INTEGER;"))
+                    except Exception:
+                        pass
+
+            # Sincronização automática inicial de usuários existentes para o quadro de profissionais
+            try:
+                from app.models import Usuario, ProfissionalAEE
+                mapa_perfil_cargo = {
+                    'aee': 'Professor(a) de AEE (SRM)',
+                    'psicologo': 'Psicólogo(a) Escolar',
+                    'psicopedagogo': 'Psicopedagogo(a)',
+                    'assistente_social': 'Assistente Social',
+                    'fonoaudiologo': 'Fonoaudiólogo(a)',
+                    'terapeuta_ocupacional': 'Terapeuta Ocupacional',
+                    'professor_libras': 'Tradutor e Intérprete de Libras',
+                    'professor_braille': 'Especialista em Braille',
+                    'cuidador': 'Profissional de Apoio Escolar / Cuidador',
+                    'professor': 'Professor(a) de Sala Regular',
+                    'diretor': 'Direção / Coordenação Escolar',
+                    'secretaria': 'Secretaria Municipal de Educação',
+                    'transporte': 'Monitor / Gestor de Transporte'
+                }
+                users_mun = Usuario.query.filter(Usuario.municipio_id.isnot(None), Usuario.perfil != 'superadmin').all()
+                for u in users_mun:
+                    p_exist = ProfissionalAEE.query.filter_by(municipio_id=u.municipio_id, usuario_id=u.id).first()
+                    if not p_exist:
+                        p_exist = ProfissionalAEE.query.filter(
+                            ProfissionalAEE.municipio_id == u.municipio_id,
+                            (ProfissionalAEE.email == u.email) | (ProfissionalAEE.nome == u.nome)
+                        ).first()
+                    if not p_exist:
+                        cargo_nome = mapa_perfil_cargo.get(u.perfil, u.cargo or u.perfil.title())
+                        novo_p = ProfissionalAEE(
+                            municipio_id=u.municipio_id,
+                            usuario_id=u.id,
+                            nome=u.nome,
+                            email=u.email,
+                            cargo=cargo_nome,
+                            escola_polo=u.escola_polo or 'Sede / Secretaria',
+                            cpf=u.cpf or '',
+                            telefone=u.telefone or '',
+                            ativo=u.ativo,
+                            status='Ativo' if u.ativo else 'Suspenso'
+                        )
+                        db.session.add(novo_p)
+                    else:
+                        if not p_exist.usuario_id:
+                            p_exist.usuario_id = u.id
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                print(f"[INFO] Auto-sync profissionais notice: {e}")
         except Exception as e:
             print(f"[INFO] DDL schema notice: {e}")
 

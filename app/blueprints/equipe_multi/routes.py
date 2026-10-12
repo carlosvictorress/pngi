@@ -249,10 +249,15 @@ def novo_atendimento_soap():
                 data_atend = datetime.utcnow().date()
 
             try:
+                prof_form_id = request.form.get('profissional_id', type=int)
+                prof_obj = ProfissionalAEE.query.filter_by(id=prof_form_id, municipio_id=g.municipio.id).first() if prof_form_id else None
+                user_id_vinculado = (prof_obj.usuario_id if prof_obj and prof_obj.usuario_id else current_user.id)
+
                 novo_soap = AtendimentoMultiSOAP(
                     municipio_id=g.municipio.id,
                     aluno_id=aluno_id,
-                    usuario_id=current_user.id,
+                    usuario_id=user_id_vinculado,
+                    profissional_id=user_id_vinculado,
                     especialidade=especialidade,
                     data_atendimento=data_atend,
                     horario_inicio=horario_inicio,
@@ -280,9 +285,16 @@ def novo_atendimento_soap():
         db.session.rollback()
         alunos = []
 
+    try:
+        profissionais = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
+    except Exception:
+        db.session.rollback()
+        profissionais = []
+
     return render_template(
         'equipe_multi/formulario_soap.html',
         alunos=alunos,
+        profissionais=profissionais,
         aluno_selecionado=aluno_selecionado,
         now=datetime.utcnow()
     )
@@ -397,11 +409,15 @@ def novo_relatorio_escuta():
             chave_aut = f"REL-{datetime.utcnow().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
             
             try:
+                prof_form_id = request.form.get('profissional_id', type=int)
+                prof_obj = ProfissionalAEE.query.filter_by(id=prof_form_id, municipio_id=g.municipio.id).first() if prof_form_id else None
+                user_id_vinculado = (prof_obj.usuario_id if prof_obj and prof_obj.usuario_id else current_user.id)
+
                 novo_rel = RelatorioEscutaEncaminhamento(
                     municipio_id=g.municipio.id,
                     aluno_id=aluno_id,
-                    usuario_id=current_user.id,
-                    profissional_id=current_user.id,
+                    usuario_id=user_id_vinculado,
+                    profissional_id=user_id_vinculado,
                     especialidade_emissor=especialidade_emissor,
                     tipo_documento=tipo_doc,
                     orgao_destino=orgao_destino,
@@ -435,9 +451,16 @@ def novo_relatorio_escuta():
         db.session.rollback()
         alunos = []
 
+    try:
+        profissionais = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
+    except Exception:
+        db.session.rollback()
+        profissionais = []
+
     return render_template(
         'equipe_multi/formulario_relatorio.html',
         alunos=alunos,
+        profissionais=profissionais,
         aluno_selecionado=aluno_selecionado,
         now=datetime.utcnow()
     )
@@ -550,10 +573,7 @@ def novo_plano_acao():
         alunos = []
 
     try:
-        profissionais = Usuario.query.filter(
-            Usuario.municipio_id == g.municipio.id,
-            Usuario.perfil.in_(['psicologo', 'psicopedagogo', 'assistente_social', 'aee', 'secretaria'])
-        ).all()
+        profissionais = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True).order_by(ProfissionalAEE.nome).all()
     except Exception:
         db.session.rollback()
         profissionais = []

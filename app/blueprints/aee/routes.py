@@ -21,62 +21,14 @@ def get_municipio_slug(endpoint, values):
         abort(404)
 
 # =========================================================================
-# 1. GERENCIAMENTO DA EQUIPE TÉCNICA E NAVEGAÇÃO POR ABAS CATEGORIZADAS
+# 1. REDIRECIONAMENTO TRANSPARENTE PARA O QUADRO UNIFICADO DE PROFISSIONAIS
 # =========================================================================
 @aee_bp.route('/', methods=['GET', 'POST'])
 @login_required
 def painel_aee():
-    if request.method == 'POST':
-        nome = request.form.get('nome')
-        cpf = request.form.get('cpf')
-        cargo = request.form.get('cargo')
-        escola_polo = request.form.get('escola_polo')
-        telefone = request.form.get('telefone')
-        email = request.form.get('email')
+    """Redireciona para o Quadro Central Unificado de Profissionais do Município."""
+    return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
 
-        novo_p = ProfissionalAEE(
-            municipio_id=g.municipio.id,
-            nome=nome,
-            cpf=cpf,
-            cargo=cargo,
-            escola_polo=escola_polo,
-            telefone=telefone,
-            email=email
-        )
-        db.session.add(novo_p)
-        db.session.commit()
-        flash("Especialista portariado e alocado com sucesso na rede municipal!", "sucesso")
-        return redirect(url_for('aee.painel_aee', municipio_slug=g.municipio.slug))
-
-    # Filtro por Busca e Categoria
-    busca = request.args.get('busca', '').strip()
-    query_prof = ProfissionalAEE.query.filter_by(municipio_id=g.municipio.id, ativo=True)
-
-    if busca:
-        query_prof = query_prof.filter((ProfissionalAEE.nome.ilike(f"%{busca}%")) | (ProfissionalAEE.cpf.ilike(f"%{busca}%")) | (ProfissionalAEE.escola_polo.ilike(f"%{busca}%")))
-
-    profissionais = query_prof.order_by(ProfissionalAEE.nome).all()
-
-    # Divisão por Categorias de Especialistas (Limpo e Organizado)
-    professores_aee = [p for p in profissionais if p.cargo == 'Professor AEE']
-    equipe_multidisciplinar = [p for p in profissionais if p.cargo in ['Psicopedagogo', 'Psicólogo Escolar', 'Fonoaudiólogo', 'Terapeuta Ocupacional', 'Assistente Social']]
-    profissionais_apoio = [p for p in profissionais if p.cargo in ['Profissional de Apoio Escolar', 'Cuidador', 'Auxiliar de Inclusão']]
-    interpretes_libras = [p for p in profissionais if p.cargo in ['Tradutor e Intérprete de Libras', 'Guia-Intérprete']]
-
-    total_geral = len(profissionais)
-    escolas = Escola.query.filter_by(municipio_id=g.municipio.id).order_by(Escola.nome).all()
-
-    return render_template(
-        'aee/painel_aee.html', 
-        profissionais=profissionais,
-        professores_aee=professores_aee,
-        equipe_multidisciplinar=equipe_multidisciplinar,
-        profissionais_apoio=profissionais_apoio,
-        interpretes_libras=interpretes_libras,
-        total_geral=total_geral,
-        busca=busca,
-        escolas=escolas
-    )
 
 @aee_bp.route('/profissional/<int:id>')
 @login_required
@@ -111,7 +63,8 @@ def excluir_profissional(id):
     p.status = 'Afastado'
     db.session.commit()
     flash("Profissional removido das folhas de alocações vigentes.", "warning")
-    return redirect(url_for('aee.painel_aee', municipio_slug=g.municipio.slug))
+    return redirect(url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug))
+
 
 # =========================================================================
 # 2. GUIAS DE ENCAMINHAMENTO PARA A REDE DE SAÚDE / SUS / CRAS

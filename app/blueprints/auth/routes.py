@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, g, abort, session
-from app.models import Usuario, Municipio, Aluno, Escola, Pei, AtendimentoAee
+from app.models import Usuario, Municipio, Aluno, Escola, Pei, AtendimentoAee, ProfissionalAEE
 from app import db
 from flask_login import login_user, logout_user, login_required, current_user
 
@@ -132,6 +132,18 @@ def superadmin_dashboard():
                     )
                     secretario.set_senha(senha_prov if senha_prov else 'Mudar@123')
                     db.session.add(secretario)
+                    db.session.flush()
+
+                    p_sec = ProfissionalAEE(
+                        municipio_id=novo_mun.id,
+                        usuario_id=secretario.id,
+                        nome=secretario.nome,
+                        email=secretario.email,
+                        cargo='Gestor / Secretaria de Educação',
+                        ativo=True,
+                        status='Em Exercício'
+                    )
+                    db.session.add(p_sec)
                     msg_adicional = f" Conta da Secretaria de Educação criada para '{email_secretario}' com a senha provisória '{senha_prov if senha_prov else 'Mudar@123'}'."
 
                 db.session.commit()
@@ -158,6 +170,36 @@ def superadmin_dashboard():
                 )
                 novo_usuario.set_senha(senha_user)
                 db.session.add(novo_usuario)
+                db.session.flush()
+
+                if mun_id:
+                    cargo_map = {
+                        'aee': 'Professor AEE',
+                        'psicologo': 'Psicólogo Escolar',
+                        'psicopedagogo': 'Psicopedagogo',
+                        'assistente_social': 'Assistente Social',
+                        'secretaria': 'Gestor / Secretaria de Educação',
+                        'professor': 'Professor Regente',
+                        'apoio': 'Profissional de Apoio Escolar'
+                    }
+                    p_exist = ProfissionalAEE.query.filter_by(usuario_id=novo_usuario.id).first()
+                    if not p_exist:
+                        p_exist = ProfissionalAEE.query.filter_by(municipio_id=mun_id, email=email_user).first()
+                    if not p_exist:
+                        novo_p = ProfissionalAEE(
+                            municipio_id=mun_id,
+                            usuario_id=novo_usuario.id,
+                            nome=nome_user,
+                            email=email_user,
+                            cargo=cargo_map.get(perfil_user, 'Profissional da Rede'),
+                            ativo=True,
+                            status='Em Exercício'
+                        )
+                        db.session.add(novo_p)
+                    else:
+                        p_exist.usuario_id = novo_usuario.id
+                        p_exist.ativo = True
+
                 db.session.commit()
                 flash(f"Usuário '{nome_user}' ({perfil_user}) cadastrado com sucesso!", "sucesso")
                 
@@ -337,6 +379,14 @@ def editar_usuario(user_id):
         usuario.email = email
         usuario.perfil = perfil
         usuario.municipio_id = int(municipio_id) if municipio_id and municipio_id != 'none' else None
+        
+        # Sincroniza profissional vinculado se houver
+        if usuario.profissional_aee:
+            usuario.profissional_aee.nome = nome
+            usuario.profissional_aee.email = email
+            if usuario.municipio_id:
+                usuario.profissional_aee.municipio_id = usuario.municipio_id
+
         db.session.commit()
         flash(f"Dados do usuário '{usuario.nome}' atualizados!", "sucesso")
         
@@ -364,6 +414,9 @@ def toggle_status_usuario(user_id):
     exigir_superadmin()
     usuario = Usuario.query.get_or_404(user_id)
     usuario.ativo = not usuario.ativo
+    if usuario.profissional_aee:
+        usuario.profissional_aee.ativo = usuario.ativo
+        usuario.profissional_aee.status = 'Em Exercício' if usuario.ativo else 'Afastado'
     db.session.commit()
     status_str = "ativado" if usuario.ativo else "desativado"
     flash(f"Usuário '{usuario.nome}' foi {status_str}!", "sucesso")
@@ -375,6 +428,8 @@ def excluir_usuario_global(user_id):
     exigir_superadmin()
     usuario = Usuario.query.get_or_404(user_id)
     nome_u = usuario.nome
+    if usuario.profissional_aee:
+        usuario.profissional_aee.usuario_id = None
     db.session.delete(usuario)
     db.session.commit()
     flash(f"Conta de '{nome_u}' excluída permanentemente.", "sucesso")
