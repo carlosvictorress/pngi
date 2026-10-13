@@ -6,83 +6,82 @@
 {% block content %}
 <div class="space-y-6 pb-12 font-sans">
 
-    <!-- BANNER SUPERIOR DA LISTA DE ESPERA -->
-    <div class="bg-gradient-to-r from-amber-900 via-slate-900 to-yellow-950 rounded-3xl p-6 md:p-8 text-white shadow-xl relative overflow-hidden border border-amber-800/40">
-        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            <div class="space-y-2 max-w-2xl">
-                <div class="inline-flex items-center gap-2 bg-amber-500/20 text-amber-300 text-[10px] font-bold px-3 py-1 rounded-full border border-amber-400/30 uppercase tracking-widest">
-                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                    GESTÃO DE FLUXO & TRIAGEM DE VAGAS DA SALA DE RECURSOS
-                </div>
-                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight text-white">Lista de Espera da Sala de AEE</h1>
-                <p class="text-xs text-slate-300 leading-relaxed font-normal">
-                    Controle transparente de candidatos aguardando atendimento educacional especializado. 
-                    Ordene por prioridade, registre contatos telefônicos de responsáveis e convoque para triagem.
-                </p>
+    <!-- CABEÇALHO EXECUTIVO DA LISTA DE ESPERA -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="space-y-1.5 max-w-2xl">
+            <div class="inline-flex items-center gap-1.5 bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider">
+                <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                <span>Gestão de Fluxo & Triagem de Vagas da Sala de Recursos</span>
             </div>
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">Lista de Espera da Sala de AEE</h1>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                Controle transparente de candidatos aguardando atendimento educacional especializado. Ordene por prioridade, registre contatos telefônicos de responsáveis e convoque para triagem.
+            </p>
+        </div>
 
-            <div class="flex flex-wrap gap-2.5 shrink-0">
-                <button onclick="document.getElementById('modal-novo-espera').classList.remove('hidden')"
-                        class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 transform hover:scale-[1.02]">
-                    <span>➕</span> Cadastrar na Fila de Espera
-                </button>
+        <div class="flex flex-wrap gap-2.5 shrink-0">
+            <button onclick="document.getElementById('modal-novo-espera').classList.remove('hidden')"
+                    class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs transition-all inline-flex items-center gap-2">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                <span>Cadastrar na Fila de Espera</span>
+            </button>
 
-                <a href="{{ url_for('aee.sala_recursos', municipio_slug=g.municipio.slug) }}" 
-                   class="bg-white/10 hover:bg-white/20 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition-all border border-white/20 flex items-center gap-2">
-                    <span>🎒</span> Voltar à Sala de AEE
-                </a>
-            </div>
+            <a href="{{ url_for('aee.sala_recursos', municipio_slug=g.municipio.slug) }}" 
+               class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs transition-all inline-flex items-center gap-2">
+                <i data-lucide="blocks" class="w-4 h-4 text-slate-500"></i>
+                <span>Voltar à Sala de AEE</span>
+            </a>
         </div>
     </div>
 
     <!-- CARDS DE MÉTRICAS DA FILA -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div class="space-y-1">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Aguardando Vaga</span>
-                <div class="text-2xl font-black text-amber-600">{{ total_espera }}</div>
-                <span class="text-[10px] text-amber-700 font-semibold">Candidatos na fila ativa</span>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Aguardando Vaga</span>
+                <div class="text-2xl font-bold text-slate-900 font-mono">{{ total_espera }}</div>
+                <span class="text-[11px] text-amber-700 font-medium">Candidatos na fila ativa</span>
             </div>
-            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl font-bold">
-                ⏳
+            <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                <i data-lucide="hourglass" class="w-4 h-4"></i>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div class="space-y-1">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Chamados / Convocados</span>
-                <div class="text-2xl font-black text-blue-600">{{ total_chamados }}</div>
-                <span class="text-[10px] text-blue-700 font-semibold">Em processo de triagem</span>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Chamados / Convocados</span>
+                <div class="text-2xl font-bold text-slate-900 font-mono">{{ total_chamados }}</div>
+                <span class="text-[11px] text-orbi-blue font-medium">Em processo de triagem</span>
             </div>
-            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold">
-                📞
+            <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                <i data-lucide="phone-call" class="w-4 h-4"></i>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between">
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs flex items-center justify-between">
             <div class="space-y-1">
-                <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Matriculados no AEE</span>
-                <div class="text-2xl font-black text-emerald-600">{{ total_matriculados }}</div>
-                <span class="text-[10px] text-emerald-700 font-semibold">Vagas efetivadas na SRM</span>
+                <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Matriculados no AEE</span>
+                <div class="text-2xl font-bold text-slate-900 font-mono">{{ total_matriculados }}</div>
+                <span class="text-[11px] text-emerald-700 font-medium">Vagas efetivadas na SRM</span>
             </div>
-            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl font-bold">
-                🎓
+            <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                <i data-lucide="graduation-cap" class="w-4 h-4"></i>
             </div>
         </div>
     </div>
 
     <!-- FILTROS E BUSCA -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Buscar Candidato</label>
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Buscar Candidato</label>
                 <input type="text" name="busca" value="{{ busca }}" placeholder="Nome, CPF ou Telefone..."
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 transition-all">
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Status na Fila</label>
-                <select name="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Status na Fila</label>
+                <select name="status" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 transition-all">
                     <option value="">Todos os status</option>
                     <option value="Aguardando Vaga" {% if filtro_status == 'Aguardando Vaga' %}selected{% endif %}>Aguardando Vaga</option>
                     <option value="Chamado/Convocado" {% if filtro_status == 'Chamado/Convocado' %}selected{% endif %}>Chamado/Convocado</option>
@@ -92,9 +91,9 @@
                 </select>
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Prioridade</label>
-                <select name="prioridade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Prioridade</label>
+                <select name="prioridade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 transition-all">
                     <option value="">Todas as prioridades</option>
                     <option value="Alta / Urgente" {% if filtro_prioridade == 'Alta / Urgente' %}selected{% endif %}>Alta / Urgente</option>
                     <option value="Média" {% if filtro_prioridade == 'Média' %}selected{% endif %}>Média</option>
@@ -103,11 +102,12 @@
             </div>
 
             <div class="flex gap-2">
-                <button type="submit" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition-all shadow-sm">
-                    Filtrar Lista
+                <button type="submit" class="flex-1 bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold py-2.5 rounded-xl text-xs transition-all shadow-xs inline-flex items-center justify-center gap-1.5">
+                    <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                    <span>Filtrar Lista</span>
                 </button>
                 <a href="{{ url_for('aee.lista_espera', municipio_slug=g.municipio.slug) }}" 
-                   class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all text-center">
+                   class="px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 rounded-xl text-xs font-semibold transition-all text-center shadow-xs">
                     Limpar
                 </a>
             </div>
@@ -115,12 +115,13 @@
     </div>
 
     <!-- TABELA DA LISTA DE ESPERA -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
         <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-            <h2 class="text-sm font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-                <span>📋</span> Candidatos na Lista de Espera ({{ candidatos|length }})
+            <h2 class="text-sm font-bold text-slate-900 tracking-tight flex items-center gap-2">
+                <i data-lucide="clipboard-list" class="w-4 h-4 text-orbi-blue"></i>
+                <span>Candidatos na Lista de Espera ({{ candidatos|length }})</span>
             </h2>
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                 Ordenado por Prioridade e Data de Solicitação
             </span>
         </div>
@@ -128,7 +129,7 @@
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 text-[10px] font-bold uppercase tracking-widest text-slate-500 border-b border-slate-200">
+                    <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                         <th class="py-3 px-4">Candidato</th>
                         <th class="py-3 px-4">Telefone & Contato</th>
                         <th class="py-3 px-4">Escola / Série</th>
@@ -142,57 +143,61 @@
                     {% for c in candidatos %}
                     <tr class="hover:bg-slate-50/80 transition-colors">
                         <td class="py-3.5 px-4">
-                            <div class="font-extrabold text-slate-900 text-xs">{{ c.nome_completo }}</div>
-                            <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+                            <div class="font-bold text-slate-900 text-xs">{{ c.nome_completo }}</div>
+                            <div class="text-[11px] text-slate-400 font-mono mt-0.5">
                                 CPF: {{ c.cpf or 'Não informado' }} • Nasc: {{ c.data_nascimento or 'N/A' }}
                             </div>
                             {% if c.nome_responsavel %}
-                            <div class="text-[10px] text-slate-500 mt-0.5">
+                            <div class="text-[11px] text-slate-500 mt-0.5">
                                 <span class="font-semibold text-slate-600">Responsável:</span> {{ c.nome_responsavel }}
                             </div>
                             {% endif %}
                             {% if c.endereco %}
-                            <div class="text-[10px] text-slate-400 truncate max-w-xs mt-0.5">
-                                📍 {{ c.endereco }}
+                            <div class="text-[11px] text-slate-400 truncate max-w-xs mt-0.5 inline-flex items-center gap-1">
+                                <i data-lucide="map-pin" class="w-3 h-3 shrink-0"></i>
+                                <span class="truncate">{{ c.endereco }}</span>
                             </div>
                             {% endif %}
                         </td>
 
                         <td class="py-3.5 px-4 font-mono">
-                            <div class="font-bold text-slate-800">{{ c.telefone }}</div>
+                            <div class="font-semibold text-slate-800">{{ c.telefone }}</div>
                             <a href="https://wa.me/55{{ (c.telefone or '')|replace('(', '')|replace(')', '')|replace('-', '')|replace(' ', '') }}" target="_blank"
-                               class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 hover:text-emerald-700 mt-0.5">
-                                <span>💬</span> Enviar WhatsApp
+                               class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 mt-0.5 font-sans">
+                                <i data-lucide="message-circle" class="w-3 h-3"></i>
+                                <span>Enviar WhatsApp</span>
                             </a>
                         </td>
 
                         <td class="py-3.5 px-4">
-                            <span class="font-bold text-slate-800 block text-xs">{{ c.escola_origem or 'Não informada' }}</span>
-                            <span class="text-[10px] text-blue-600 font-semibold block mt-0.5">
+                            <span class="font-semibold text-slate-800 block text-xs">{{ c.escola_origem or 'Não informada' }}</span>
+                            <span class="text-[11px] text-orbi-blue font-medium block mt-0.5">
                                 Série: {{ c.ano_serie or 'A definir' }} • Turno: {{ c.turno_pretendido }}
                             </span>
                         </td>
 
                         <td class="py-3.5 px-4">
-                            <span class="text-xs text-slate-800 font-semibold block">{{ c.diagnostico_hipotese or 'Em triagem inicial' }}</span>
+                            <span class="text-xs text-slate-800 font-medium block">{{ c.diagnostico_hipotese or 'Em triagem inicial' }}</span>
                             {% if c.em_investigacao %}
-                            <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[9px] font-extrabold px-2 py-0.5 rounded border border-amber-200 mt-1">
-                                <span>🔍</span> Em Investigação
+                            <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-[10px] font-semibold px-2 py-0.5 rounded-md border border-amber-200/70 mt-1">
+                                <i data-lucide="search" class="w-3 h-3"></i>
+                                <span>Em Investigação</span>
                             </span>
                             {% endif %}
                         </td>
 
                         <td class="py-3.5 px-4 text-center">
                             {% if c.prioridade == 'Alta / Urgente' %}
-                            <span class="bg-rose-100 text-rose-800 text-[10px] font-black px-2.5 py-1 rounded-full border border-rose-200">
-                                🚨 Alta / Urgente
+                            <span class="bg-rose-50 text-rose-700 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-rose-200/80 inline-flex items-center gap-1">
+                                <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                                <span>Alta / Urgente</span>
                             </span>
                             {% elif c.prioridade == 'Média' %}
-                            <span class="bg-amber-100 text-amber-800 text-[10px] font-black px-2.5 py-1 rounded-full border border-amber-200">
+                            <span class="bg-amber-50 text-amber-800 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-amber-200/80">
                                 Média
                             </span>
                             {% else %}
-                            <span class="bg-slate-100 text-slate-600 text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                            <span class="bg-slate-100 text-slate-600 text-[11px] font-medium px-2.5 py-1 rounded-full">
                                 Baixa
                             </span>
                             {% endif %}
@@ -201,9 +206,9 @@
                         <td class="py-3.5 px-4 text-center">
                             <form action="{{ url_for('aee.alterar_status_espera', municipio_slug=g.municipio.slug, id=c.id) }}" method="POST">
                                 <select name="novo_status" onchange="this.form.submit()"
-                                        class="text-[10px] font-bold rounded-lg px-2 py-1 border outline-none cursor-pointer
+                                        class="text-[11px] font-semibold rounded-lg px-2.5 py-1 border outline-none cursor-pointer
                                         {% if c.status == 'Aguardando Vaga' %}bg-amber-50 text-amber-800 border-amber-200
-                                        {% elif c.status == 'Chamado/Convocado' %}bg-blue-50 text-blue-800 border-blue-200
+                                        {% elif c.status == 'Chamado/Convocado' %}bg-orbi-50 text-orbi-blue border-orbi-200
                                         {% elif c.status == 'Matriculado no AEE' %}bg-emerald-50 text-emerald-800 border-emerald-200
                                         {% else %}bg-slate-50 text-slate-700 border-slate-200{% endif %}">
                                     <option value="Aguardando Vaga" {% if c.status == 'Aguardando Vaga' %}selected{% endif %}>Aguardando Vaga</option>
@@ -218,8 +223,8 @@
                         <td class="py-3.5 px-4 text-right">
                             <form action="{{ url_for('aee.excluir_espera', municipio_slug=g.municipio.slug, id=c.id) }}" method="POST"
                                   onsubmit="return confirm('Tem certeza que deseja remover este candidato da lista de espera?');" class="inline">
-                                <button type="submit" class="text-rose-500 hover:text-rose-700 p-1 font-bold text-xs" title="Remover da Lista">
-                                    🗑️
+                                <button type="submit" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors" title="Remover da Lista">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </form>
                         </td>
@@ -239,95 +244,102 @@
 </div>
 
 <!-- MODAL: CADASTRAR NA LISTA DE ESPERA -->
-<div id="modal-novo-espera" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-xl w-full p-6 md:p-8 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-                <h3 class="text-base font-black text-slate-900 tracking-tight">Cadastrar na Lista de Espera AEE</h3>
-                <p class="text-xs text-slate-400">Inserção de candidato na fila de triagem da Sala de Recursos</p>
+<div id="modal-novo-espera" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto space-y-5">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center">
+                    <i data-lucide="user-plus" class="w-4 h-4"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 tracking-tight">Cadastrar na Lista de Espera AEE</h3>
+                    <p class="text-[11px] text-slate-500">Inserção de candidato na fila de triagem da Sala de Recursos</p>
+                </div>
             </div>
             <button onclick="document.getElementById('modal-novo-espera').classList.add('hidden')"
-                    class="text-slate-400 hover:text-slate-600 font-black text-xl leading-none">✕</button>
+                    class="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
         </div>
 
-        <form action="{{ url_for('aee.lista_espera', municipio_slug=g.municipio.slug) }}" method="POST" class="space-y-3.5">
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Nome Completo do Candidato *</label>
+        <form action="{{ url_for('aee.lista_espera', municipio_slug=g.municipio.slug) }}" method="POST" class="space-y-3.5 text-xs">
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold text-slate-700 block">Nome Completo do Candidato *</label>
                 <input type="text" name="nome_completo" required placeholder="Nome completo da criança/estudante..."
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                       class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Data de Nascimento *</label>
+            <div class="grid grid-cols-2 gap-3.5">
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-700 block">Data de Nascimento *</label>
                     <input type="date" name="data_nascimento" required
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                           class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">CPF</label>
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-700 block">CPF</label>
                     <input type="text" name="cpf" placeholder="000.000.000-00"
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                           class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Número de Telefone / WhatsApp *</label>
+            <div class="grid grid-cols-2 gap-3.5">
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-700 block">Número de Telefone / WhatsApp *</label>
                     <input type="text" name="telefone" required placeholder="(86) 99999-9999"
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                           class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Nome do Responsável</label>
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-700 block">Nome do Responsável</label>
                     <input type="text" name="nome_responsavel" placeholder="Mãe, pai ou tutor legal..."
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                           class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Escola de Origem</label>
+            <div class="grid grid-cols-2 gap-3.5">
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-700 block">Escola de Origem</label>
                     <input type="text" name="escola_origem" placeholder="Nome da escola..."
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                           class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Ano / Série Escolar</label>
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-700 block">Ano / Série Escolar</label>
                     <input type="text" name="ano_serie" placeholder="Ex: 2º Ano Fundamental..."
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                           class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
                 </div>
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Endereço Residencial</label>
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold text-slate-700 block">Endereço Residencial</label>
                 <input type="text" name="endereco" placeholder="Rua, número, bairro..."
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                       class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Diagnóstico ou Suspeita Clínica (CID ou Investigação)</label>
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold text-slate-700 block">Diagnóstico ou Suspeita Clínica (CID ou Investigação)</label>
                 <input type="text" name="diagnostico_hipotese" placeholder="Ex: TEA, TDAH, Deficiência Intelectual, Transtorno de Linguagem..."
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                       class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2.5 p-3 bg-amber-50/60 border border-amber-200/70 rounded-xl">
                 <input type="checkbox" id="check-invest-espera" name="em_investigacao" value="true"
-                       class="w-4 h-4 text-amber-600 rounded border-slate-300">
-                <label for="check-invest-espera" class="text-xs font-bold text-amber-800 cursor-pointer">
+                       class="w-4 h-4 text-orbi-blue rounded border-slate-300">
+                <label for="check-invest-espera" class="text-xs font-semibold text-amber-900 cursor-pointer">
                     Estudante em Investigação Diagnóstica (sem laudo definitivo ainda)
                 </label>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Prioridade na Fila</label>
-                    <select name="prioridade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
-                        <option value="Alta / Urgente">🚨 Alta / Urgente (Demanda severa)</option>
+            <div class="grid grid-cols-2 gap-3.5">
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-700 block">Prioridade na Fila</label>
+                    <select name="prioridade" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
+                        <option value="Alta / Urgente">Alta / Urgente (Demanda severa)</option>
                         <option value="Média" selected>Média (Fluxo regular)</option>
                         <option value="Baixa">Baixa (Observação)</option>
                     </select>
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Turno de Preferência</label>
-                    <select name="turno_pretendido" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-amber-500">
+                <div class="space-y-1.5">
+                    <label class="text-[11px] font-semibold text-slate-700 block">Turno de Preferência</label>
+                    <select name="turno_pretendido" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15">
                         <option value="Contraturno" selected>Contraturno Escolar</option>
                         <option value="Manhã">Manhã</option>
                         <option value="Tarde">Tarde</option>
@@ -335,20 +347,21 @@
                 </div>
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Observações da Triagem</label>
+            <div class="space-y-1.5">
+                <label class="text-[11px] font-semibold text-slate-700 block">Observações da Triagem</label>
                 <textarea name="observacoes_triagem" rows="2" placeholder="Queixas da escola ou família, encaminhamentos prévios..."
-                          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                          class="w-full bg-white border border-slate-300 rounded-xl p-3 text-xs outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15"></textarea>
             </div>
 
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+            <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
                 <button type="button" onclick="document.getElementById('modal-novo-espera').classList.add('hidden')"
-                        class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">
+                        class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 rounded-xl text-xs font-semibold transition-all">
                     Cancelar
                 </button>
                 <button type="submit"
-                        class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-sm">
-                    Salvar na Lista de Espera
+                        class="px-5 py-2.5 bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold rounded-xl text-xs transition-all shadow-xs inline-flex items-center gap-2">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Salvar na Lista de Espera</span>
                 </button>
             </div>
         </form>

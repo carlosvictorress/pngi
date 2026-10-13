@@ -1,165 +1,218 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Operacional — Prefeitura de {{ municipio.nome }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['-apple-system', 'BlinkMacSystemFont', 'sans-serif'] },
-                    colors: { apple: { blue: '#0066cc', dark: '#1d1d1f', light: '#86868b', gray: '#f5f5f7', border: '#e8e8ed' } }
-                }
-            }
-        }
-    </script>
-</head>
-<body class="bg-apple-gray text-apple-dark min-h-screen flex flex-col font-sans antialiased">
+{% extends 'base.html' %}
 
-    <header class="border-b border-apple-border py-4 px-6 md:px-12 bg-white sticky top-0 z-50 shadow-sm">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
+{% block title %}Painel Operacional — Prefeitura de {{ municipio.nome }}{% endblock %}
+{% block header_title %}Visão Geral do Município — {{ municipio.nome }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8 pb-8">
+
+    <!-- CABEÇALHO EXECUTIVO DO MUNICÍPIO -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+        <div class="flex items-start sm:items-center gap-4">
+            <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-center shrink-0 p-2 shadow-xs">
                 {% if municipio.brasao_url %}
-                    <img src="{{ municipio.brasao_url }}" class="w-7 h-7 object-contain" alt="Brasão">
+                    <img src="{{ municipio.brasao_url }}" class="w-full h-full object-contain" alt="Brasão de {{ municipio.nome }}">
                 {% else %}
-                    <div class="w-7 h-7 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-xs">🏛️</div>
+                    <i data-lucide="landmark" class="w-6 h-6 text-orbi-blue"></i>
                 {% endif %}
-                <div>
-                    <span class="font-semibold text-sm block">Prefeitura de {{ municipio.nome }}</span>
-                    <span class="text-[10px] text-apple-light block -mt-0.5">Gestão Municipal da Educação Inclusiva</span>
-                </div>
             </div>
-            
-            <div class="flex items-center gap-4">
-                {% if current_user.perfil == 'superadmin' %}
-                    <span class="text-[11px] bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-1 rounded-full font-medium">Modo SuperAdmin</span>
-                    <a href="/auth/admin-global" class="text-xs text-apple-blue hover:underline font-medium">&larr; Voltar à Central</a>
-                {% else %}
-                    <span class="text-xs text-apple-light font-medium">Servidor: <b class="text-apple-dark">{{ current_user.nome }}</b> (<span class="uppercase font-mono text-[10px] text-purple-700 font-bold">{{ current_user.perfil }}</span>)</span>
-                    <a href="/auth/logout" class="text-xs text-red-500 hover:underline font-medium">Sair</a>
-                {% endif %}
+            <div class="space-y-1">
+                <div class="inline-flex items-center gap-1.5 bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider">
+                    <span class="w-1.5 h-1.5 rounded-full bg-orbi-blue"></span>
+                    <span>Gestão Municipal da Educação Especial</span>
+                </div>
+                <h2 class="text-xl md:text-2xl font-bold text-slate-900 tracking-tight">Prefeitura de {{ municipio.nome }} — {{ municipio.estado }}</h2>
+                <p class="text-xs text-slate-500">Panorama consolidado da rede de ensino, prontuários ativos, planos educacionais e serviços especializados.</p>
             </div>
         </div>
-    </header>
 
-    <main class="flex-grow max-w-6xl mx-auto w-full px-6 md:px-12 py-10 space-y-8">
-        
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="space-y-1">
-                <h1 class="text-xl font-semibold tracking-tight">Visão Geral do Município</h1>
-                <p class="text-xs text-apple-light">Dados consolidados da rede de ensino de {{ municipio.nome }} — {{ municipio.estado }}.</p>
-            </div>
+        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+            {% if current_user.perfil == 'superadmin' %}
+            <a href="/auth/admin-global" class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition-all">
+                <i data-lucide="arrow-left" class="w-4 h-4 text-slate-500"></i>
+                <span>Voltar à Central Mestre</span>
+            </a>
+            {% endif %}
 
             {% if current_user.perfil in ['secretaria', 'superadmin'] %}
-            <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=municipio.slug) }}" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-sm transition-all">
-                👥 Quadro de Profissionais & Especialistas
+            <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=municipio.slug) }}" class="inline-flex items-center gap-2 bg-orbi-blue hover:bg-orbi-blue-hover text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-xs transition-all">
+                <i data-lucide="users" class="w-4 h-4"></i>
+                <span>Quadro de Profissionais</span>
             </a>
             {% endif %}
         </div>
+    </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            
-            <!-- ALUNOS PCD (Central) -->
-            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] uppercase font-semibold text-apple-light tracking-wider">Alunos Inclusivos</span>
-                    <div class="text-3xl font-light mt-1 text-apple-dark">
-                        {{ total_alunos }}
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <a href="/{{ municipio.slug }}/alunos/" class="text-xs text-apple-blue hover:underline font-medium">Gerenciar Alunos &rarr;</a>
+    <!-- INDICADORES EXECUTIVOS (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <!-- ALUNOS INCLUSIVOS -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-slate-500">Alunos Inclusivos</span>
+                <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center">
+                    <i data-lucide="graduation-cap" class="w-4 h-4"></i>
                 </div>
             </div>
-
-            <!-- ESCOLAS (Infraestrutura) -->
-            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] uppercase font-semibold text-apple-light tracking-wider">Escolas Monitoradas</span>
-                    <div class="text-3xl font-light mt-1 text-apple-dark">{{ total_escolas }}</div>
-                </div>
-                <div class="mt-4">
-                    <a href="/{{ municipio.slug }}/escolas/" class="text-xs text-apple-blue hover:underline font-medium">Rede Escolar &rarr;</a>
+            <div class="mt-3">
+                <div class="text-3xl font-bold text-slate-900 font-mono tracking-tight">{{ total_alunos }}</div>
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">Prontuários Censo MEC</span>
+                    <a href="/{{ municipio.slug }}/alunos/" class="inline-flex items-center gap-1 text-xs font-semibold text-orbi-blue hover:text-orbi-blue-hover">
+                        <span>Gerenciar</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
                 </div>
             </div>
+        </div>
 
-            <!-- ATENDIMENTOS SOAP / EQUIPE MULTI (Se ativo) -->
-            {% if not municipio or municipio.modulo_equipe_multi %}
-            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] uppercase font-semibold text-purple-600 tracking-wider">Atendimentos SOAP (Multi)</span>
-                    <div class="text-3xl font-light mt-1 text-purple-700">
-                        {{ total_equipe }}
-                    </div>
+        <!-- ESCOLAS MONITORADAS -->
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-slate-500">Escolas Monitoradas</span>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <i data-lucide="school" class="w-4 h-4"></i>
                 </div>
-                <div class="mt-4 flex items-center justify-between">
-                    <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=municipio.slug) }}" class="text-xs text-purple-700 hover:underline font-medium">Atendimento SOAP &rarr;</a>
+            </div>
+            <div class="mt-3">
+                <div class="text-3xl font-bold text-slate-900 font-mono tracking-tight">{{ total_escolas }}</div>
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">Unidades na rede</span>
+                    <a href="/{{ municipio.slug }}/escolas/" class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 hover:text-emerald-700">
+                        <span>Rede Escolar</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- PEI INTELIGENTE -->
+        {% if not municipio or municipio.modulo_pei %}
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-slate-500">PEI Inteligente (IA)</span>
+                <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-3xl font-bold text-slate-900 font-mono tracking-tight">{{ total_peis }}</div>
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">Planos emitidos</span>
+                    <a href="/{{ municipio.slug }}/pei/" class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+                        <span>Planos PEI</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- EQUIPE & ATENDIMENTOS SOAP -->
+        {% if not municipio or municipio.modulo_equipe_multi %}
+        <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-medium text-slate-500">Equipe & Operadores</span>
+                <div class="w-9 h-9 rounded-xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center">
+                    <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                </div>
+            </div>
+            <div class="mt-3">
+                <div class="text-3xl font-bold text-slate-900 font-mono tracking-tight">{{ total_equipe }}</div>
+                <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=municipio.slug) }}" class="inline-flex items-center gap-1 text-xs font-semibold text-purple-600 hover:text-purple-700">
+                        <span>Atendimento SOAP</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
                     {% if current_user.perfil in ['secretaria', 'superadmin'] %}
-                        <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=municipio.slug) }}" class="text-[10px] text-slate-400 hover:underline">Quadro Geral</a>
+                    <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=municipio.slug) }}" class="text-[11px] font-medium text-slate-400 hover:text-slate-600">Quadro Geral</a>
                     {% endif %}
                 </div>
             </div>
-            {% endif %}
+        </div>
+        {% endif %}
 
-            <!-- PEIS EMITIDOS (Se ativo) -->
-            {% if not municipio or municipio.modulo_pei %}
-            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] uppercase font-semibold text-blue-600 tracking-wider">PEI Inteligente (IA)</span>
-                    <div class="text-3xl font-light mt-1 text-apple-dark">{{ total_peis }}</div>
-                </div>
-                <div class="mt-4">
-                    <a href="/{{ municipio.slug }}/pei/" class="text-xs text-apple-blue hover:underline font-medium">Planos PEI &rarr;</a>
-                </div>
+    </div>
+
+    <!-- MÓDULOS OPERACIONAIS ATIVOS -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 tracking-tight">Módulos Operacionais da Rede</h3>
+                <p class="text-xs text-slate-500">Acesso direto aos ambientes especializados contratados pelo município.</p>
             </div>
-            {% endif %}
+        </div>
 
-            <!-- SALA DE RECURSOS / AEE (Se ativo) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            
+            <!-- SALA DE RECURSOS / AEE -->
             {% if not municipio or municipio.modulo_aee %}
-            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] uppercase font-semibold text-emerald-600 tracking-wider">Sala de Recursos (SRM)</span>
-                    <div class="text-sm font-semibold text-slate-800 mt-2">Atendimentos AEE</div>
-                    <p class="text-[10px] text-slate-400 mt-0.5">Prontuário e Fila de Espera</p>
+            <a href="{{ url_for('aee.sala_recursos', municipio_slug=municipio.slug) }}" class="group bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-orbi-blue/50 hover:shadow-card transition-all flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center">
+                            <i data-lucide="blocks" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 rounded-md">SRM / AEE</span>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 group-hover:text-orbi-blue transition-colors">Sala de Recursos Multifuncionais</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Prontuário pedagógico individual, registro de sessões, assiduidade e fila de espera municipal.</p>
+                    </div>
                 </div>
-                <div class="mt-4">
-                    <a href="{{ url_for('aee.sala_recursos', municipio_slug=municipio.slug) }}" class="text-xs text-emerald-700 hover:underline font-medium">Acessar SRM &rarr;</a>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-700 group-hover:text-orbi-blue">
+                    <span>Acessar Sala de Recursos</span>
+                    <i data-lucide="arrow-up-right" class="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"></i>
                 </div>
-            </div>
+            </a>
             {% endif %}
 
-            <!-- TRANSPORTE INCLUSIVO (Se ativo) -->
+            <!-- TRANSPORTE INCLUSIVO -->
             {% if not municipio or municipio.modulo_transporte %}
-            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] uppercase font-semibold text-amber-600 tracking-wider">Transporte Inclusivo</span>
-                    <div class="text-sm font-semibold text-slate-800 mt-2">Logística & Rotas</div>
-                    <p class="text-[10px] text-slate-400 mt-0.5">Veículos adaptados e monitores</p>
+            <a href="/{{ municipio.slug }}/transporte/" class="group bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-orbi-blue/50 hover:shadow-card transition-all flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center">
+                            <i data-lucide="bus" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/60 px-2.5 py-0.5 rounded-md">Logística & Frota</span>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 group-hover:text-orbi-blue transition-colors">Transporte Escolar Adaptado</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Controle de rotas acessíveis, veículos com elevador, monitores de itinerário e relatório Fundeb.</p>
+                    </div>
                 </div>
-                <div class="mt-4">
-                    <a href="/{{ municipio.slug }}/transporte/" class="text-xs text-amber-700 hover:underline font-medium">Rotas & Veículos &rarr;</a>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-700 group-hover:text-orbi-blue">
+                    <span>Gerenciar Rotas e Veículos</span>
+                    <i data-lucide="arrow-up-right" class="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"></i>
                 </div>
-            </div>
+            </a>
             {% endif %}
 
-            <!-- BLINDAGEM JURÍDICA (Se ativo e perfil autorizado) -->
+            <!-- BLINDAGEM JURÍDICA -->
             {% if (not municipio or municipio.modulo_blindagem_juridica) and current_user.perfil in ['secretaria', 'superadmin'] %}
-            <div class="bg-white border border-apple-border rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <span class="text-[10px] uppercase font-semibold text-amber-700 tracking-wider">Blindagem Jurídica</span>
-                    <div class="text-sm font-semibold text-slate-800 mt-2">Conformidade Legal</div>
-                    <p class="text-[10px] text-slate-400 mt-0.5">Gestão de TACs e Notificações MP</p>
+            <a href="{{ url_for('core.dashboard_blindagem', municipio_slug=municipio.slug) }}" class="group bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-orbi-blue/50 hover:shadow-card transition-all flex flex-col justify-between">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="w-10 h-10 rounded-xl bg-sky-50 border border-sky-100 text-orbi-blue flex items-center justify-center">
+                            <i data-lucide="shield-check" class="w-5 h-5"></i>
+                        </div>
+                        <span class="text-[11px] font-semibold text-sky-700 bg-sky-50 border border-sky-200/60 px-2.5 py-0.5 rounded-md">Compliance Legal</span>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 group-hover:text-orbi-blue transition-colors">Blindagem Jurídica & MP</h4>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Emissão de dossiês para o Ministério Público, dimensionamento de apoios (LBI) e espelho INEP.</p>
+                    </div>
                 </div>
-                <div class="mt-4">
-                    <a href="{{ url_for('core.dashboard_blindagem', municipio_slug=municipio.slug) }}" class="text-xs text-amber-700 hover:underline font-medium">Monitorar TACs &rarr;</a>
+                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-700 group-hover:text-orbi-blue">
+                    <span>Monitorar Conformidade</span>
+                    <i data-lucide="arrow-up-right" class="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"></i>
                 </div>
-            </div>
+            </a>
             {% endif %}
 
         </div>
+    </div>
 
-    </main> 
-</body>
-</html>
+</div>
+{% endblock %}

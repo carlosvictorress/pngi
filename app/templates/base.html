@@ -3,242 +3,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Gestoor 360{% endblock %} — {{ g.municipio.nome }}</title>
+    <title>{% block title %}ORBI — Gestão da Educação Especial{% endblock %} — {{ g.municipio.nome if g.municipio else 'Portal' }}</title>
+    
     <!-- PWA METADATA & MANIFEST -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#2563EB">
+    <meta name="theme-color" content="#0A2540">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Gestoor 360">
-    <link rel="apple-touch-icon" href="/static/img/icon-192.png">
+    <meta name="apple-mobile-web-app-title" content="ORBI">
+    <link rel="apple-touch-icon" href="/static/img/logo.jpeg">
+    <link rel="icon" type="image/jpeg" href="/static/img/logo.jpeg">
+
+    <!-- GOOGLE FONTS: PLUS JAKARTA SANS, INTER & JETBRAINS MONO -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- TAILWIND CSS & CHOICES.JS & LUCIDE ICONS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: {
-                        sans: ['Inter', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+                        sans: ['"Plus Jakarta Sans"', 'Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
                     },
                     colors: {
+                        orbi: {
+                            navy: '#0A2540',
+                            'navy-dark': '#061729',
+                            blue: '#0084CE',
+                            'blue-hover': '#006DAE',
+                            'blue-light': '#E0F0FE',
+                            orange: '#F28E13',
+                            green: '#16A34A',
+                            purple: '#6B3FA0',
+                            50: '#F0F7FF',
+                            100: '#E0F0FE',
+                            200: '#BAE0FD',
+                            500: '#0084CE',
+                            600: '#0070B0',
+                            700: '#0A2540',
+                            800: '#071B30',
+                            900: '#04101D'
+                        },
                         gov: {
-                            navy: '#0A192F',
-                            blue: '#1351B4',
-                            green: '#00A859',
-                            yellow: '#FFCD00',
-                            dark: '#1E293B',
+                            navy: '#0A2540',
+                            blue: '#0084CE',
+                            green: '#16A34A',
+                            yellow: '#F59E0B',
+                            dark: '#0F172A',
                             light: '#64748B',
                             bg: '#F8FAFC'
+                        },
+                        brand: {
+                            50: '#F0F7FF',
+                            100: '#E0F0FE',
+                            200: '#BAE0FD',
+                            500: '#0084CE',
+                            600: '#0070B0',
+                            700: '#0369A1',
+                            800: '#075985',
+                            900: '#0A2540'
                         }
                     },
                     boxShadow: {
-                        glow: '0 0 20px rgba(19, 81, 180, 0.3)',
-                        card: '0 10px 30px -5px rgba(0, 0, 0, 0.1)'
+                        'xs': '0 1px 2px 0 rgba(15, 23, 42, 0.04)',
+                        'card': '0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.04)',
+                        'elevated': '0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04)',
+                        'glow': '0 0 20px rgba(0, 132, 206, 0.25)'
                     }
                 }
             }
         }
     </script>
+
     <style>
-        /* CSS de Acessibilidade com Escopo Adaptado para Não Quebrar o Layout */
-        .alto-contraste {
+        /* Acessibilidade WCAG — Alto Contraste */
+        .alto-contraste,
+        .alto-contraste body {
             background-color: #000000 !important;
-            color: #ffff00 !important;
+            color: #FFFF00 !important;
         }
         .alto-contraste * {
             background-color: #000000 !important;
-            color: #ffff00 !important;
-            border-color: #ffff00 !important;
+            color: #FFFF00 !important;
+            border-color: #FFFF00 !important;
+            box-shadow: none !important;
         }
-        /* Ajustes para manter o estilo minimalista no Choices.js */
-        .choices__inner {
-            background-color: #F8FAFC !important; 
-            border-radius: 0.5rem !important; 
-            border: 1px solid #E2E8F0 !important; 
-            padding: 6px 12px !important;
-            min-height: 42px;
-            font-size: 12px;
-            color: #1E293B !important;
-            transition: all 0.2s ease;
-        }
-        .choices__inner:focus-within {
-            border-color: #1351B4 !important;
-            box-shadow: 0 0 0 2px rgba(19, 81, 180, 0.1) !important;
-        }
-        .choices__list--dropdown { border-radius: 0.5rem !important; box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.1) !important; border: 1px solid #E2E8F0 !important; }
-        .choices__item--selectable { font-weight: 500 !important; font-size: 12px !important; }
-        .choices__input { background-color: transparent !important; font-size: 12px !important; color: #1E293B !important; }
-        .choices[data-type*="select-one"]::after { border-color: #64748B transparent transparent transparent !important; }
-        
-        /* Suavização de renderização de fontes */
+
+        /* Tipografia & Suavização Global */
         body {
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            background-color: #F8FAFC;
+            color: #0F172A;
+        }
+
+        /* Customização Elegante para Choices.js */
+        .choices {
+            margin-bottom: 0 !important;
+        }
+        .choices__inner {
+            background-color: #FFFFFF !important;
+            border-radius: 0.75rem !important;
+            border: 1px solid #CBD5E1 !important;
+            padding: 6px 12px !important;
+            min-height: 40px !important;
+            font-size: 0.8125rem !important;
+            color: #0F172A !important;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.03) !important;
+        }
+        .choices__inner:focus-within,
+        .is-focused .choices__inner,
+        .is-open .choices__inner {
+            border-color: #0084CE !important;
+            box-shadow: 0 0 0 3px rgba(0, 132, 206, 0.12) !important;
+        }
+        .choices__list--dropdown {
+            border-radius: 0.75rem !important;
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12) !important;
+            border: 1px solid #E2E8F0 !important;
+            margin-top: 4px !important;
+            z-index: 50 !important;
+        }
+        .choices__item--selectable {
+            font-weight: 500 !important;
+            font-size: 0.8125rem !important;
+            padding: 8px 12px !important;
+        }
+        .choices__item--selectable.is-highlighted {
+            background-color: #F0F7FF !important;
+            color: #0084CE !important;
+        }
+        .choices__input {
+            background-color: transparent !important;
+            font-size: 0.8125rem !important;
+            color: #0F172A !important;
+        }
+        .choices[data-type*="select-one"]::after {
+            border-color: #64748B transparent transparent transparent !important;
+        }
+
+        /* Scrollbar Discreta */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+        /* Sidebar Scrollbar */
+        #sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        #sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 9999px; }
+
+        /* Otimização Global de Impressão */
+        @media print {
+            aside, header, footer, #mobile-bottom-nav, #mobile-top-bar, .no-print {
+                display: none !important;
+            }
+            #app-shell {
+                padding-left: 0 !important;
+            }
+            main#conteudo-principal {
+                padding: 0 !important;
+            }
+            body {
+                background: #FFFFFF !important;
+            }
         }
     </style>
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gov-bg text-gov-dark min-h-screen flex font-sans {% if session.get('impersonator_id') %}pt-10{% endif %}">
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex font-sans selection:bg-orbi-blue selection:text-white {% if session.get('impersonator_id') %}pt-10{% endif %}">
 
     {% if session.get('impersonator_id') %}
     <!-- BANNER FIXO DE IMPERSONAÇÃO DO SUPERADMIN -->
-    <div class="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-slate-900 px-4 py-2 text-xs font-bold flex items-center justify-between shadow-lg border-b border-amber-600">
+    <div class="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-slate-950 px-4 py-2 text-xs font-semibold flex items-center justify-between shadow-sm border-b border-amber-600/30 no-print">
         <div class="flex items-center gap-2">
-            <span class="text-base animate-bounce">🎭</span>
-            <span>MODO IMPERSONAÇÃO ATIVO: Você está navegando como <u>{{ current_user.nome }}</u> ({{ current_user.perfil.upper() }})</span>
+            <i data-lucide="user-check" class="w-4 h-4 text-slate-950"></i>
+            <span>Modo Impersonação Ativo: Navegando como <strong class="underline">{{ current_user.nome }}</strong> ({{ current_user.perfil.upper() }})</span>
         </div>
-        <a href="{{ url_for('auth.parar_impersonacao') }}" class="bg-slate-900 hover:bg-black text-white px-3 py-1 rounded-lg font-bold text-[11px] transition-all shadow border border-white/20 flex items-center gap-1.5">
-            <span>🔙</span> Sair do Modo Impersonação & Voltar ao SuperAdmin
+        <a href="{{ url_for('auth.parar_impersonacao') }}" class="bg-slate-950 hover:bg-slate-800 text-white px-3 py-1 rounded-lg font-semibold text-[11px] transition-all flex items-center gap-1.5">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+            <span>Voltar ao Painel Mestre</span>
         </a>
     </div>
     {% endif %}
 
-    <aside class="w-64 bg-gov-navy text-slate-300 flex flex-col justify-between fixed inset-y-0 left-0 z-40 border-r border-white/5 hidden md:flex shadow-xl">
-        <div class="flex flex-col">
-            <div class="p-6 border-b border-white/10 flex items-center gap-3.5">
-                <div class="w-9 h-9 bg-gradient-to-br from-gov-blue to-blue-600 border border-white/20 text-white rounded-lg flex flex-col items-center justify-center shadow-glow">
-                    <span class="font-bold text-[10px] tracking-tighter">GOV</span>
-                    <span class="font-semibold text-[7px] -mt-1 text-gov-yellow">360</span>
+    <!-- SIDEBAR EXECUTIVA ORBI (DESKTOP) -->
+    <aside class="w-64 bg-[#0A2540] text-slate-300 flex flex-col justify-between fixed inset-y-0 left-0 z-40 border-r border-slate-800/80 hidden md:flex select-none no-print {% if session.get('impersonator_id') %}top-10{% endif %}">
+        
+        <!-- TOPO: IDENTIDADE ORBI -->
+        <div class="h-16 px-5 border-b border-white/[0.08] flex items-center justify-between shrink-0">
+            <a href="/{{ g.municipio.slug }}/dashboard" class="flex items-center gap-3 group">
+                <div class="w-9 h-9 bg-white rounded-xl p-1 flex items-center justify-center shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+                    <img src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="ORBI" class="w-full h-full object-contain rounded-lg">
                 </div>
-                <div class="tracking-tight">
-                    <span class="font-semibold text-white block text-sm tracking-wide">Gestoor 360</span>
-                    <span class="text-[9px] text-blue-300 font-medium tracking-widest uppercase block mt-0.5">Educação Inclusiva</span>
+                <div class="leading-tight">
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-extrabold text-white text-base tracking-tight">ORBI</span>
+                        <span class="text-[9px] font-mono font-semibold bg-orbi-blue/20 text-sky-300 border border-orbi-blue/30 px-1.5 py-0.5 rounded">GOV</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-medium block truncate max-w-[140px]">{{ g.municipio.nome if g.municipio else 'Educação Inclusiva' }}</span>
                 </div>
-            </div>
+            </a>
+        </div>
 
-            <nav class="p-5 space-y-1.5" id="nav-lateral">
-                <a href="/{{ g.municipio.slug }}/dashboard" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
-                   <span class="opacity-80">📊</span> Dashboard Municipal
-                </a>
+        <!-- NAVEGAÇÃO CATEGORIZADA -->
+        <div id="sidebar-scroll" class="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+            <nav id="nav-lateral" class="space-y-5">
                 
-                {% if not g.municipio or g.municipio.modulo_pei %}
-                <a href="{{ url_for('pei.dashboard_secretaria', municipio_slug=g.municipio.slug) }}" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
-                   <span class="opacity-80">🏢</span> Painel da Secretaria
-                </a>
-                {% endif %}
+                <!-- GRUPO 1: GOVERNANÇA & REDE -->
+                <div class="space-y-1">
+                    <span class="px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400/70 block mb-1.5">Governança & Rede</span>
+                    
+                    <a href="/{{ g.municipio.slug }}/dashboard"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Visão Geral</span>
+                    </a>
 
-                {% if (not g.municipio or g.municipio.modulo_blindagem_juridica) and current_user.perfil in ['secretaria', 'superadmin'] %}
-                <a href="{{ url_for('core.dashboard_blindagem', municipio_slug=g.municipio.slug) }}" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-amber-400 hover:bg-white/10 hover:text-amber-300 transition-all link-menu-nav">
-                   <span>🛡️</span> Blindagem Jurídica & MP
-                </a>
-                {% endif %}
+                    {% if not g.municipio or g.municipio.modulo_pei %}
+                    <a href="{{ url_for('pei.dashboard_secretaria', municipio_slug=g.municipio.slug) }}"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="bar-chart-3" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Painel da Secretaria</span>
+                    </a>
+                    {% endif %}
 
-                {% if current_user.perfil in ['secretaria', 'superadmin'] %}
-                <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug) }}" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-sky-300 hover:bg-sky-900/30 hover:text-white transition-all link-menu-nav">
-                   <span>👥</span> Quadro de Profissionais
-                </a>
-                {% endif %}
-                
-                <a href="{{ url_for('escolas.cadastrar_escola', municipio_slug=g.municipio.slug) }}" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
-                   <span class="opacity-80">🏫</span> Infraestrutura Escolar
-                </a>
-                
-                <a href="{{ url_for('alunos.listar', municipio_slug=g.municipio.slug) }}" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
-                   <span class="opacity-80">👤</span> Cadastro Central Aluno
-                </a>
+                    {% if current_user.perfil in ['secretaria', 'superadmin'] %}
+                    <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug) }}"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="users" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Quadro de Profissionais</span>
+                    </a>
+                    {% endif %}
 
-                <a href="{{ url_for('alunos.listar_desativados', municipio_slug=g.municipio.slug) }}" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
-                   <span class="opacity-80">📁</span> Arquivo Inativo
-                </a>
+                    <a href="{{ url_for('escolas.cadastrar_escola', municipio_slug=g.municipio.slug) }}"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="school" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Unidades Escolares</span>
+                    </a>
+                </div>
 
-                {% if not g.municipio or g.municipio.modulo_pei %}
-                <a href="/{{ g.municipio.slug }}/pei" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
-                   <span class="opacity-80">🧠</span> PEI Inteligente
-                </a>
-                {% endif %}
+                <!-- GRUPO 2: ESTUDANTES -->
+                <div class="space-y-1">
+                    <span class="px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400/70 block mb-1.5">Alunado & Censo</span>
+                    
+                    <a href="{{ url_for('alunos.listar', municipio_slug=g.municipio.slug) }}"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="graduation-cap" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Cadastro de Alunos</span>
+                    </a>
 
-                {% if not g.municipio or g.municipio.modulo_aee %}
-                <a href="{{ url_for('aee.sala_recursos', municipio_slug=g.municipio.slug) }}" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
-                   <span class="opacity-80">🎒</span> Sala de Recursos (AEE)
-                </a>
-                {% endif %}
+                    <a href="{{ url_for('alunos.listar_desativados', municipio_slug=g.municipio.slug) }}"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="archive" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Arquivo Inativo</span>
+                    </a>
+                </div>
 
-                {% if not g.municipio or g.municipio.modulo_equipe_multi %}
-                <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=g.municipio.slug) }}" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-semibold text-purple-300 hover:bg-purple-900/30 hover:text-purple-200 transition-all link-menu-nav">
-                   <span>🩺</span> Atendimentos SOAP (Multi)
-                </a>
-                {% endif %}
+                <!-- GRUPO 3: PEDAGÓGICO & CLÍNICO -->
+                <div class="space-y-1">
+                    <span class="px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400/70 block mb-1.5">Pedagógico & Clínico</span>
 
-                {% if not g.municipio or g.municipio.modulo_transporte %}
-                <a href="/{{ g.municipio.slug }}/transporte/" 
-                   class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-xs font-medium text-slate-400 hover:bg-white/5 hover:text-white transition-all link-menu-nav">
-                   <span class="opacity-80">🚌</span> Transporte Inclusivo
-                </a>
-                {% endif %}
+                    {% if not g.municipio or g.municipio.modulo_pei %}
+                    <a href="/{{ g.municipio.slug }}/pei"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="sparkles" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">PEI Inteligente</span>
+                    </a>
+                    {% endif %}
+
+                    {% if not g.municipio or g.municipio.modulo_aee %}
+                    <a href="{{ url_for('aee.sala_recursos', municipio_slug=g.municipio.slug) }}"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="blocks" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Sala de Recursos (AEE)</span>
+                    </a>
+                    {% endif %}
+
+                    {% if not g.municipio or g.municipio.modulo_equipe_multi %}
+                    <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=g.municipio.slug) }}"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="stethoscope" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Equipe Multidisciplinar</span>
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- GRUPO 4: OPERAÇÕES & COMPLIANCE -->
+                <div class="space-y-1">
+                    <span class="px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-400/70 block mb-1.5">Operações & Legal</span>
+
+                    {% if not g.municipio or g.municipio.modulo_transporte %}
+                    <a href="/{{ g.municipio.slug }}/transporte/"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="bus" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Transporte Inclusivo</span>
+                    </a>
+                    {% endif %}
+
+                    {% if (not g.municipio or g.municipio.modulo_blindagem_juridica) and current_user.perfil in ['secretaria', 'superadmin'] %}
+                    <a href="{{ url_for('core.dashboard_blindagem', municipio_slug=g.municipio.slug) }}"
+                       class="flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all link-menu-nav">
+                        <i data-lucide="shield-check" class="w-4 h-4 shrink-0 opacity-80"></i>
+                        <span class="truncate">Blindagem Jurídica & MP</span>
+                    </a>
+                    {% endif %}
+                </div>
+
             </nav>
         </div>
 
-        <div class="p-5 border-t border-white/10 bg-white/5 backdrop-blur-md space-y-1.5">
-            <span class="text-[9px] font-semibold uppercase tracking-widest text-slate-500 block">Operador da Secretaria</span>
-            <span class="text-white block font-semibold truncate text-xs">{{ current_user.nome }}</span>
-            <span class="text-slate-400 block text-[10px] font-medium tracking-wide">Perfil: {{ current_user.perfil }}</span>
-            <a href="/auth/logout" class="text-red-400 hover:text-red-300 transition-colors block font-medium pt-3 text-[10px] uppercase tracking-widest">Encerrar Sessão ↗</a>
+        <!-- RODAPÉ DA SIDEBAR: PERFIL DO OPERADOR -->
+        <div class="p-3.5 border-t border-white/[0.08] bg-black/20 shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-orbi-blue/20 border border-orbi-blue/40 text-sky-300 flex items-center justify-center font-bold text-xs shrink-0">
+                    {{ current_user.nome[:2].upper() if current_user.is_authenticated and current_user.nome else 'OP' }}
+                </div>
+                <div class="min-w-0 flex-1">
+                    <span class="text-white font-semibold text-xs block truncate">{{ current_user.nome if current_user.is_authenticated else 'Operador' }}</span>
+                    <span class="text-slate-400 text-[11px] font-medium block truncate capitalize">{{ current_user.perfil if current_user.is_authenticated else '' }}</span>
+                </div>
+                <a href="/auth/logout" title="Encerrar Sessão" class="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-white/[0.06] transition-colors shrink-0">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </a>
+            </div>
         </div>
     </aside>
 
-    <div class="flex-1 md:pl-64 flex flex-col min-h-screen">
+    <!-- ÁREA PRINCIPAL (CONTEÚDO) -->
+    <div id="app-shell" class="flex-1 md:pl-64 flex flex-col min-h-screen min-w-0">
 
-        <!-- CABEÇALHO MOBILE EXCLUSIVO PARA SMARTPHONES (MD:HIDDEN) -->
-        <div class="bg-slate-900 text-white py-2.5 px-4 flex md:hidden items-center justify-between sticky top-0 z-40 border-b border-slate-800 shadow-md">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center font-black text-xs text-white shadow">
-                    360
+        <!-- CABEÇALHO MOBILE (MD:HIDDEN) -->
+        <div id="mobile-top-bar" class="bg-[#0A2540] text-white py-2.5 px-4 flex md:hidden items-center justify-between sticky top-0 z-40 border-b border-slate-800 shadow-sm no-print">
+            <a href="/{{ g.municipio.slug }}/dashboard" class="flex items-center gap-2.5">
+                <div class="w-8 h-8 bg-white rounded-lg p-1 flex items-center justify-center shadow-xs">
+                    <img src="{{ url_for('static', filename='img/logo.jpeg') }}" alt="ORBI" class="w-full h-full object-contain">
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-black text-xs text-white leading-tight">Gestoor 360</span>
-                    <span class="text-[9px] text-blue-400 font-bold tracking-wider uppercase">{{ g.municipio.nome }}</span>
+                    <span class="font-bold text-xs text-white leading-tight">ORBI</span>
+                    <span class="text-[10px] text-sky-300 font-medium truncate max-w-[160px]">{{ g.municipio.nome if g.municipio else '' }}</span>
                 </div>
-            </div>
+            </a>
             <div class="flex items-center gap-2">
                 {% if current_user.is_authenticated and current_user.perfil %}
-                <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-1 rounded font-mono">{{ current_user.perfil.upper() }}</span>
+                <span class="text-[10px] bg-white/10 text-slate-200 px-2 py-0.5 rounded-md font-mono uppercase">{{ current_user.perfil }}</span>
                 {% endif %}
-                <a href="/auth/logout" class="text-red-400 p-1 font-bold text-xs" title="Sair">🚪</a>
+                <a href="/auth/logout" class="text-slate-300 hover:text-rose-400 p-1.5 rounded-lg" title="Sair">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </a>
             </div>
         </div>
 
-        <header class="bg-white/80 backdrop-blur-md border-b border-slate-200 py-4 px-6 md:px-8 sticky top-0 z-30 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 transition-all">
-            <div>
-                <h1 class="text-lg font-bold tracking-tight text-gov-dark">{% block header_title %}{% endblock %}</h1>
-            </div>
-            
-            <div class="flex items-center gap-5">
-                <div class="flex items-center border border-slate-200 rounded-lg bg-slate-50 p-1 text-[10px] font-semibold text-slate-500 shadow-sm">
-                    <button onclick="toggleContraste()" class="px-3 py-1.5 hover:bg-white rounded-md transition-all uppercase tracking-widest">🌓 Contraste</button>
-                    <div class="w-px h-4 bg-slate-200 mx-1"></div>
-                    <button onclick="alterarFonte(1)" class="px-2.5 py-1.5 hover:bg-white rounded-md transition-all">A+</button>
-                    <button onclick="alterarFonte(-1)" class="px-2.5 py-1.5 hover:bg-white rounded-md transition-all">A-</button>
+        <!-- TOPBAR EXECUTIVA (DESKTOP & TABLET) -->
+        <header class="bg-white/90 backdrop-blur-md border-b border-slate-200/80 h-16 px-6 md:px-8 sticky top-0 z-30 flex items-center justify-between gap-4 no-print">
+            <div class="flex items-center gap-3 min-w-0">
+                {% if g.municipio and g.municipio.brasao_url %}
+                <img src="{{ g.municipio.brasao_url }}" alt="{{ g.municipio.nome }}" class="w-6 h-6 object-contain hidden sm:block shrink-0">
+                {% endif %}
+                <div class="min-w-0">
+                    <h1 class="text-sm md:text-base font-bold tracking-tight text-slate-900 truncate">
+                        {% block header_title %}Gestão da Educação Especial{% endblock %}
+                    </h1>
                 </div>
-                <span class="bg-green-50 text-gov-green border border-green-100 px-3 py-1.5 rounded-md text-[9px] font-semibold uppercase tracking-widest hidden sm:flex items-center gap-1.5 shadow-sm">
-                    <span class="w-1.5 h-1.5 rounded-full bg-gov-green animate-pulse"></span>
-                    Homologado MEC
+            </div>
+
+            <div class="flex items-center gap-3 shrink-0">
+                {% if current_user.is_authenticated and current_user.perfil == 'superadmin' %}
+                <a href="/auth/admin-global" class="hidden lg:inline-flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors shadow-xs">
+                    <i data-lucide="shield" class="w-3.5 h-3.5 text-sky-400"></i>
+                    <span>Torre Mestre</span>
+                </a>
+                {% endif %}
+
+                <!-- CONTROLES DE ACESSIBILIDADE -->
+                <div class="flex items-center border border-slate-200/90 rounded-lg bg-slate-50/80 p-0.5 text-[11px] font-semibold text-slate-600">
+                    <button onclick="toggleContraste()" title="Alternar Alto Contraste" class="px-2.5 py-1 hover:bg-white hover:text-slate-900 rounded-md transition-all flex items-center gap-1.5">
+                        <i data-lucide="contrast" class="w-3.5 h-3.5"></i>
+                        <span class="hidden sm:inline">Contraste</span>
+                    </button>
+                    <div class="w-px h-3.5 bg-slate-200 mx-0.5"></div>
+                    <button onclick="alterarFonte(1)" title="Aumentar Fonte" class="px-2 py-1 hover:bg-white hover:text-slate-900 rounded-md transition-all">A+</button>
+                    <button onclick="alterarFonte(-1)" title="Diminuir Fonte" class="px-2 py-1 hover:bg-white hover:text-slate-900 rounded-md transition-all">A-</button>
+                </div>
+
+                <!-- SELO DE CONFORMIDADE -->
+                <span class="bg-emerald-50 text-emerald-700 border border-emerald-200/70 px-2.5 py-1 rounded-lg text-[11px] font-semibold hidden xl:inline-flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>Conformidade MEC / LBI</span>
                 </span>
             </div>
         </header>
 
-        <main class="flex-grow p-4 sm:p-6 md:p-8 pb-24 md:pb-8" id="conteudo-principal">
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="flex-grow p-4 sm:p-6 md:p-8 pb-24 md:pb-10 max-w-[1600px] w-full mx-auto" id="conteudo-principal">
             
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-                    <div class="space-y-3 mb-8 font-sans text-xs font-medium no-print">
+                    <div class="space-y-2.5 mb-6 font-sans text-xs font-medium no-print">
                         {% for category, message in messages %}
-                            <div class="p-4 rounded-xl shadow-sm border flex items-center justify-between
-                                {% if category == 'success' %} bg-green-50 text-gov-green border-green-100
-                                {% elif category == 'danger' %} bg-red-50 text-red-600 border-red-100
-                                {% else %} bg-yellow-50 text-amber-700 border-yellow-100 {% endif %}">
-                                <span class="tracking-wide">{{ message }}</span>
-                                <button onclick="this.parentElement.remove()" class="opacity-50 hover:opacity-100 transition-opacity focus:outline-none ml-4">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            <div class="p-3.5 px-4 rounded-xl shadow-xs border flex items-center justify-between gap-3
+                                {% if category == 'success' or category == 'sucesso' %} bg-emerald-50/90 text-emerald-800 border-emerald-200
+                                {% elif category == 'danger' or category == 'erro' %} bg-rose-50/90 text-rose-800 border-rose-200
+                                {% else %} bg-amber-50/90 text-amber-800 border-amber-200 {% endif %}">
+                                <div class="flex items-center gap-2.5">
+                                    {% if category == 'success' or category == 'sucesso' %}
+                                        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+                                    {% elif category == 'danger' or category == 'erro' %}
+                                        <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600 shrink-0"></i>
+                                    {% else %}
+                                        <i data-lucide="info" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                                    {% endif %}
+                                    <span>{{ message }}</span>
+                                </div>
+                                <button onclick="this.parentElement.remove()" class="opacity-60 hover:opacity-100 transition-opacity focus:outline-none p-1">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
                                 </button>
                             </div>
                         {% endfor %}
@@ -251,53 +437,110 @@
 
         <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
 
-        <footer class="border-t border-slate-200 py-6 text-center text-[9px] font-semibold text-slate-400 bg-white uppercase tracking-widest mt-auto">
-            Plataforma de Governança Inclusiva — {{ g.municipio.nome }} - {{ g.municipio.estado }} © 2026
+        <footer class="border-t border-slate-200/80 py-4 px-6 md:px-8 text-xs text-slate-400 bg-white mt-auto no-print">
+            <div class="max-w-[1600px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-slate-600">ORBI</span>
+                    <span>•</span>
+                    <span>Plataforma de Governança da Educação Especial</span>
+                </div>
+                <div>
+                    {% if g.municipio %}{{ g.municipio.nome }} — {{ g.municipio.estado }} © 2026{% else %}© 2026{% endif %}
+                </div>
+            </div>
         </footer>
 
     </div>
 
     {% if current_user.is_authenticated and current_user.senha_provisoria %}
     <!-- MODAL BLOQUEANTE: TROCA OBRIGATÓRIA DE SENHA PROVISÓRIA -->
-    <div id="modal_senha_provisoria" class="fixed inset-0 z-50 bg-slate-900/85 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="bg-white border-t-8 border-t-amber-500 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
-            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div class="w-12 h-12 bg-amber-100 border border-amber-300 text-amber-800 rounded-xl flex items-center justify-center text-2xl font-bold">
-                    🔒
+    <div id="modal_senha_provisoria" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div class="flex items-center gap-3.5 border-b border-slate-100 pb-4">
+                <div class="w-11 h-11 bg-amber-50 border border-amber-200 text-amber-600 rounded-xl flex items-center justify-center shrink-0">
+                    <i data-lucide="key-round" class="w-5 h-5"></i>
                 </div>
                 <div>
-                    <h3 class="text-base font-extrabold text-gov-navy">Substituição de Senha Provisória</h3>
-                    <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Primeiro acesso detectado na plataforma</p>
+                    <h3 class="text-base font-bold text-slate-900">Substituição de Senha Provisória</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Primeiro acesso detectado na plataforma</p>
                 </div>
             </div>
 
-            <p class="text-xs text-slate-600 leading-relaxed bg-amber-50 border border-amber-200 p-3 rounded-xl">
-                Por razões de segurança governamental, você está utilizando uma <strong>senha provisória</strong>. Cadastre sua nova senha pessoal antes de navegar.
+            <p class="text-xs text-slate-600 leading-relaxed bg-amber-50/70 border border-amber-200/80 p-3.5 rounded-xl">
+                Por razões de segurança institucional, você está utilizando uma <strong>senha provisória</strong>. Defina sua nova senha pessoal para continuar.
             </p>
 
             <form action="{{ url_for('auth.alterar_senha_provisoria') }}" method="POST" class="space-y-4 text-xs">
                 <div>
-                    <label class="block mb-1 font-bold text-slate-700">Senha Provisória Atual *</label>
-                    <input type="password" name="senha_atual" placeholder="Digite a senha provisória informada" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:bg-white focus:border-gov-blue focus:outline-none">
+                    <label class="block mb-1.5 font-semibold text-slate-700">Senha Provisória Atual *</label>
+                    <input type="password" name="senha_atual" placeholder="Digite a senha provisória informada" required class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                 </div>
 
                 <div>
-                    <label class="block mb-1 font-bold text-slate-700">Nova Senha Pessoal *</label>
-                    <input type="password" name="nova_senha" minlength="6" placeholder="No mínimo 6 caracteres" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:bg-white focus:border-gov-blue focus:outline-none">
+                    <label class="block mb-1.5 font-semibold text-slate-700">Nova Senha Pessoal *</label>
+                    <input type="password" name="nova_senha" minlength="6" placeholder="No mínimo 6 caracteres" required class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                 </div>
 
                 <div>
-                    <label class="block mb-1 font-bold text-slate-700">Confirmar Nova Senha *</label>
-                    <input type="password" name="confirmar_senha" minlength="6" placeholder="Repita a nova senha" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-slate-900 focus:bg-white focus:border-gov-blue focus:outline-none">
+                    <label class="block mb-1.5 font-semibold text-slate-700">Confirmar Nova Senha *</label>
+                    <input type="password" name="confirmar_senha" minlength="6" placeholder="Repita a nova senha" required class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                 </div>
 
-                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-extrabold py-3 rounded-xl transition-all shadow-md text-xs uppercase tracking-wider">
-                    🔑 Cadastrar Nova Senha & Acessar
+                <button type="submit" class="w-full bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold py-3 rounded-xl transition-all shadow-sm text-xs flex items-center justify-center gap-2">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Salvar Nova Senha e Acessar</span>
                 </button>
             </form>
         </div>
     </div>
     {% endif %}
+
+    <!-- BANNER FLUTUANTE DE INSTALAÇÃO DO APP PWA (MOBILE) -->
+    <div id="pwa-install-banner" class="hidden fixed bottom-16 left-4 right-4 md:bottom-6 md:left-auto md:right-6 md:w-96 bg-slate-900 text-white p-4 rounded-2xl shadow-xl border border-slate-800 z-50 no-print">
+        <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white rounded-xl p-1 flex items-center justify-center shrink-0">
+                    <img src="/static/img/logo.jpeg" alt="ORBI" class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-white">Instalar Aplicativo ORBI</h4>
+                    <p class="text-[11px] text-slate-400">Acesso rápido direto na tela inicial</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="pwa-install-btn" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold text-xs px-3.5 py-2 rounded-xl transition-all">
+                    Instalar
+                </button>
+                <button onclick="fecharBannerPwa()" class="text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR MOBILE (MD:HIDDEN) -->
+    <nav id="mobile-bottom-nav" class="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 text-slate-500 py-2 px-2 shadow-lg justify-around items-center no-print">
+        <a href="/{{ g.municipio.slug }}/dashboard" class="flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-orbi-blue transition-colors px-2 py-1">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span>Início</span>
+        </a>
+        <a href="{{ url_for('alunos.listar', municipio_slug=g.municipio.slug) }}" class="flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-orbi-blue transition-colors px-2 py-1">
+            <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+            <span>Alunos</span>
+        </a>
+        <a href="/{{ g.municipio.slug }}/pei" class="flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-orbi-blue transition-colors px-2 py-1">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>PEI</span>
+        </a>
+        <a href="/{{ g.municipio.slug }}/aee" class="flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-orbi-blue transition-colors px-2 py-1">
+            <i data-lucide="blocks" class="w-4 h-4"></i>
+            <span>AEE</span>
+        </a>
+        <a href="/{{ g.municipio.slug }}/transporte/" class="flex flex-col items-center gap-1 text-[10px] font-semibold text-slate-500 hover:text-orbi-blue transition-colors px-2 py-1">
+            <i data-lucide="bus" class="w-4 h-4"></i>
+            <span>Rotas</span>
+        </a>
+    </nav>
 
     <script>
         function toggleContraste() {
@@ -310,68 +553,56 @@
             el.style.fontSize = (tamanhoAtual + direcao) + 'px';
         }
 
-        // DESTAQUE DA ABA ATIVA CONFORME PARÂMETROS OPERACIONAIS DA URL
         document.addEventListener("DOMContentLoaded", function() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
             const currentUrl = window.location.pathname;
+            let matchedLink = null;
+            let longestMatch = 0;
+
             document.querySelectorAll("#nav-lateral a").forEach(link => {
                 const hrefPath = link.getAttribute("href");
-                
-                if (currentUrl === hrefPath || (hrefPath && hrefPath.length > 5 && currentUrl.includes(hrefPath))) {
-                    link.classList.remove("text-slate-400", "hover:bg-slate-800/50", "hover:text-white");
-                    link.classList.add("bg-gov-blue", "text-white", "font-black", "shadow-md", "shadow-blue-900/40");
+                if (!hrefPath) return;
+                const cleanHref = hrefPath.replace(/\/$/, "");
+                const cleanCurrent = currentUrl.replace(/\/$/, "");
+
+                if (cleanCurrent === cleanHref || (cleanHref.length > 4 && cleanCurrent.startsWith(cleanHref))) {
+                    if (cleanHref.length > longestMatch) {
+                        longestMatch = cleanHref.length;
+                        matchedLink = link;
+                    }
                 }
             });
 
-            // Inicialização do campo de busca rápida
+            if (matchedLink) {
+                matchedLink.classList.remove("text-slate-300", "hover:bg-white/[0.06]");
+                matchedLink.classList.add("bg-orbi-blue", "text-white", "font-semibold", "shadow-sm");
+            }
+
             const searchableSelects = document.querySelectorAll('.search-select');
             searchableSelects.forEach(select => {
                 new Choices(select, {
                     searchEnabled: true,
                     itemSelectText: '',
-                    noResultsText: 'Nenhuma escola encontrada',
+                    noResultsText: 'Nenhum resultado encontrado',
                     noChoicesText: 'Sem opções disponíveis',
                     placeholder: true,
-                    searchPlaceholderValue: 'Digite o nome da escola para buscar...',
+                    searchPlaceholderValue: 'Digite para buscar...',
                     shouldSort: false
                 });
             });
         });
-    </script>
 
-    <!-- BANNER FLUTUANTE DE INSTALAÇÃO DO APP PWA (MOBILE) -->
-    <div id="pwa-install-banner" class="hidden fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-96 bg-slate-900 text-white p-4 rounded-2xl shadow-2xl border border-slate-700 z-50">
-        <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black text-xs text-white">
-                    360
-                </div>
-                <div>
-                    <h4 class="text-xs font-black">Instalar Gestoor 360</h4>
-                    <p class="text-[10px] text-slate-300">Abra como aplicativo na tela inicial</p>
-                </div>
-            </div>
-            <div class="flex items-center gap-2">
-                <button id="pwa-install-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs px-3.5 py-2 rounded-xl transition-all shadow-md">
-                    Instalar
-                </button>
-                <button onclick="fecharBannerPwa()" class="text-slate-400 hover:text-white text-xs px-1">
-                    ✕
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // REGISTRO DO SERVICE WORKER PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
-                    .then(reg => console.log('[PWA] ServiceWorker ativo no escopo:', reg.scope))
-                    .catch(err => console.error('[PWA] Falha ao registrar ServiceWorker:', err));
+                    .then(reg => console.log('[PWA] ServiceWorker ativo:', reg.scope))
+                    .catch(err => console.error('[PWA] Erro ServiceWorker:', err));
             });
         }
 
-        // CONTROLADOR DO PROMPT DE INSTALAÇÃO DO PWA
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -385,39 +616,18 @@
             btnInstalar.addEventListener('click', async () => {
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
-                    const { outcome } = await deferredPrompt.userChoice;
-                    console.log('[PWA] Escolha do usuário:', outcome);
+                    await deferredPrompt.userChoice;
                     deferredPrompt = null;
                     fecharBannerPwa();
                 }
+            });
+        }
+
         function fecharBannerPwa() {
             const banner = document.getElementById('pwa-install-banner');
             if (banner) banner.classList.add('hidden');
         }
     </script>
-
-    <!-- BARRA DE NAVEGAÇÃO INFERIOR ESTILO APLICATIVO NATIVO (EXCLUSIVA PARA DISPOSITIVOS MÓVEIS MD:HIDDEN) -->
-    <nav id="mobile-bottom-nav" class="flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900 border-t border-slate-800 text-slate-400 py-2.5 px-2 shadow-2xl justify-around items-center">
-        <a href="/{{ g.municipio.slug }}/dashboard" class="flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 active:text-blue-400 transition-colors p-1">
-            <span class="text-lg">🏠</span>
-            <span>Início</span>
-        </a>
-        <a href="{{ url_for('alunos.listar', municipio_slug=g.municipio.slug) }}" class="flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 active:text-blue-400 transition-colors p-1">
-            <span class="text-lg">👥</span>
-            <span>Alunos</span>
-        </a>
-        <a href="/{{ g.municipio.slug }}/pei" class="flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 active:text-blue-400 transition-colors p-1">
-            <span class="text-lg">📋</span>
-            <span>PEI</span>
-        </a>
-        <a href="/{{ g.municipio.slug }}/aee" class="flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 active:text-blue-400 transition-colors p-1">
-            <span class="text-lg">🎒</span>
-            <span>AEE</span>
-        </a>
-        <a href="/{{ g.municipio.slug }}/transporte/" class="flex flex-col items-center gap-1 text-[10px] font-bold text-slate-400 active:text-blue-400 transition-colors p-1">
-            <span class="text-lg">🚌</span>
-            <span>Rota</span>
-        </a>
-    </nav>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

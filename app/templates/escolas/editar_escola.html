@@ -1,131 +1,146 @@
 {% extends 'base.html' %}
 
-{% block header_title %}Infraestrutura Rede — Retificação de Dados Escolares{% endblock %}
+{% block title %}Editar Unidade Escolar — {{ escola.nome }}{% endblock %}
+{% block header_title %}Infraestrutura da Rede — Retificação de Dados Escolares{% endblock %}
 
 {% block content %}
-<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-gov-dark space-y-6">
+<div class="space-y-6 pb-12">
 
-    <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md relative overflow-hidden">
-        <div class="absolute top-0 left-0 right-0 h-1.5 bg-gov-blue"></div>
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div class="space-y-1">
-                <span class="text-[10px] uppercase font-black tracking-widest text-gov-blue block">Retificação Cadastral</span>
-                <h2 class="text-xl font-black text-slate-800 tracking-tight uppercase">Editando: {{ escola.nome }}</h2>
+    <!-- CABEÇALHO EXECUTIVO -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="space-y-1.5">
+            <div class="inline-flex items-center gap-2 bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider">
+                <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
+                <span>Retificação Cadastral</span>
             </div>
-            <a href="{{ url_for('escolas.cadastrar_escola', municipio_slug=g.municipio.slug) }}" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">
-                &larr; Cancelar e Voltar
-            </a>
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight">Editando: {{ escola.nome }}</h2>
+            <p class="text-xs text-slate-500">Atualize as informações jurídicas, endereço ou indicadores de acessibilidade INEP da unidade escolar.</p>
         </div>
+
+        <a href="{{ url_for('escolas.cadastrar_escola', municipio_slug=g.municipio.slug) }}" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all inline-flex items-center gap-2 self-start lg:self-center shrink-0">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Cancelar e Voltar</span>
+        </a>
     </div>
 
-    <div class="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
-        <div class="flex flex-wrap border-b border-slate-200 bg-slate-900 text-xs font-black uppercase tracking-wider text-slate-400">
-            <button type="button" onclick="mudarBloco(1)" id="aba-1" class="flex-1 py-4 px-4 text-center border-b-2 border-emerald-400 text-white font-black bg-slate-800/50 transition-all focus:outline-none">
-                1. Identificação Jurídica & Gestão
+    <!-- PAINEL DE EDIÇÃO COM ABAS -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="flex flex-wrap border-b border-slate-200/80 bg-slate-50/80 text-xs font-semibold text-slate-500">
+            <button type="button" onclick="mudarBloco(1)" id="aba-1" class="flex-1 py-3.5 px-4 text-center border-b-2 border-orbi-blue text-orbi-blue bg-white font-bold transition-all focus:outline-none inline-flex items-center justify-center gap-2">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                <span>1. Identificação Jurídica & Gestão</span>
             </button>
-            <button type="button" onclick="mudarBloco(2)" id="aba-2" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
-                2. Localização & Endereço
+            <button type="button" onclick="mudarBloco(2)" id="aba-2" class="flex-1 py-3.5 px-4 text-center border-b-2 border-transparent hover:text-slate-800 hover:bg-white/60 transition-all focus:outline-none inline-flex items-center justify-center gap-2">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                <span>2. Localização & Endereço</span>
             </button>
-            <button type="button" onclick="mudarBloco(3)" id="aba-3" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 transition-all focus:outline-none">
-                3. Acessibilidade & Estrutura Física
+            <button type="button" onclick="mudarBloco(3)" id="aba-3" class="flex-1 py-3.5 px-4 text-center border-b-2 border-transparent hover:text-slate-800 hover:bg-white/60 transition-all focus:outline-none inline-flex items-center justify-center gap-2">
+                <i data-lucide="accessibility" class="w-3.5 h-3.5"></i>
+                <span>3. Acessibilidade & Estrutura Física</span>
             </button>
         </div>
 
-        <form method="POST" class="p-6 md:p-8 space-y-6 text-xs font-medium">
-            <div id="bloco-1" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Nome Oficial da Escola *</label>
-                        <input type="text" name="nome" value="{{ escola.nome }}" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+        <form method="POST" class="p-6 md:p-8 space-y-6 text-xs">
+            <div id="bloco-1" class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">Nome Oficial da Escola *</label>
+                        <input type="text" name="nome" value="{{ escola.nome }}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none">
                     </div>
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Código INEP (MEC) *</label>
-                        <input type="text" name="codigo_inep" value="{{ escola.codigo_inep }}" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono font-bold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">Código INEP (MEC) *</label>
+                        <input type="text" name="codigo_inep" value="{{ escola.codigo_inep }}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-mono font-semibold text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none">
                     </div>
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">CNPJ da Unidade</label>
-                        <input type="text" name="cnpj" value="{{ escola.cnpj if escola.cnpj else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono focus:bg-white focus:border-gov-blue focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Nome Completo do Gestor / Diretor *</label>
-                        <input type="text" name="diretora_nome" value="{{ escola.diretora_nome }}" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">CPF do Gestor</label>
-                        <input type="text" name="diretora_cpf" value="{{ escola.diretora_cpf if escola.diretora_cpf else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono focus:bg-white focus:border-gov-blue focus:outline-none">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">CNPJ da Unidade</label>
+                        <input type="text" name="cnpj" value="{{ escola.cnpj if escola.cnpj else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Telefone de Contato / Secretaria</label>
-                        <input type="text" name="telefone" value="{{ escola.telefone if escola.telefone else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">Nome Completo do Gestor / Diretor *</label>
+                        <input type="text" name="diretora_nome" value="{{ escola.diretora_nome }}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none">
                     </div>
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">E-mail Institucional</label>
-                        <input type="email" name="email_institucional" value="{{ escola.email_institucional if escola.email_institucional else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">CPF do Gestor</label>
+                        <input type="text" name="diretora_cpf" value="{{ escola.diretora_cpf if escola.diretora_cpf else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">Telefone de Contato / Secretaria</label>
+                        <input type="text" name="telefone" value="{{ escola.telefone if escola.telefone else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">E-mail Institucional</label>
+                        <input type="email" name="email_institucional" value="{{ escola.email_institucional if escola.email_institucional else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none">
                     </div>
                 </div>
             </div>
 
-            <div id="bloco-2" class="space-y-6 hidden">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Zona de Localização *</label>
-                        <select name="zona" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-bold focus:bg-white focus:outline-none cursor-pointer">
+            <div id="bloco-2" class="space-y-5 hidden">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">Zona de Localização *</label>
+                        <select name="zona" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-semibold text-slate-900 focus:bg-white focus:border-orbi-blue focus:outline-none cursor-pointer">
                             <option value="Urbana" {% if escola.zona == 'Urbana' %}selected{% endif %}>Urbana</option>
                             <option value="Rural" {% if escola.zona == 'Rural' %}selected{% endif %}>Rural (Campo)</option>
                         </select>
                     </div>
-                    <div class="md:col-span-2 space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Logradouro / Rua / Povoado *</label>
-                        <input type="text" name="endereco_rua" value="{{ escola.endereco_rua if escola.endereco_rua else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none">
+                    <div class="md:col-span-2 space-y-1.5">
+                        <label class="block font-semibold text-slate-700">Logradouro / Rua / Povoado *</label>
+                        <input type="text" name="endereco_rua" value="{{ escola.endereco_rua if escola.endereco_rua else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-orbi-blue focus:outline-none">
                     </div>
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Número</label>
-                        <input type="text" name="numero" value="{{ escola.numero if escola.numero else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-center focus:bg-white focus:outline-none">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">Número</label>
+                        <input type="text" name="numero" value="{{ escola.numero if escola.numero else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-center text-slate-900 focus:bg-white focus:border-orbi-blue focus:outline-none">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">Bairro / Região Distrital *</label>
-                        <input type="text" name="bairro" value="{{ escola.bairro if escola.bairro else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:outline-none">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">Bairro / Região Distrital *</label>
+                        <input type="text" name="bairro" value="{{ escola.bairro if escola.bairro else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-orbi-blue focus:outline-none">
                     </div>
-                    <div class="space-y-1">
-                        <label class="block font-bold text-slate-700 uppercase tracking-wide">CEP Escolar</label>
-                        <input type="text" name="cep" value="{{ escola.cep if escola.cep else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono focus:bg-white focus:outline-none">
+                    <div class="space-y-1.5">
+                        <label class="block font-semibold text-slate-700">CEP Escolar</label>
+                        <input type="text" name="cep" value="{{ escola.cep if escola.cep else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-mono text-slate-900 focus:bg-white focus:border-orbi-blue focus:outline-none">
                     </div>
                 </div>
             </div>
 
-            <div id="bloco-3" class="space-y-6 hidden">
+            <div id="bloco-3" class="space-y-5 hidden">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-3 font-bold text-slate-700 shadow-inner">
-                        <span class="text-[10px] text-gov-blue uppercase font-black block border-b border-slate-200 pb-1">♿ Estrutura Inclusiva Homologada</span>
-                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_sala_recursos" class="w-4 h-4 cursor-pointer" {% if escola.possui_sala_recursos %}checked{% endif %}> Possui Sala de Recursos Multifuncionais (SRM / Atendimento AEE)</label>
-                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_rampas" class="w-4 h-4 cursor-pointer" {% if escola.possui_rampas %}checked{% endif %}> Possui Acessibilidade por Rampas ou Elevadores</label>
-                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_banheiro_adaptado" class="w-4 h-4 cursor-pointer" {% if escola.possui_banheiro_adaptado %}checked{% endif %}> Possui Banheiros Próprios Adaptados para PCD</label>
-                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_portas_largas" class="w-4 h-4 cursor-pointer" {% if escola.possui_portas_largas %}checked{% endif %}> Possui Vias de Acesso e Portas Largas para Cadeirantes</label>
-                        <label class="flex items-center gap-3 cursor-pointer p-1 rounded hover:bg-white transition-all"><input type="checkbox" name="possui_sinalizacao_tatil" class="w-4 h-4 cursor-pointer" {% if escola.possui_sinalizacao_tatil %}checked{% endif %}> Possui Sinalização Tátil/Visual de Direcionamento</label>
+                    <div class="bg-slate-50/80 border border-slate-200/80 rounded-2xl p-5 space-y-3 font-medium text-slate-700">
+                        <div class="flex items-center gap-2 border-b border-slate-200/80 pb-2.5">
+                            <i data-lucide="accessibility" class="w-4 h-4 text-orbi-blue"></i>
+                            <span class="text-[11px] text-slate-900 uppercase font-bold tracking-wider">Estrutura Inclusiva Homologada</span>
+                        </div>
+                        <label class="flex items-center gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-all"><input type="checkbox" name="possui_sala_recursos" class="w-4 h-4 rounded border-slate-300 text-orbi-blue cursor-pointer" {% if escola.possui_sala_recursos %}checked{% endif %}> Possui Sala de Recursos Multifuncionais (SRM / Atendimento AEE)</label>
+                        <label class="flex items-center gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-all"><input type="checkbox" name="possui_rampas" class="w-4 h-4 rounded border-slate-300 text-orbi-blue cursor-pointer" {% if escola.possui_rampas %}checked{% endif %}> Possui Acessibilidade por Rampas ou Elevadores</label>
+                        <label class="flex items-center gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-all"><input type="checkbox" name="possui_banheiro_adaptado" class="w-4 h-4 rounded border-slate-300 text-orbi-blue cursor-pointer" {% if escola.possui_banheiro_adaptado %}checked{% endif %}> Possui Banheiros Próprios Adaptados para PCD</label>
+                        <label class="flex items-center gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-all"><input type="checkbox" name="possui_portas_largas" class="w-4 h-4 rounded border-slate-300 text-orbi-blue cursor-pointer" {% if escola.possui_portas_largas %}checked{% endif %}> Possui Vias de Acesso e Portas Largas para Cadeirantes</label>
+                        <label class="flex items-center gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-white transition-all"><input type="checkbox" name="possui_sinalizacao_tatil" class="w-4 h-4 rounded border-slate-300 text-orbi-blue cursor-pointer" {% if escola.possui_sinalizacao_tatil %}checked{% endif %}> Possui Sinalização Tátil/Visual de Direcionamento</label>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="space-y-1">
-                            <label class="block font-bold text-slate-700 uppercase tracking-wide">Modalidades de Ensino Ofertadas</label>
-                            <input type="text" name="modalidades_atendidas" value="{{ escola.modalidades_atendidas if escola.modalidades_atendidas else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
-                        </div>
-                        <div class="space-y-1">
-                            <label class="block font-bold text-slate-700 uppercase tracking-wide">Quantidade Total de Salas de Aula Ativas</label>
-                            <input type="number" name="total_salas_aula" value="{{ escola.total_salas_aula if escola.total_salas_aula else 1 }}" min="1" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-bold focus:bg-white focus:outline-none">
+                    <div class="space-y-4 flex flex-col justify-between">
+                        <div class="space-y-4">
+                            <div class="space-y-1.5">
+                                <label class="block font-semibold text-slate-700">Modalidades de Ensino Ofertadas</label>
+                                <input type="text" name="modalidades_atendidas" value="{{ escola.modalidades_atendidas if escola.modalidades_atendidas else '' }}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium text-slate-900 focus:bg-white focus:border-orbi-blue focus:outline-none">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block font-semibold text-slate-700">Quantidade Total de Salas de Aula Ativas</label>
+                                <input type="number" name="total_salas_aula" value="{{ escola.total_salas_aula if escola.total_salas_aula else 1 }}" min="1" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 font-mono font-bold text-slate-900 focus:bg-white focus:border-orbi-blue focus:outline-none">
+                            </div>
                         </div>
 
-                        <div class="pt-4 flex justify-end">
-                            <button type="submit" class="w-full bg-gov-blue hover:bg-slate-800 text-white font-black py-4 px-6 rounded-lg uppercase tracking-wider transition-all shadow-md">
-                                💾 Atualizar Unidade Escolar
+                        <div class="pt-2 flex justify-end">
+                            <button type="submit" class="w-full bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-xs inline-flex items-center justify-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                <span>Atualizar Unidade Escolar</span>
                             </button>
                         </div>
                     </div>
@@ -143,14 +158,14 @@
 
         for (let i = 1; i <= 3; i++) {
             let aba = document.getElementById('aba-' + i);
-            aba.classList.remove('border-emerald-400', 'text-white', 'bg-slate-800/50');
-            aba.classList.add('border-transparent', 'text-slate-400');
+            aba.classList.remove('border-orbi-blue', 'text-orbi-blue', 'bg-white', 'font-bold');
+            aba.classList.add('border-transparent', 'text-slate-500');
         }
 
         document.getElementById('bloco-' + blocoAlvo).classList.remove('hidden');
         let abaAtiva = document.getElementById('aba-' + blocoAlvo);
-        abaAtiva.classList.remove('border-transparent', 'text-slate-400');
-        abaAtiva.classList.add('border-emerald-400', 'text-white', 'bg-slate-800/50');
+        abaAtiva.classList.remove('border-transparent', 'text-slate-500');
+        abaAtiva.classList.add('border-orbi-blue', 'text-orbi-blue', 'bg-white', 'font-bold');
     }
 </script>
 {% endblock %}

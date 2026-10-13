@@ -1,82 +1,120 @@
 {% extends 'base.html' %}
 
-{% block header_title %}Módulo 7 — Monitoramento Operacional e Indicadores Gerais{% endblock %}
+{% block title %}Visão Geral Operacional — ORBI{% endblock %}
+{% block header_title %}Monitoramento Operacional e Indicadores Gerais{% endblock %}
 
 {% block content %}
-<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-gov-dark space-y-8">
+<div class="space-y-6">
 
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between bg-white border border-slate-200 rounded-xl p-6 shadow-md gap-4 relative overflow-hidden">
-        <div class="absolute top-0 left-0 bottom-0 w-1.5 bg-gov-blue"></div>
-        <div class="space-y-1 pl-2">
-            <span class="text-[10px] font-black tracking-widest text-gov-blue uppercase block">Sala de Situação & Monitoramento Operacional</span>
-            <h2 class="text-xl font-black text-slate-800 tracking-tight uppercase">Governança Inclusiva: <span class="text-gov-blue">{{ g.municipio.nome }} — {{ g.municipio.estado }}</span></h2>
-            <p class="text-xs text-slate-500 font-medium">Análise em tempo real de indicadores consolidados e metas regulamentares da rede de educação especial.</p>
+    <!-- CABEÇALHO EXECUTIVO -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="space-y-2 max-w-2xl">
+            <div class="inline-flex items-center gap-2 bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider">
+                <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+                <span>Sala de Situação & Monitoramento Operacional</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight">
+                Governança Inclusiva: <span class="text-orbi-blue">{{ g.municipio.nome }} — {{ g.municipio.estado }}</span>
+            </h2>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                Análise em tempo real de indicadores consolidados e metas regulamentares da rede municipal de educação especial.
+            </p>
         </div>
-        <div class="text-xs text-slate-600 bg-slate-50 px-4 py-3 rounded-lg border border-slate-200 font-bold shadow-inner self-end lg:self-center">
-            <span class="text-slate-400 uppercase text-[10px] block font-black mb-0.5">Operador Credenciado</span>
-            <span class="text-slate-800">{{ current_user.nome }}</span> &bull; <span class="bg-gov-blue text-white text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-wider ml-1 shadow-sm">{{ current_user.perfil }}</span>
+
+        <div class="bg-slate-50/80 border border-slate-200/80 rounded-xl px-4 py-3 flex items-center gap-3.5 self-start lg:self-center shrink-0">
+            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200/80 text-orbi-blue flex items-center justify-center shadow-xs shrink-0">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </div>
+            <div class="text-xs">
+                <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 block">Operador Credenciado</span>
+                <div class="flex items-center gap-2 mt-0.5">
+                    <span class="font-bold text-slate-900">{{ current_user.nome }}</span>
+                    <span class="bg-orbi-50 text-orbi-blue border border-orbi-100 text-[10px] px-2 py-0.5 rounded-md font-semibold uppercase tracking-wider">{{ current_user.perfil }}</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="space-y-4">
-        <div class="flex items-center gap-2 border-b border-slate-300 pb-2">
-            <span class="text-base">📊</span>
-            <h3 class="uppercase tracking-wider text-[11px] font-black text-slate-500">Painel de Indicadores Gerais (Censo Municipal Letivo)</h3>
+    <!-- PAINEL DE INDICADORES GERAIS -->
+    <div class="space-y-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i data-lucide="bar-chart-3" class="w-4 h-4 text-orbi-blue"></i>
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Painel de Indicadores Gerais (Censo Municipal Letivo)</h3>
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md relative overflow-hidden flex items-center justify-between group hover:border-gov-blue transition-all">
-                <div class="absolute top-0 bottom-0 left-0 w-1.5 bg-gov-blue"></div>
-                <div class="space-y-1.5 pl-2">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Alunos Inclusos Matriculados (INEP)</span>
-                    <div class="text-5xl font-black text-slate-800 tracking-tight">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- KPI 1: ALUNOS MATRICULADOS -->
+            <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-start justify-between gap-4 hover:border-slate-300 transition-colors">
+                <div class="space-y-2">
+                    <span class="text-xs font-medium text-slate-500 block">Alunos Inclusos Matriculados (INEP)</span>
+                    <div class="text-3xl font-bold text-slate-900 font-mono tracking-tight">
                         {{ total_alunos }}
                     </div>
-                    <span class="text-[10px] text-gov-green font-bold block bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded w-fit">✓ Sincronizado</span>
+                    <span class="inline-flex items-center gap-1.5 text-[11px] text-emerald-700 font-semibold bg-emerald-50 border border-emerald-200/70 px-2.5 py-0.5 rounded-full">
+                        <i data-lucide="check-circle-2" class="w-3 h-3 text-emerald-600"></i>
+                        <span>Sincronizado com Censo</span>
+                    </span>
                 </div>
-                <span class="text-4xl bg-slate-100 p-4 rounded-xl border border-slate-200 shadow-inner group-hover:scale-105 transition-transform">👥</span>
+                <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 text-orbi-blue flex items-center justify-center shrink-0">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                </div>
             </div>
 
-            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-md relative overflow-hidden flex items-center justify-between group hover:border-purple-600 transition-all">
-                <div class="absolute top-0 bottom-0 left-0 w-1.5 bg-purple-600"></div>
-                <div class="space-y-1.5 pl-2">
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider block">Casos Homologados com TEA</span>
-                    <div class="text-5xl font-black text-purple-600 tracking-tight">
+            <!-- KPI 2: CASOS TEA -->
+            <div class="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs flex items-start justify-between gap-4 hover:border-slate-300 transition-colors">
+                <div class="space-y-2">
+                    <span class="text-xs font-medium text-slate-500 block">Casos Homologados com TEA</span>
+                    <div class="text-3xl font-bold text-slate-900 font-mono tracking-tight">
                         {{ total_tea }}
                     </div>
-                    <span class="text-[10px] text-purple-700 font-bold block bg-purple-50 border border-purple-100 px-2 py-0.5 rounded w-fit">🛡️ Suporte Prioritário</span>
+                    <span class="inline-flex items-center gap-1.5 text-[11px] text-purple-700 font-semibold bg-purple-50 border border-purple-200/70 px-2.5 py-0.5 rounded-full">
+                        <i data-lucide="shield" class="w-3 h-3 text-purple-600"></i>
+                        <span>Suporte Prioritário</span>
+                    </span>
                 </div>
-                <span class="text-4xl bg-purple-50 text-purple-600 p-4 rounded-xl border border-purple-100 shadow-inner group-hover:scale-105 transition-transform">🧠</span>
+                <div class="w-10 h-10 rounded-xl bg-purple-50/70 border border-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                    <i data-lucide="brain" class="w-5 h-5"></i>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="space-y-4">
-        <div class="text-xs font-black uppercase tracking-wider text-slate-500 border-b border-slate-300 pb-2">Ações Estratégicas de Controle Disponíveis</div>
+    <!-- AÇÕES ESTRATÉGICAS -->
+    <div class="space-y-3">
+        <div class="flex items-center gap-2">
+            <i data-lucide="compass" class="w-4 h-4 text-orbi-blue"></i>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Ações Estratégicas de Controle Disponíveis</h3>
+        </div>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <a href="{{ url_for('alunos.listar', municipio_slug=g.municipio.slug) }}" 
-               class="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-gov-blue hover:shadow-md transition-all group">
+               class="flex items-center justify-between bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-orbi-blue/50 hover:shadow-card transition-all group">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-lg shadow-inner group-hover:bg-gov-blue/5 transition-colors">👤</div>
+                    <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 text-orbi-blue flex items-center justify-center group-hover:bg-orbi-50 transition-colors shrink-0">
+                        <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+                    </div>
                     <div>
-                        <h4 class="font-black text-sm uppercase text-slate-800 tracking-tight">Cadastro Central do Aluno</h4>
-                        <p class="text-[11px] text-slate-500 font-medium">Ficha nacional, dados civis, filiação e mapeamento Censo MEC.</p>
+                        <h4 class="font-bold text-sm text-slate-900 tracking-tight group-hover:text-orbi-blue transition-colors">Cadastro Central do Aluno</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">Ficha nacional, dados civis, filiação e mapeamento Censo MEC.</p>
                     </div>
                 </div>
-                <span class="text-gov-blue font-black text-sm group-hover:translate-x-1 transition-transform">&rarr;</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-orbi-blue group-hover:translate-x-0.5 transition-all shrink-0"></i>
             </a>
 
             <a href="/{{ g.municipio.slug }}/pei" 
-               class="flex items-center justify-between bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-gov-blue hover:shadow-md transition-all group">
+               class="flex items-center justify-between bg-white border border-slate-200/80 rounded-2xl p-5 shadow-xs hover:border-orbi-blue/50 hover:shadow-card transition-all group">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-lg shadow-inner group-hover:bg-gov-blue/5 transition-colors">🧠</div>
+                    <div class="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 text-orbi-blue flex items-center justify-center group-hover:bg-orbi-50 transition-colors shrink-0">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </div>
                     <div>
-                        <h4 class="font-black text-sm uppercase text-slate-800 tracking-tight">Sala de Gestão do PEI</h4>
-                        <p class="text-[11px] text-slate-500 font-medium">Elaborar Plano de Desenvolvimento Individualizado com IA.</p>
+                        <h4 class="font-bold text-sm text-slate-900 tracking-tight group-hover:text-orbi-blue transition-colors">Sala de Gestão do PEI</h4>
+                        <p class="text-xs text-slate-500 mt-0.5">Elaborar Plano de Desenvolvimento Individualizado com IA.</p>
                     </div>
                 </div>
-                <span class="text-gov-blue font-black text-sm group-hover:translate-x-1 transition-transform">&rarr;</span>
+                <i data-lucide="arrow-right" class="w-4 h-4 text-slate-400 group-hover:text-orbi-blue group-hover:translate-x-0.5 transition-all shrink-0"></i>
             </a>
         </div>
     </div>

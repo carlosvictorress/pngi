@@ -4,65 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso do Responsável — Prefeitura de {{ municipio.nome }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { 
-                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif']
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
                     },
                     colors: {
+                        orbi: {
+                            navy: '#0A2540',
+                            blue: '#0084CE',
+                            'blue-hover': '#006DAE',
+                            50: '#F0F7FF',
+                            100: '#E0F0FE'
+                        },
                         brand: { 
-                            50: '#F0F5FF',
-                            500: '#2563EB',
-                            600: '#1D4ED8',
-                            navy: '#0B132B',
-                            teal: '#00F5D4'
+                            50: '#F0F7FF',
+                            500: '#0084CE',
+                            600: '#0084CE',
+                            navy: '#0A2540'
                         }
+                    },
+                    boxShadow: {
+                        'xs': '0 1px 2px 0 rgba(15, 23, 42, 0.04)',
+                        'elevated': '0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 8px 10px -6px rgba(15, 23, 42, 0.04)'
                     }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col justify-between font-sans antialiased">
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen flex flex-col justify-between font-sans antialiased">
 
     <!-- TOPBAR -->
-    <header class="bg-white border-b border-slate-200 py-3.5 px-6 shadow-sm">
+    <header class="bg-white border-b border-slate-200/80 py-3.5 px-6 shadow-xs">
         <div class="max-w-5xl mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <a href="/auth/{{ municipio.slug }}/login" class="text-xs font-semibold text-brand-600 hover:underline flex items-center gap-1">
-                    ← Voltar ao Login da Prefeitura
+                <a href="/auth/{{ municipio.slug }}/login" class="text-xs font-semibold text-slate-600 hover:text-orbi-blue bg-slate-50 hover:bg-orbi-50 border border-slate-200/80 px-3 py-1.5 rounded-xl transition-colors inline-flex items-center gap-1.5">
+                    <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                    <span>Voltar ao Login da Prefeitura</span>
                 </a>
             </div>
             <div class="text-right">
-                <span class="block text-xs font-extrabold text-slate-900 uppercase">Portal da Família</span>
-                <span class="block text-[10px] text-slate-500">Prefeitura de {{ municipio.nome }} — {{ municipio.estado }}</span>
+                <span class="block text-xs font-bold text-slate-900 uppercase tracking-tight">Portal da Família</span>
+                <span class="block text-[11px] text-slate-500">Prefeitura de {{ municipio.nome }} — {{ municipio.estado }}</span>
             </div>
         </div>
     </header>
 
     <main class="flex-grow flex items-center justify-center px-4 py-12">
-        <div class="max-w-[450px] w-full space-y-6">
+        <div class="max-w-[440px] w-full space-y-5">
             
             {% if erro %}
-            <div class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-xs font-bold flex items-center gap-3 shadow-sm">
-                <span>⚠️</span>
+            <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2.5 shadow-xs">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600 shrink-0"></i>
                 <span>{{ erro }}</span>
             </div>
             {% endif %}
 
-            <div class="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 space-y-6">
+            <div class="bg-white rounded-2xl p-8 shadow-elevated border border-slate-200/80 space-y-6">
                 
-                <div class="text-center space-y-2">
-                    <div class="w-16 h-16 bg-blue-50 text-brand-600 rounded-2xl mx-auto flex items-center justify-center text-3xl shadow-inner">
-                        👨‍👩‍👧
+                <div class="text-center space-y-2.5">
+                    <div class="w-14 h-14 bg-orbi-50 border border-orbi-100 text-orbi-blue rounded-2xl mx-auto flex items-center justify-center">
+                        <i data-lucide="users" class="w-7 h-7"></i>
                     </div>
-                    <h1 class="text-xl font-extrabold text-slate-900">Acesso da Família</h1>
+                    <h1 class="text-xl font-bold text-slate-900 tracking-tight">Acesso da Família</h1>
                     <p class="text-xs text-slate-500 leading-relaxed">
                         Informe o número da <strong>Matrícula Escolar</strong> e a <strong>Data de Nascimento</strong> do estudante para acompanhar o desenvolvimento pedagógico e o AEE.
                     </p>
@@ -70,32 +83,39 @@
 
                 <form method="POST" class="space-y-4">
                     <div class="space-y-1.5">
-                        <label class="block text-xs font-bold text-slate-700">Matrícula Escolar do Estudante *</label>
-                        <input type="text" name="matricula" required placeholder="Ex: MAT-2026-001" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-medium">
+                        <label class="block text-xs font-semibold text-slate-700">Matrícula Escolar do Estudante *</label>
+                        <input type="text" name="matricula" required placeholder="Ex: MAT-2026-001" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-mono text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                     </div>
 
                     <div class="space-y-1.5">
-                        <label class="block text-xs font-bold text-slate-700">Data de Nascimento do Estudante *</label>
-                        <input type="date" name="data_nascimento" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none transition-all font-medium">
+                        <label class="block text-xs font-semibold text-slate-700">Data de Nascimento do Estudante *</label>
+                        <input type="date" name="data_nascimento" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:bg-white focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all font-medium">
                     </div>
 
-                    <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-extrabold py-3.5 px-4 rounded-xl text-xs uppercase tracking-wider transition-all duration-300 shadow-md">
-                        Acessar Prontuário & PEI do Estudante
+                    <button type="submit" class="w-full bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold py-3 px-4 rounded-xl text-xs transition-all shadow-xs inline-flex items-center justify-center gap-2">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span>Acessar Prontuário & PEI do Estudante</span>
                     </button>
                 </form>
 
-                <p class="text-[10px] text-slate-400 text-center leading-relaxed border-t border-slate-100 pt-4">
-                    🔒 Espaço reservado e protegido para pais e responsáveis legais, conforme o Art. 28 da Lei Brasileira de Inclusão.
-                </p>
+                <div class="text-[11px] text-slate-400 text-center leading-relaxed border-t border-slate-100 pt-4 flex items-center justify-center gap-1.5">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                    <span>Espaço reservado para pais e responsáveis legais (Art. 28 da LBI).</span>
+                </div>
 
             </div>
 
         </div>
     </main>
 
-    <footer class="border-t border-slate-200 py-6 text-center text-[11px] text-slate-500 bg-white">
-        Plataforma de Educação Inclusiva — {{ municipio.nome }} © 2026
+    <footer class="border-t border-slate-200/80 py-5 text-center text-xs text-slate-400 bg-white">
+        ORBI — Plataforma de Governança da Educação Especial • {{ municipio.nome }} © 2026
     </footer>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
 </html>

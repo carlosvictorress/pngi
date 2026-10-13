@@ -4,53 +4,58 @@
 {% block header_title %}Planos de Ação Mensais da Equipe (Estudo de Casos & Gestão){% endblock %}
 
 {% block content %}
-<div class="space-y-6 pb-12 font-sans">
+<div class="space-y-6">
 
-    <!-- CABEÇALHO -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <div class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-purple-200">
-                GOVERNANÇA TÉCNICA • ESTUDO DE CASOS & PRESTAÇÃO DE CONTAS
+    <!-- CABEÇALHO EXECUTIVO -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="space-y-1.5">
+            <div class="flex items-center gap-2">
+                <span class="bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider inline-flex items-center gap-1.5">
+                    <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
+                    <span>Governança Técnica • Estudo de Casos</span>
+                </span>
             </div>
-            <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-1">
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">
                 Planos de Ação Mensais & Atas de Reunião
             </h1>
-            <p class="text-xs text-slate-500">
+            <p class="text-xs text-slate-500 leading-relaxed">
                 Encontros mensais da Equipe Multidisciplinar para discussão de casos clínicos e geração de relatórios oficiais para a gestão.
             </p>
         </div>
 
-        <div class="flex gap-2 shrink-0">
+        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
             <a href="{{ url_for('equipe_multi.novo_plano_acao', municipio_slug=g.municipio.slug) }}"
-               class="bg-purple-600 hover:bg-purple-700 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 transform hover:scale-[1.02]">
-                <span>➕</span> Nova Reunião Mensal / Plano
+               class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Nova Reunião Mensal / Plano</span>
             </a>
             <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=g.municipio.slug) }}"
-               class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
-                Painel Multi
+               class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 text-slate-500"></i>
+                <span>Painel Multi</span>
             </a>
         </div>
     </div>
 
     <!-- LISTAGEM DE PLANOS MENSAIS -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {% for pl in planos %}
-        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:border-purple-300 hover:shadow-md transition-all flex flex-col justify-between space-y-4">
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between space-y-4">
             <div class="space-y-3">
                 <div class="flex items-center justify-between">
-                    <span class="bg-purple-50 text-purple-800 text-[10px] font-black uppercase px-2.5 py-1 rounded-full border border-purple-200">
+                    <span class="bg-orbi-50 text-orbi-blue text-[11px] font-semibold uppercase px-2.5 py-0.5 rounded-full border border-orbi-100">
                         {{ pl.mes_referencia }} / {{ pl.ano_referencia }}
                     </span>
-                    <span class="text-[10px] font-mono text-slate-400">
+                    <span class="text-[11px] font-mono text-slate-400">
                         {{ pl.data_reuniao.strftime('%d/%m/%Y') }}
                     </span>
                 </div>
 
-                <h3 class="text-base font-extrabold text-slate-900 tracking-tight leading-snug">
+                <h3 class="text-base font-bold text-slate-900 tracking-tight leading-snug">
                     {{ pl.titulo }}
                 </h3>
 
-                <div class="text-xs text-slate-600 space-y-1 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                <div class="text-xs text-slate-600 space-y-1.5 bg-slate-50/70 p-3.5 rounded-xl border border-slate-200/70">
                     <div><strong class="text-slate-700">Membros Presentes:</strong> <span class="text-slate-600 text-[11px] block truncate">{{ pl.profissionais_presentes }}</span></div>
                     <div><strong class="text-slate-700">Local:</strong> <span class="text-slate-600 text-[11px]">{{ pl.local_reuniao }}</span></div>
                 </div>
@@ -62,21 +67,25 @@
 
             <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
                 <a href="{{ url_for('equipe_multi.detalhes_plano_acao', municipio_slug=g.municipio.slug, id=pl.id) }}"
-                   class="font-bold text-slate-600 hover:text-slate-900 transition-colors">
-                    Ver Detalhes
+                   class="font-semibold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1 transition-colors">
+                    <span>Ver Detalhes</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                 </a>
 
                 <a href="{{ url_for('equipe_multi.imprimir_plano_acao', municipio_slug=g.municipio.slug, id=pl.id) }}" target="_blank"
-                   class="bg-purple-600 hover:bg-purple-700 text-white font-extrabold px-3.5 py-2 rounded-xl text-xs transition-all shadow-sm flex items-center gap-1.5">
-                    <span>🖨️</span> Imprimir p/ Gestão ↗
+                   class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold px-3.5 py-2 rounded-xl text-xs transition-all shadow-xs inline-flex items-center gap-1.5">
+                    <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                    <span>Imprimir p/ Gestão</span>
                 </a>
             </div>
         </div>
         {% else %}
-        <div class="col-span-full bg-white p-12 text-center rounded-3xl border border-slate-200 text-slate-400 text-xs space-y-2">
-            <span class="text-4xl block">🗓️</span>
-            <span class="font-bold text-slate-700 block">Nenhuma reunião mensal de equipe registrada para este período.</span>
-            <p class="text-[11px] text-slate-400">Clique em "+ Nova Reunião Mensal / Plano" para registrar o encontro técnico de alinhamento e estudo de casos.</p>
+        <div class="col-span-full bg-white p-12 text-center rounded-2xl border border-slate-200/80 shadow-xs text-slate-400 text-xs space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-center mx-auto text-slate-400">
+                <i data-lucide="calendar-check" class="w-6 h-6"></i>
+            </div>
+            <span class="font-bold text-slate-700 block text-sm">Nenhuma reunião mensal de equipe registrada para este período.</span>
+            <p class="text-xs text-slate-400">Clique em "Nova Reunião Mensal / Plano" para registrar o encontro técnico de alinhamento e estudo de casos.</p>
         </div>
         {% endfor %}
     </div>

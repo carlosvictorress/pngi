@@ -4,31 +4,48 @@
 {% block header_title %}Transferência Interna e Remanejamento de Unidade Escolar{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto space-y-8 pb-12">
+<div class="max-w-2xl mx-auto space-y-6 pb-10">
 
     <!-- CABEÇALHO DA TRANSFERÊNCIA -->
-    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-4">
-        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <span class="bg-blue-50 text-brand-600 font-extrabold text-[10px] px-3 py-1 rounded-xl uppercase border border-blue-200">
-                Remanejamento Municipal
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3.5">
+            <span class="bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider inline-flex items-center gap-1.5">
+                <i data-lucide="arrow-left-right" class="w-3.5 h-3.5"></i>
+                <span>Remanejamento Municipal</span>
             </span>
-            <span class="text-xs font-mono font-bold text-slate-500">Ano Letivo: {{ aluno.ano_letivo or '2026' }}</span>
+            <span class="text-xs font-mono font-semibold text-slate-500 bg-slate-100 border border-slate-200/80 px-2.5 py-1 rounded-lg">Ano Letivo: {{ aluno.ano_letivo or '2026' }}</span>
         </div>
 
-        <div>
-            <h1 class="text-xl font-extrabold text-slate-900">Transferir {{ aluno.nome }}</h1>
-            <p class="text-xs text-slate-500">Escola Atual: <strong>{{ aluno.escola.nome if aluno.escola else 'Não alocado' }}</strong> (Turma: {{ aluno.turma }})</p>
+        <div class="flex items-start gap-3.5">
+            <div class="w-10 h-10 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                <i data-lucide="user-check" class="w-5 h-5"></i>
+            </div>
+            <div class="space-y-1">
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">Transferir {{ aluno.nome }}</h1>
+                <p class="text-xs text-slate-500 leading-relaxed flex items-center gap-1.5 flex-wrap">
+                    <i data-lucide="school" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <span>Escola Atual: <strong class="text-slate-800">{{ aluno.escola.nome if aluno.escola else 'Não alocado' }}</strong> (Turma: {{ aluno.turma }})</span>
+                </p>
+            </div>
         </div>
     </div>
 
     <!-- FORMULÁRIO DE REMANEJAMENTO -->
-    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-6">
-        <h2 class="text-base font-extrabold text-slate-900">Selecione a Nova Unidade Escolar de Destino</h2>
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-5">
+        <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+            <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                <i data-lucide="building-2" class="w-4 h-4"></i>
+            </div>
+            <div>
+                <h2 class="text-sm font-bold text-slate-900">Selecione a Nova Unidade Escolar de Destino</h2>
+                <p class="text-xs text-slate-500">O histórico pedagógico e clínico acompanhará o estudante automaticamente.</p>
+            </div>
+        </div>
 
         <form method="POST" class="space-y-4 text-xs">
-            <div class="space-y-1">
-                <label class="block font-bold text-slate-700">Escola de Destino *</label>
-                <select name="escola_destino_id" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium text-slate-900">
+            <div class="space-y-1.5">
+                <label class="block font-semibold text-slate-700">Escola de Destino *</label>
+                <select name="escola_destino_id" required class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                     <option value="">-- Selecione a Escola --</option>
                     {% for esc in escolas %}
                     {% if esc.id != aluno.escola_id %}
@@ -38,23 +55,25 @@
                 </select>
             </div>
 
-            <div class="space-y-1">
-                <label class="block font-bold text-slate-700">Nova Turma de Alocação *</label>
-                <input type="text" name="nova_turma" required placeholder="Ex: 4º Ano A (Matutino)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 font-medium">
+            <div class="space-y-1.5">
+                <label class="block font-semibold text-slate-700">Nova Turma de Alocação *</label>
+                <input type="text" name="nova_turma" required placeholder="Ex: 4º Ano A (Matutino)" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
             </div>
 
-            <div class="space-y-1">
-                <label class="block font-bold text-slate-700">Motivo / Justificativa da Transferência</label>
-                <textarea name="motivo_transferencia" rows="3" placeholder="Ex: Mudança de endereço da família para o Povoado Centro." class="w-full bg-slate-50 border border-slate-300 rounded-xl p-3 font-medium"></textarea>
+            <div class="space-y-1.5">
+                <label class="block font-semibold text-slate-700">Motivo / Justificativa da Transferência</label>
+                <textarea name="motivo_transferencia" rows="3" placeholder="Ex: Mudança de endereço da família para o Povoado Centro." class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all"></textarea>
             </div>
 
-            <div class="pt-2 flex items-center justify-between gap-4">
-                <a href="{{ url_for('alunos.perfil_aluno', aluno_id=aluno.id, municipio_slug=g.municipio_slug) }}" class="text-slate-600 font-bold hover:underline">
-                    Cancel e Voltar
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
+                <a href="{{ url_for('alunos.perfil_aluno', aluno_id=aluno.id, municipio_slug=g.municipio_slug) }}" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold px-4 py-2.5 rounded-xl text-xs inline-flex items-center gap-2 transition-all">
+                    <i data-lucide="arrow-left" class="w-4 h-4 text-slate-500"></i>
+                    <span>Cancelar e Voltar</span>
                 </a>
                 
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition-all shadow-md">
-                    Confirmar Remanejamento Escolar
+                <button type="submit" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold px-5 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all">
+                    <i data-lucide="check" class="w-4 h-4"></i>
+                    <span>Confirmar Remanejamento Escolar</span>
                 </button>
             </div>
         </form>

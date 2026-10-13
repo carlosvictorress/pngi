@@ -1,303 +1,405 @@
 {% extends 'base.html' %}
 
-{% block header_title %}Módulo 1 - Prontuário Unificado e Ficha do Censo Escolar MEC{% endblock %}
+{% block header_title %}Módulo 1 — Prontuário Unificado e Ficha do Censo Escolar MEC{% endblock %}
 
 {% block content %}
-<div class="max-w-[1600px] mx-auto px-4 font-sans antialiased text-slate-800">
+<div class="space-y-6 pb-10">
     
-    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-        <div>
-            <span class="text-[10px] uppercase font-black tracking-widest text-gov-blue block">Ficha Regulamentar de Matrícula</span>
-            <p class="text-slate-500 text-xs mt-0.5">Instrumento unificado em estrita conformidade com o padrão INEP/MEC e diretrizes da PNEEI.</p>
+    <!-- CABEÇALHO EXECUTIVO -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs">
+        <div class="space-y-1.5">
+            <span class="bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider inline-flex items-center gap-1.5">
+                <i data-lucide="file-spreadsheet" class="w-3.5 h-3.5"></i>
+                <span>Ficha Regulamentar de Matrícula</span>
+            </span>
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight">Prontuário Unificado e Ficha do Censo Escolar MEC</h2>
+            <p class="text-xs text-slate-500 leading-relaxed">Instrumento unificado em estrita conformidade com o padrão INEP/MEC e diretrizes da PNEEI.</p>
         </div>
-        <a href="/{{ g.municipio.slug }}/alunos/" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm">
-            &larr; Voltar para Listagem
+        <a href="/{{ g.municipio.slug }}/alunos/" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 text-xs font-semibold px-4 py-2.5 rounded-xl transition-all shadow-xs inline-flex items-center gap-2 shrink-0">
+            <i data-lucide="arrow-left" class="w-4 h-4 text-slate-500"></i>
+            <span>Voltar para Listagem</span>
         </a>
     </div>
 
-    <div class="bg-white rounded-xl border border-slate-200 shadow-md overflow-hidden mb-6">
+    <!-- CONTAINER DO FORMULÁRIO MULTI-ETAPAS -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
         
-        <div class="flex flex-wrap border-b border-slate-200 bg-slate-900 text-xs font-black uppercase tracking-wider text-slate-400">
-            <button onclick="mudarEtapa(1)" id="btn-etapa-1" class="flex-1 py-4 px-4 text-center border-b-2 border-emerald-400 text-white font-black whitespace-nowrap bg-slate-800/50 transition-all focus:outline-none">
-                1. Dados Pessoais e Civis
+        <!-- NAVEGAÇÃO POR ETAPAS (TABS EXECUTIVAS) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-b border-slate-200/80 bg-slate-50/80 text-xs font-semibold">
+            <button type="button" onclick="mudarEtapa(1)" id="btn-etapa-1" class="py-4 px-4 text-center border-b-2 border-orbi-blue text-orbi-blue bg-white font-semibold transition-all focus:outline-none inline-flex items-center justify-center gap-2">
+                <i data-lucide="user" class="w-4 h-4"></i>
+                <span>1. Dados Pessoais e Civis</span>
             </button>
-            <button onclick="mudarEtapa(2)" id="btn-etapa-2" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 whitespace-nowrap transition-all focus:outline-none">
-                2. Vínculo Escolar & Censo
+            <button type="button" onclick="mudarEtapa(2)" id="btn-etapa-2" class="py-4 px-4 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-white/60 transition-all focus:outline-none inline-flex items-center justify-center gap-2">
+                <i data-lucide="school" class="w-4 h-4"></i>
+                <span>2. Vínculo Escolar & Censo</span>
             </button>
-            <button onclick="mudarEtapa(3)" id="btn-etapa-3" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 whitespace-nowrap transition-all focus:outline-none">
-                3. Condição Diagnóstica & AEE
+            <button type="button" onclick="mudarEtapa(3)" id="btn-etapa-3" class="py-4 px-4 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-white/60 transition-all focus:outline-none inline-flex items-center justify-center gap-2">
+                <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                <span>3. Condição Diagnóstica & AEE</span>
             </button>
-            <button onclick="mudarEtapa(4)" id="btn-etapa-4" class="flex-1 py-4 px-4 text-center border-b-2 border-transparent hover:text-white hover:bg-slate-800/30 whitespace-nowrap transition-all focus:outline-none">
-                4. Saúde & Logística Coletiva
+            <button type="button" onclick="mudarEtapa(4)" id="btn-etapa-4" class="py-4 px-4 text-center border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-white/60 transition-all focus:outline-none inline-flex items-center justify-center gap-2">
+                <i data-lucide="bus" class="w-4 h-4"></i>
+                <span>4. Saúde & Logística Coletiva</span>
             </button>
         </div>
 
-        <form method="POST" class="p-6 md:p-8 space-y-8 text-xs font-medium">
+        <form method="POST" class="p-6 md:p-8 space-y-8 text-xs">
 
+            <!-- ETAPA 1: DADOS PESSOAIS E CIVIS -->
             <div id="etapa-1" class="space-y-6">
-                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
-                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">01</span>
-                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Informações Cadastrais Básicas do Aluno</h3>
-                </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Nome Completo do Estudante *</label>
-                        <input type="text" name="nome" placeholder="Nome idêntico ao registro civil" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">CPF do Aluno</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="campo_cpf" name="cpf" placeholder="000.000.000-00" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none">
-                            <button type="button" onclick="buscarAlunoRedeNacional()" class="bg-gov-blue hover:bg-slate-800 text-white font-bold px-4 rounded-lg flex items-center justify-center transition-colors tooltip" title="Buscar em outros municípios">
-                                🔍 Buscar
-                            </button>
+                <!-- CARD SEÇÃO 01 -->
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-5">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                            <i data-lucide="id-card" class="w-4 h-4"></i>
                         </div>
-                        <span id="feedback_busca" class="text-[10px] font-bold mt-1 block"></span>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Data de Nascimento *</label>
-                        <input type="date" name="data_nascimento" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Sexo Biológico (Padrão MEC)</label>
-                        <select name="sexo" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
-                            <option value="Masculino">Masculino</option>
-                            <option value="Feminino">Feminino</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Cor / Raça (Padrão IBGE/INEP)</label>
-                        <select name="raca_cor" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
-                            <option value="Branca">Branca</option>
-                            <option value="Preta">Preta</option>
-                            <option value="Parda">Parda</option>
-                            <option value="Amarela">Amarela</option>
-                            <option value="Indígena">Indígena</option>
-                            <option value="Não Declarada">Não Declarada</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Nacionalidade / Naturalidade</label>
-                        <input type="text" name="naturalidade" placeholder="Ex: Valença do Piauí - PI" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none">
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
-                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">02</span>
-                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Filiação e Núcleo Familiar</h3>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Nome Completo da Mãe (Responsável Legal Principal) *</label>
-                        <input type="text" name="nome_mae" placeholder="Nome completo da genitora" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Nome Completo do Pai / Segundo Responsável</label>
-                        <input type="text" name="nome_pai" placeholder="Nome completo do genitor" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Endereço Residencial (Rua, Nº, Compl.)</label>
-                        <input type="text" name="endereco" placeholder="Ex: Rua Central, 120" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Bairro / Localidade</label>
-                        <input type="text" name="bairro" placeholder="Ex: Centro / Bairro Novo" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Telefone Principal de Contato e WhatsApp *</label>
-                        <input type="text" name="contato_urgencia" placeholder="(86) 99999-9999" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
-                    </div>
-                    <div class="flex items-center pt-4 md:pt-6">
-                        <label class="flex items-center gap-3 cursor-pointer text-sm font-black text-slate-700 bg-slate-100 border border-slate-200 rounded-xl p-3 w-full hover:bg-slate-200/50 transition-colors">
-                            <input type="checkbox" name="recebe_bpc" class="w-4 h-4 rounded border-slate-300 text-gov-blue focus:ring-gov-blue cursor-pointer">
-                            <span>Família recebe Benefício de Prestação Continuada (BPC)</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div id="etapa-2" class="space-y-6 hidden">
-                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
-                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">03</span>
-                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Vínculo Operacional na Rede Municipal</h3>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Código do Aluno no Censo / INEP</label>
-                        <input type="text" name="codigo_inep" placeholder="Identificação única nacional INEP" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Número de Matrícula Interna *</label>
-                        <input type="text" name="matricula" placeholder="Código de controle municipal" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Unidade Escolar de Lotação *</label>
-                        <select name="escola_id" required class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
-                            <option value="" disabled selected>Selecione a Unidade de Ensino...</option>
-                            {% for e in escolas %}
-                            <option value="{{ e.id }}">🏢 {{ e.nome }} (INEP: {{ e.codigo_inep }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Turma e Turno *</label>
-                        <input type="text" name="turma" placeholder="Ex: 5º Ano B — Tarde" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Modalidade de Ensino</label>
-                        <select name="modalidade" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
-                            <option value="Regular">Ensino Regular</option>
-                            <option value="EJA">EJA (Educação de Jovens e Adultos)</option>
-                            <option value="Profissional">Educação Profissional</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Etapa de Ensino (INEP)</label>
-                        <select name="etapa_ensino" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer">
-                            <option value="Creche">Educação Infantil (Creche)</option>
-                            <option value="Pre-Escola">Educação Infantil (Pré-Escola)</option>
-                            <option value="Fundamental-Iniciais">Ensino Fundamental (Anos Iniciais)</option>
-                            <option value="Fundamental-Finais">Ensino Fundamental (Anos Finais)</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
-                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">04</span>
-                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Recursos Necessários para Avaliações Oficiais (SAEB/Provas Censo)</h3>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 border border-slate-200 rounded-xl p-4 font-bold text-slate-700">
-                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_ledor" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer"> Necessita de Ledor de Prova</label>
-                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_transcritor" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer"> Necessita de Transcritor (Auxílio para escrita)</label>
-                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_libras" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer"> Necessita de Guia-Intérprete de Libras</label>
-                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-slate-200/40 transition-all"><input type="checkbox" name="recurso_ampliado" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer"> Necessita de Prova Impressa com Fonte Ampliada</label>
-                </div>
-            </div>
-
-            <div id="etapa-3" class="space-y-6 hidden">
-                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
-                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">05</span>
-                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Mapeamento da Educação Especial</h3>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Deficiência / Categoria Principal *</label>
-                        <select name="tipo_deficiencia" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:bg-white focus:border-gov-blue focus:outline-none cursor-pointer" required>
-                            <option value="Física">Deficiência Física</option>
-                            <option value="Intelectual">Deficiência Intelectual</option>
-                            <option value="Auditiva">Deficiência Auditiva</option>
-                            <option value="Visual">Deficiência Visual</option>
-                            <option value="Surdocegueira">Surdocegueira</option>
-                            <option value="Múltipla">Deficiência Múltipla</option>
-                            <option value="Nenhuma">Nenhuma Deficiência Declarada</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Código CID Principal</label>
-                        <input type="text" name="cid" placeholder="Ex: F84.0, G80" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:ring-1 focus:ring-gov-blue focus:outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Hipótese Diagnóstica (se em investigação)</label>
-                        <input type="text" name="hipotese_diagnostica" placeholder="Ex: Atraso global no desenvolvimento" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none">
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">01. Informações Cadastrais Básicas do Aluno</h3>
+                            <p class="text-xs text-slate-500">Registro civil, identificação nacional e dados demográficos para o Censo Escolar.</p>
+                        </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-3 col-span-1 md:col-span-3 gap-4 pt-2">
-                        <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-amber-950 bg-amber-50 border border-amber-200 rounded-xl p-2.5 hover:bg-amber-100/60 transition-colors">
-                            <input type="checkbox" name="em_investigacao" class="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-600 cursor-pointer">
-                            <span>🔍 Em processo de investigação clínica / Sem laudo</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-purple-950 bg-purple-50 border border-purple-200 rounded-xl p-2.5 hover:bg-purple-100/60 transition-colors">
-                            <input type="checkbox" name="possui_tea" class="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-600 cursor-pointer">
-                            <span>Estudante com TEA</span>
-                        </label>
-                        <label class="flex items-center gap-3 cursor-pointer text-xs font-black text-teal-950 bg-teal-50 border border-teal-200 rounded-xl p-2.5 hover:bg-teal-100/60 transition-colors">
-                            <input type="checkbox" name="possui_superdotacao" class="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-600 cursor-pointer">
-                            <span>Altas Habilidades / Superdotação</span>
-                        </label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Nome Completo do Estudante *</label>
+                            <input type="text" name="nome" placeholder="Nome idêntico ao registro civil" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all" required>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">CPF do Aluno</label>
+                            <div class="flex gap-2">
+                                <input type="text" id="campo_cpf" name="cpf" placeholder="000.000.000-00" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
+                                <button type="button" onclick="buscarAlunoRedeNacional()" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold px-3.5 py-2.5 rounded-xl inline-flex items-center justify-center gap-1.5 transition-all shrink-0 shadow-xs" title="Buscar em outros municípios">
+                                    <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                                    <span>Buscar</span>
+                                </button>
+                            </div>
+                            <span id="feedback_busca" class="text-[11px] font-medium mt-1 block"></span>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Data de Nascimento *</label>
+                            <input type="date" name="data_nascimento" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all" required>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Sexo Biológico (Padrão MEC)</label>
+                            <select name="sexo" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none cursor-pointer transition-all">
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Cor / Raça (Padrão IBGE/INEP)</label>
+                            <select name="raca_cor" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none cursor-pointer transition-all">
+                                <option value="Branca">Branca</option>
+                                <option value="Preta">Preta</option>
+                                <option value="Parda">Parda</option>
+                                <option value="Amarela">Amarela</option>
+                                <option value="Indígena">Indígena</option>
+                                <option value="Não Declarada">Não Declarada</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Nacionalidade / Naturalidade</label>
+                            <input type="text" name="naturalidade" placeholder="Ex: Valença do Piauí - PI" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
-                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">06</span>
-                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Atendimento Educacional Especializado (AEE) Contra-turno</h3>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Local de Atendimento Compartilhado</label>
-                        <select name="local_aee" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
-                            <option value="Sala de Recursos Multifuncionais da Própria Escola">Sala de Recursos Multifuncionais da Própria Escola</option>
-                            <option value="Sala de Recursos de OUTRA Escola Municipal">Sala de Recursos de OUTRA Escola Municipal</option>
-                            <option value="Centro de Atendimento Especializado conveniado">Centro de Atendimento Especializado de Rede Conveniada (Ex: APAE)</option>
-                            <option value="Não Recebe AEE">Não Recebe Atendimento Especializado</option>
-                        </select>
+                <!-- CARD SEÇÃO 02 -->
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-5">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                            <i data-lucide="users" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">02. Filiação e Núcleo Familiar</h3>
+                            <p class="text-xs text-slate-500">Responsáveis legais, endereço residencial e enquadramento socioassistencial.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Necessidade de Moderação Técnico-Apoio</label>
-                        <select name="necessita_apoio" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold bg-white focus:outline-none cursor-pointer">
-                            <option value="Monitor de Cuidados Pessoais / Vida Diária">Monitor de Cuidados Pessoais / Vida Diária</option>
-                            <option value="Estagiário Auxiliar Pedagógico">Estagiário Auxiliar Pedagógico de Ensino</option>
-                            <option value="Intérprete de Libras em sala">Intérprete Regular de Libras em Classe</option>
-                            <option value="Nenhum">Não Necessita de Profissional Exclusivo</option>
-                        </select>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Nome Completo da Mãe (Responsável Legal Principal) *</label>
+                            <input type="text" name="nome_mae" placeholder="Nome completo da genitora" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all" required>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Nome Completo do Pai / Segundo Responsável</label>
+                            <input type="text" name="nome_pai" placeholder="Nome completo do genitor" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Endereço Residencial (Rua, Nº, Compl.)</label>
+                            <input type="text" name="endereco" placeholder="Ex: Rua Central, 120" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Bairro / Localidade</label>
+                            <input type="text" name="bairro" placeholder="Ex: Centro / Bairro Novo" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Telefone Principal de Contato e WhatsApp *</label>
+                            <input type="text" name="contato_urgencia" placeholder="(86) 99999-9999" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all" required>
+                        </div>
+                        <div class="flex items-end">
+                            <label class="flex items-center gap-3 cursor-pointer text-xs font-semibold text-slate-700 bg-slate-50 border border-slate-200/90 rounded-xl px-4 py-2.5 w-full hover:bg-orbi-50/50 hover:border-orbi-200 transition-all">
+                                <input type="checkbox" name="recebe_bpc" class="w-4 h-4 rounded border-slate-300 text-orbi-blue focus:ring-orbi-blue cursor-pointer">
+                                <span>Família recebe Benefício de Prestação Continuada (BPC)</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <!-- ETAPA 2: VÍNCULO ESCOLAR & CENSO -->
+            <div id="etapa-2" class="space-y-6 hidden">
+                
+                <!-- CARD SEÇÃO 03 -->
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-5">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                            <i data-lucide="school" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">03. Vínculo Operacional na Rede Municipal</h3>
+                            <p class="text-xs text-slate-500">Lotação escolar, código INEP e enquadramento de turma e modalidade.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Código do Aluno no Censo / INEP</label>
+                            <input type="text" name="codigo_inep" placeholder="Identificação única nacional INEP" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Número de Matrícula Interna *</label>
+                            <input type="text" name="matricula" placeholder="Código de controle municipal" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all" required>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Unidade Escolar de Lotação *</label>
+                            <select name="escola_id" required class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none cursor-pointer transition-all">
+                                <option value="" disabled selected>Selecione a Unidade de Ensino...</option>
+                                {% for e in escolas %}
+                                <option value="{{ e.id }}">{{ e.nome }} (INEP: {{ e.codigo_inep }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Turma e Turno *</label>
+                            <input type="text" name="turma" placeholder="Ex: 5º Ano B — Tarde" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all" required>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Modalidade de Ensino</label>
+                            <select name="modalidade" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none cursor-pointer transition-all">
+                                <option value="Regular">Ensino Regular</option>
+                                <option value="EJA">EJA (Educação de Jovens e Adultos)</option>
+                                <option value="Profissional">Educação Profissional</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Etapa de Ensino (INEP)</label>
+                            <select name="etapa_ensino" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none cursor-pointer transition-all">
+                                <option value="Creche">Educação Infantil (Creche)</option>
+                                <option value="Pre-Escola">Educação Infantil (Pré-Escola)</option>
+                                <option value="Fundamental-Iniciais">Ensino Fundamental (Anos Iniciais)</option>
+                                <option value="Fundamental-Finais">Ensino Fundamental (Anos Finais)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD SEÇÃO 04 -->
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-5">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">04. Recursos Necessários para Avaliações Oficiais (SAEB / Provas Censo)</h3>
+                            <p class="text-xs text-slate-500">Adaptações regulamentares exigidas para exames externos e avaliações diagnósticas.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <label class="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-orbi-50/50 hover:border-orbi-200 font-semibold text-slate-700 transition-all">
+                            <input type="checkbox" name="recurso_ledor" class="rounded border-slate-300 text-orbi-blue w-4 h-4 cursor-pointer">
+                            <span>Necessita de Ledor de Prova</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-orbi-50/50 hover:border-orbi-200 font-semibold text-slate-700 transition-all">
+                            <input type="checkbox" name="recurso_transcritor" class="rounded border-slate-300 text-orbi-blue w-4 h-4 cursor-pointer">
+                            <span>Necessita de Transcritor (Auxílio para escrita)</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-orbi-50/50 hover:border-orbi-200 font-semibold text-slate-700 transition-all">
+                            <input type="checkbox" name="recurso_libras" class="rounded border-slate-300 text-orbi-blue w-4 h-4 cursor-pointer">
+                            <span>Necessita de Guia-Intérprete de Libras</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:bg-orbi-50/50 hover:border-orbi-200 font-semibold text-slate-700 transition-all">
+                            <input type="checkbox" name="recurso_ampliado" class="rounded border-slate-300 text-orbi-blue w-4 h-4 cursor-pointer">
+                            <span>Necessita de Prova Impressa com Fonte Ampliada</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ETAPA 3: CONDIÇÃO DIAGNÓSTICA & AEE -->
+            <div id="etapa-3" class="space-y-6 hidden">
+                
+                <!-- CARD SEÇÃO 05 -->
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-5">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                            <i data-lucide="activity" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">05. Mapeamento da Educação Especial</h3>
+                            <p class="text-xs text-slate-500">Classificação clínica, CID e indicadores específicos da Educação Inclusiva.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Deficiência / Categoria Principal *</label>
+                            <select name="tipo_deficiencia" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none cursor-pointer transition-all" required>
+                                <option value="Física">Deficiência Física</option>
+                                <option value="Intelectual">Deficiência Intelectual</option>
+                                <option value="Auditiva">Deficiência Auditiva</option>
+                                <option value="Visual">Deficiência Visual</option>
+                                <option value="Surdocegueira">Surdocegueira</option>
+                                <option value="Múltipla">Deficiência Múltipla</option>
+                                <option value="Nenhuma">Nenhuma Deficiência Declarada</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Código CID Principal</label>
+                            <input type="text" name="cid" placeholder="Ex: F84.0, G80" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Hipótese Diagnóstica (se em investigação)</label>
+                            <input type="text" name="hipotese_diagnostica" placeholder="Ex: Atraso global no desenvolvimento" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 col-span-1 md:col-span-3 gap-4 pt-1">
+                            <label class="flex items-center gap-3 cursor-pointer text-xs font-semibold text-amber-900 bg-amber-50/70 border border-amber-200/80 rounded-xl p-3.5 hover:bg-amber-100/50 transition-colors">
+                                <input type="checkbox" name="em_investigacao" class="w-4 h-4 rounded border-amber-300 text-amber-600 focus:ring-amber-600 cursor-pointer">
+                                <i data-lucide="microscope" class="w-4 h-4 text-amber-600 shrink-0"></i>
+                                <span>Em processo de investigação clínica / Sem laudo</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer text-xs font-semibold text-purple-900 bg-purple-50/70 border border-purple-200/80 rounded-xl p-3.5 hover:bg-purple-100/50 transition-colors">
+                                <input type="checkbox" name="possui_tea" class="w-4 h-4 rounded border-purple-300 text-purple-600 focus:ring-purple-600 cursor-pointer">
+                                <i data-lucide="puzzle" class="w-4 h-4 text-purple-600 shrink-0"></i>
+                                <span>Estudante com TEA</span>
+                            </label>
+                            <label class="flex items-center gap-3 cursor-pointer text-xs font-semibold text-teal-900 bg-teal-50/70 border border-teal-200/80 rounded-xl p-3.5 hover:bg-teal-100/50 transition-colors">
+                                <input type="checkbox" name="possui_superdotacao" class="w-4 h-4 rounded border-teal-300 text-teal-600 focus:ring-teal-600 cursor-pointer">
+                                <i data-lucide="sparkles" class="w-4 h-4 text-teal-600 shrink-0"></i>
+                                <span>Altas Habilidades / Superdotação</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD SEÇÃO 06 -->
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-5">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                            <i data-lucide="blocks" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">06. Atendimento Educacional Especializado (AEE) Contraturno</h3>
+                            <p class="text-xs text-slate-500">Alocação em Sala de Recursos Multifuncionais e suporte de profissional de apoio.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Local de Atendimento Compartilhado</label>
+                            <select name="local_aee" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none cursor-pointer transition-all">
+                                <option value="Sala de Recursos Multifuncionais da Própria Escola">Sala de Recursos Multifuncionais da Própria Escola</option>
+                                <option value="Sala de Recursos de OUTRA Escola Municipal">Sala de Recursos de OUTRA Escola Municipal</option>
+                                <option value="Centro de Atendimento Especializado conveniado">Centro de Atendimento Especializado de Rede Conveniada (Ex: APAE)</option>
+                                <option value="Não Recebe AEE">Não Recebe Atendimento Especializado</option>
+                            </select>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Necessidade de Moderação Técnico-Apoio</label>
+                            <select name="necessita_apoio" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none cursor-pointer transition-all">
+                                <option value="Monitor de Cuidados Pessoais / Vida Diária">Monitor de Cuidados Pessoais / Vida Diária</option>
+                                <option value="Estagiário Auxiliar Pedagógico">Estagiário Auxiliar Pedagógico de Ensino</option>
+                                <option value="Intérprete de Libras em sala">Intérprete Regular de Libras em Classe</option>
+                                <option value="Nenhum">Não Necessita de Profissional Exclusivo</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ETAPA 4: SAÚDE & LOGÍSTICA COLETIVA -->
             <div id="etapa-4" class="space-y-6 hidden">
-                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2">
-                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">07</span>
-                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">Prontuário Médico e Cuidados Institucionais</h3>
-                </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Medicações de Uso Contínuo e Dosagens</label>
-                        <textarea name="medicacoes" placeholder="Especifique os fármacos controlados e cronograma de administração em horário escolar..." rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                <!-- CARD SEÇÃO 07 -->
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-5">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                            <i data-lucide="heart-pulse" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">07. Prontuário Médico e Cuidados Institucionais</h3>
+                            <p class="text-xs text-slate-500">Prescrições contínuas, restrições alimentares e adequações de infraestrutura.</p>
+                        </div>
                     </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Restrições Alimentares / Intolerâncias</label>
-                        <textarea name="restricoes_alimentares" placeholder="Laudo de patologias digestivas, restrições ou alergias severas com a merenda..." rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
-                    </div>
-                    <div>
-                        <label class="block text-slate-700 font-bold mb-1">Acessibilidade Necessária na Estrutura</label>
-                        <textarea name="acessibilidade_necessaria" placeholder="Ex: Mobiliário adaptado, rampa de acesso, instalações sanitárias adaptadas, etc..." rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-semibold focus:bg-white focus:border-gov-blue focus:outline-none placeholder:text-slate-400"></textarea>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Medicações de Uso Contínuo e Dosagens</label>
+                            <textarea name="medicacoes" placeholder="Especifique os fármacos controlados e cronograma de administração em horário escolar..." rows="3" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all"></textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Restrições Alimentares / Intolerâncias</label>
+                            <textarea name="restricoes_alimentares" placeholder="Laudo de patologias digestivas, restrições ou alergias severas com a merenda..." rows="3" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all"></textarea>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-slate-700 font-semibold">Acessibilidade Necessária na Estrutura</label>
+                            <textarea name="acessibilidade_necessaria" placeholder="Ex: Mobiliário adaptado, rampa de acesso, instalações sanitárias adaptadas, etc..." rows="3" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all"></textarea>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-2 border-b-2 border-slate-200 pb-2 pt-4">
-                    <span class="w-6 h-6 rounded-lg bg-gov-blue text-white flex items-center justify-center font-black text-xs">08</span>
-                    <h3 class="text-base font-black text-gov-blue uppercase tracking-tight">🚐 Pré-Mapeamento Logístico (Módulo de Transporte Inclusivo)</h3>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50/50 border-2 border-dashed border-blue-200 rounded-xl p-5 font-black text-slate-700">
-                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
-                        <input type="checkbox" name="necessita_transporte_adaptado" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer">
-                        <span>Estudante necessita de Ônibus/Van Escolar Adaptada</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
-                        <input type="checkbox" name="cadeirante" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer">
-                        <span>Aluno Cadeirante (Exige elevador/plataforma hidráulica)</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
-                        <input type="checkbox" name="necessita_acompanhante" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer">
-                        <span>Exige Responsável/Acompanhante a bordo na poltrona auxiliar</span>
-                    </label>
-                    <label class="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-blue-100/40 transition-all">
-                        <input type="checkbox" name="possui_monitor_rota" class="rounded border-slate-300 text-gov-blue w-4 h-4 cursor-pointer">
-                        <span>Necessita de monitor de rota especializado em crises comportamentais</span>
-                    </label>
+                <!-- CARD SEÇÃO 08 -->
+                <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs space-y-5">
+                    <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                        <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                            <i data-lucide="bus" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900">08. Pré-Mapeamento Logístico (Módulo de Transporte Inclusivo)</h3>
+                            <p class="text-xs text-slate-500">Requisitos de mobilidade, plataforma veicular e acompanhamento em rota.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                        <label class="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl bg-orbi-50/40 border border-orbi-100 hover:bg-orbi-50 font-semibold text-slate-700 transition-all">
+                            <input type="checkbox" name="necessita_transporte_adaptado" class="rounded border-slate-300 text-orbi-blue w-4 h-4 cursor-pointer">
+                            <span>Estudante necessita de Ônibus/Van Escolar Adaptada</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl bg-orbi-50/40 border border-orbi-100 hover:bg-orbi-50 font-semibold text-slate-700 transition-all">
+                            <input type="checkbox" name="cadeirante" class="rounded border-slate-300 text-orbi-blue w-4 h-4 cursor-pointer">
+                            <span>Aluno Cadeirante (Exige elevador/plataforma hidráulica)</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl bg-orbi-50/40 border border-orbi-100 hover:bg-orbi-50 font-semibold text-slate-700 transition-all">
+                            <input type="checkbox" name="necessita_acompanhante" class="rounded border-slate-300 text-orbi-blue w-4 h-4 cursor-pointer">
+                            <span>Exige Responsável/Acompanhante a bordo na poltrona auxiliar</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer p-3.5 rounded-xl bg-orbi-50/40 border border-orbi-100 hover:bg-orbi-50 font-semibold text-slate-700 transition-all">
+                            <input type="checkbox" name="possui_monitor_rota" class="rounded border-slate-300 text-orbi-blue w-4 h-4 cursor-pointer">
+                            <span>Necessita de monitor de rota especializado em crises comportamentais</span>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="border-t border-slate-200 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p class="text-xs text-slate-400 font-bold tracking-tight">Ao validar e chancelar, a ficha será auditada e consolidada na base do censo municipal.</p>
-                    <button type="submit" class="w-full sm:w-auto bg-gov-blue hover:bg-slate-800 text-white font-black text-xs uppercase tracking-wider px-8 py-3.5 rounded-lg transition-all shadow-md flex items-center justify-center gap-2">
-                        💾 Homologar e Salvar Matrícula Unificada
+                <!-- RODAPÉ DE SUBMISSÃO -->
+                <div class="border-t border-slate-200/80 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <p class="text-xs text-slate-500">Ao validar e chancelar, a ficha será auditada e consolidada na base do censo municipal.</p>
+                    <button type="submit" class="w-full sm:w-auto bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold text-xs px-6 py-3 rounded-xl transition-all shadow-xs inline-flex items-center justify-center gap-2">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        <span>Homologar e Salvar Matrícula Unificada</span>
                     </button>
                 </div>
             </div>
@@ -315,15 +417,15 @@
 
         for (let i = 1; i <= 4; i++) {
             let btn = document.getElementById('btn-etapa-' + i);
-            btn.classList.remove('border-emerald-400', 'text-white', 'bg-slate-800/50');
-            btn.classList.add('border-transparent', 'text-slate-400');
+            btn.classList.remove('border-orbi-blue', 'text-orbi-blue', 'bg-white');
+            btn.classList.add('border-transparent', 'text-slate-500');
         }
 
         document.getElementById('etapa-' + etapaAlvo).classList.remove('hidden');
 
         let btnAtivo = document.getElementById('btn-etapa-' + etapaAlvo);
-        btnAtivo.classList.remove('border-transparent', 'text-slate-400');
-        btnAtivo.classList.add('border-emerald-400', 'text-white', 'bg-slate-800/50');
+        btnAtivo.classList.remove('border-transparent', 'text-slate-500');
+        btnAtivo.classList.add('border-orbi-blue', 'text-orbi-blue', 'bg-white');
     }
 
     async function buscarAlunoRedeNacional() {
@@ -332,12 +434,12 @@
         
         if (cpf.length !== 11) {
             feedback.textContent = "Digite um CPF válido (11 dígitos).";
-            feedback.className = "text-[10px] font-bold mt-1 block text-red-500";
+            feedback.className = "text-[11px] font-semibold mt-1 block text-rose-600";
             return;
         }
 
-        feedback.textContent = "Buscando na rede nacional Gestoor 360...";
-        feedback.className = "text-[10px] font-bold mt-1 block text-blue-500";
+        feedback.textContent = "Buscando na rede nacional ORBI...";
+        feedback.className = "text-[11px] font-semibold mt-1 block text-orbi-blue";
 
         try {
             const municipioSlug = "{{ g.municipio.slug }}";
@@ -374,16 +476,16 @@
                 if(d.necessita_acompanhante !== undefined) document.querySelector('[name="necessita_acompanhante"]').checked = d.necessita_acompanhante;
                 if(d.possui_monitor_rota !== undefined) document.querySelector('[name="possui_monitor_rota"]').checked = d.possui_monitor_rota;
 
-                feedback.innerHTML = `✅ <b>Aluno localizado!</b> Dados importados com sucesso. Ao salvar esta matrícula, o vínculo na prefeitura anterior será inativado automaticamente.`;
-                feedback.className = "text-xs font-black mt-2 block text-emerald-600 bg-emerald-50 p-2 rounded border border-emerald-200";
+                feedback.innerHTML = `<b>Aluno localizado!</b> Dados importados com sucesso. Ao salvar esta matrícula, o vínculo na prefeitura anterior será inativado automaticamente.`;
+                feedback.className = "text-xs font-semibold mt-2 block text-emerald-700 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200";
             } else {
                 feedback.textContent = "Estudante não encontrado na base de outros municípios. Pode prosseguir com o cadastro manual.";
-                feedback.className = "text-[10px] font-bold mt-1 block text-slate-500";
+                feedback.className = "text-[11px] font-medium mt-1 block text-slate-500";
             }
         } catch (error) {
             console.error(error);
             feedback.textContent = "Erro ao buscar na base nacional.";
-            feedback.className = "text-[10px] font-bold mt-1 block text-red-500";
+            feedback.className = "text-[11px] font-semibold mt-1 block text-rose-600";
         }
     }
 </script>

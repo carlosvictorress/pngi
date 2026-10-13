@@ -4,25 +4,29 @@
 {% block header_title %}Registro da Reunião Mensal & Plano de Ação de Casos{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-6 pb-12 font-sans">
+<div class="max-w-5xl mx-auto space-y-6">
 
-    <!-- CABEÇALHO -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <div class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-purple-200">
-                PLANEJAMENTO ESTRATÉGICO & PRESTAÇÃO DE CONTAS
+    <!-- CABEÇALHO EXECUTIVO -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="space-y-1.5">
+            <div class="flex items-center gap-2">
+                <span class="bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider inline-flex items-center gap-1.5">
+                    <i data-lucide="calendar-check" class="w-3.5 h-3.5"></i>
+                    <span>Planejamento Estratégico & Prestação de Contas</span>
+                </span>
             </div>
-            <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-1">
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">
                 Ata Técnica Mensal & Plano de Intervenção
             </h1>
-            <p class="text-xs text-slate-500">
+            <p class="text-xs text-slate-500 leading-relaxed">
                 Registro oficial da reunião mensal da equipe multidisciplinar com estudo de casos clínicos e metas setoriais.
             </p>
         </div>
 
         <a href="{{ url_for('equipe_multi.listar_planos_acao', municipio_slug=g.municipio.slug) }}"
-           class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all shrink-0">
-            ← Voltar para Planos de Ação
+           class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 shrink-0 transition-all">
+            <i data-lucide="arrow-left" class="w-4 h-4 text-slate-500"></i>
+            <span>Voltar para Planos de Ação</span>
         </a>
     </div>
 
@@ -30,22 +34,25 @@
     <form action="{{ url_for('equipe_multi.novo_plano_acao', municipio_slug=g.municipio.slug) }}" method="POST" class="space-y-6">
 
         <!-- 1. DADOS DA REUNIÃO MENSAL -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
-                1. DADOS DE IDENTIFICAÇÃO DA REUNIÃO MENSAL
-            </h2>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                <i data-lucide="calendar" class="w-4 h-4 text-orbi-blue"></i>
+                <h2 class="text-sm font-bold text-slate-900">
+                    1. Dados de Identificação da Reunião Mensal
+                </h2>
+            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="space-y-1 md:col-span-2">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Título do Encontro / Reunião *</label>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="space-y-1.5 md:col-span-2">
+                    <label class="text-xs font-semibold text-slate-700">Título do Encontro / Reunião *</label>
                     <input type="text" name="titulo" required
                            value="Reunião Mensal de Alinhamento e Estudo de Casos — {{ mes_atual }}/{{ ano_atual }}"
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-purple-500">
+                           class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                 </div>
 
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Mês de Referência *</label>
-                    <select name="mes_referencia" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold outline-none focus:ring-2 focus:ring-purple-500">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-700">Mês de Referência *</label>
+                    <select name="mes_referencia" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                         <option value="Janeiro">Janeiro</option>
                         <option value="Fevereiro">Fevereiro</option>
                         <option value="Março">Março</option>
@@ -62,75 +69,81 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Ano de Exercício</label>
-                    <input type="number" name="ano_referencia" value="{{ ano_atual }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold outline-none">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-700">Ano de Exercício</label>
+                    <input type="number" name="ano_referencia" value="{{ ano_atual }}" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-mono font-semibold text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Data da Realização</label>
-                    <input type="date" name="data_reuniao" value="{{ now.strftime('%Y-%m-%d') }}" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-700">Data da Realização</label>
+                    <input type="date" name="data_reuniao" value="{{ now.strftime('%Y-%m-%d') }}" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Local da Reunião</label>
-                    <input type="text" name="local_reuniao" value="Secretaria Municipal de Educação" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none">
+                <div class="space-y-1.5">
+                    <label class="text-xs font-semibold text-slate-700">Local da Reunião</label>
+                    <input type="text" name="local_reuniao" value="Secretaria Municipal de Educação" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                 </div>
             </div>
 
-            <div class="space-y-1.5 pt-1">
+            <div class="space-y-2 pt-1">
                 <div class="flex items-center justify-between">
-                    <label class="text-[10px] font-bold uppercase tracking-wider text-slate-600">Profissionais da Equipe Presentes * (Nomes e Funções)</label>
-                    <span class="text-[10px] text-purple-600 font-semibold hidden sm:inline">Clique no profissional para adicionar à lista:</span>
+                    <label class="text-xs font-semibold text-slate-700">Profissionais da Equipe Presentes * (Nomes e Funções)</label>
+                    <span class="text-[11px] text-orbi-blue font-medium hidden sm:inline">Clique no profissional para adicionar à lista:</span>
                 </div>
                 {% if profissionais %}
-                <div class="flex flex-wrap gap-1.5 p-2 bg-slate-50 border border-slate-200/80 rounded-xl">
+                <div class="flex flex-wrap gap-1.5 p-2.5 bg-slate-50/80 border border-slate-200/80 rounded-xl">
                     {% for p in profissionais %}
                     <button type="button" onclick="adicionarProfissionalPresente('{{ p.nome }} ({{ p.cargo or 'Especialista' }})')"
-                            class="px-2.5 py-1 bg-white hover:bg-purple-100 text-purple-800 text-[10px] font-bold rounded-lg border border-purple-200 transition-all flex items-center gap-1 shadow-xs">
-                        <span>+</span> {{ p.nome }} <span class="text-slate-400 font-normal">({{ p.cargo or 'Especialista' }})</span>
+                            class="px-2.5 py-1.5 bg-white hover:bg-orbi-50 text-slate-700 hover:text-orbi-blue text-xs font-semibold rounded-lg border border-slate-200/90 transition-all inline-flex items-center gap-1 shadow-xs">
+                        <i data-lucide="plus" class="w-3 h-3 text-orbi-blue"></i>
+                        <span>{{ p.nome }}</span>
+                        <span class="text-slate-400 font-normal">({{ p.cargo or 'Especialista' }})</span>
                     </button>
                     {% endfor %}
                 </div>
                 {% endif %}
                 <textarea name="profissionais_presentes" id="textarea-presentes" rows="2" required placeholder="Ex: Dr. João da Silva (Psicólogo Escolar), Profa. Maria Santos (Psicopedagoga), Dra. Ana Oliveira (Assistente Social)..."
-                          class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed font-medium"></textarea>
+                          class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none leading-relaxed font-medium"></textarea>
             </div>
         </div>
 
         <!-- 2. ESTUDO DE CASOS CLÍNICOS / PEDAGÓGICOS DISCUTIDOS -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h2 class="text-xs font-extrabold uppercase tracking-wider text-purple-700 flex items-center gap-1.5">
-                    <span>2.</span> ESTUDO DE CASOS DE ESTUDANTES DISCUTIDOS NA REUNIÃO
-                </h2>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="folder-open" class="w-4 h-4 text-orbi-blue"></i>
+                    <h2 class="text-sm font-bold text-slate-900">
+                        2. Estudo de Casos de Estudantes Discutidos na Reunião
+                    </h2>
+                </div>
                 <button type="button" onclick="adicionarLinhaCaso()"
-                        class="bg-purple-100 hover:bg-purple-200 text-purple-800 text-[10px] font-bold px-3 py-1 rounded-lg transition-all">
-                    + Adicionar Estudante Discutido
+                        class="bg-orbi-50 hover:bg-orbi-blue text-orbi-blue hover:text-white border border-orbi-100 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all inline-flex items-center gap-1.5">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Adicionar Estudante Discutido</span>
                 </button>
             </div>
 
-            <p class="text-[11px] text-slate-400">
+            <p class="text-xs text-slate-500">
                 Liste os estudantes prioritários analisados pela equipe nesta sessão de estudo de casos:
             </p>
 
             <div id="container-casos" class="space-y-3">
-                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3 item-caso">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div class="space-y-1 md:col-span-2">
-                            <label class="text-[9px] font-bold uppercase text-slate-500">Nome do Estudante / Escola</label>
+                <div class="p-4 bg-slate-50/70 rounded-xl border border-slate-200/80 space-y-3 item-caso">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label class="text-xs font-semibold text-slate-700">Nome do Estudante / Escola</label>
                             <input type="text" name="caso_aluno_nome[]" placeholder="Nome do aluno e escola..."
-                                   class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 font-semibold">
+                                   class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none font-medium">
                         </div>
-                        <div class="space-y-1">
-                            <label class="text-[9px] font-bold uppercase text-slate-500">Diagnóstico / Situação</label>
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-slate-700">Diagnóstico / Situação</label>
                             <input type="text" name="caso_aluno_diag[]" placeholder="Ex: TEA nível 2 / Em investigação..."
-                                   class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
+                                   class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none">
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-bold uppercase text-slate-500">Síntese do Caso e Encaminhamento Definido na Reunião</label>
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-700">Síntese do Caso e Encaminhamento Definido na Reunião</label>
                         <textarea name="caso_aluno_sintese[]" rows="2" placeholder="Resumo dos desafios observados e o plano de ação acordado em conjunto pela equipe..."
-                                  class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"></textarea>
+                                  class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none leading-relaxed"></textarea>
                     </div>
                 </div>
             </div>
@@ -139,60 +152,67 @@
         </div>
 
         <!-- 3. PLANOS DE AÇÃO SETORIAIS ESPECÍFICOS -->
-        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-5">
-            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
-                3. DELIBERAÇÕES & PLANOS DE AÇÃO POR ESPECIALIDADE
-            </h2>
+        <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs space-y-5">
+            <div class="flex items-center gap-2 border-b border-slate-100 pb-3">
+                <i data-lucide="layers" class="w-4 h-4 text-orbi-blue"></i>
+                <h2 class="text-sm font-bold text-slate-900">
+                    3. Deliberações & Planos de Ação por Especialidade
+                </h2>
+            </div>
 
             <!-- AÇÕES DA PSICOLOGIA -->
-            <div class="space-y-1.5 p-4 bg-indigo-50/40 rounded-2xl border border-indigo-100">
-                <label class="text-xs font-extrabold text-indigo-900 flex items-center gap-1.5">
-                    <span>🧠</span> Ações & Metas Definidas para a Psicologia Escolar
+            <div class="space-y-2 p-4 bg-indigo-50/40 rounded-xl border border-indigo-100">
+                <label class="text-xs font-bold text-indigo-900 flex items-center gap-2">
+                    <i data-lucide="brain" class="w-4 h-4 text-indigo-600"></i>
+                    <span>Ações & Metas Definidas para a Psicologia Escolar</span>
                 </label>
                 <textarea name="acoes_psicologia" rows="3" placeholder="Intervenções terapêuticas, escutas agendadas, oficinas de regulação emocional e suporte parental previstos..."
-                          class="w-full bg-white border border-indigo-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500 leading-relaxed"></textarea>
+                          class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none leading-relaxed"></textarea>
             </div>
 
             <!-- AÇÕES DA PSICOPEDAGOGIA -->
-            <div class="space-y-1.5 p-4 bg-emerald-50/40 rounded-2xl border border-emerald-100">
-                <label class="text-xs font-extrabold text-emerald-900 flex items-center gap-1.5">
-                    <span>🧩</span> Ações & Metas Definidas para a Psicopedagogia
+            <div class="space-y-2 p-4 bg-emerald-50/40 rounded-xl border border-emerald-100">
+                <label class="text-xs font-bold text-emerald-900 flex items-center gap-2">
+                    <i data-lucide="blocks" class="w-4 h-4 text-emerald-600"></i>
+                    <span>Ações & Metas Definidas para a Psicopedagogia</span>
                 </label>
                 <textarea name="acoes_psicopedagogia" rows="3" placeholder="Avaliações cognitivas, visitas de orientação pedagógica aos professores regentes e adequação de PEI/PAEE..."
-                          class="w-full bg-white border border-emerald-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-emerald-500 leading-relaxed"></textarea>
+                          class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none leading-relaxed"></textarea>
             </div>
 
             <!-- AÇÕES DO SERVIÇO SOCIAL -->
-            <div class="space-y-1.5 p-4 bg-amber-50/40 rounded-2xl border border-amber-100">
-                <label class="text-xs font-extrabold text-amber-900 flex items-center gap-1.5">
-                    <span>🤝</span> Ações & Metas Definidas para o Serviço Social
+            <div class="space-y-2 p-4 bg-amber-50/40 rounded-xl border border-amber-100">
+                <label class="text-xs font-bold text-amber-900 flex items-center gap-2">
+                    <i data-lucide="heart-handshake" class="w-4 h-4 text-amber-600"></i>
+                    <span>Ações & Metas Definidas para o Serviço Social</span>
                 </label>
                 <textarea name="acoes_servico_social" rows="3" placeholder="Visitas domiciliares prioritárias, reuniões de rede com CRAS/CREAS, auxílio no acesso ao BPC e acompanhamento familiar..."
-                          class="w-full bg-white border border-amber-200 rounded-xl p-3 text-xs outline-none focus:ring-2 focus:ring-amber-500 leading-relaxed"></textarea>
+                          class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none leading-relaxed"></textarea>
             </div>
 
             <!-- DELIBERAÇÕES GERAIS E GESTÃO -->
             <div class="space-y-1.5">
-                <label class="text-xs font-bold text-slate-800">Deliberações Gerais & Encaminhamentos para a Gestão Escolar / Secretaria</label>
+                <label class="text-xs font-semibold text-slate-700">Deliberações Gerais & Encaminhamentos para a Gestão Escolar / Secretaria</label>
                 <textarea name="deliberacoes_gerais" rows="3" placeholder="Recomendações técnicas à Secretaria de Educação, solicitações de formação docente ou adequações na rede..."
-                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"></textarea>
+                          class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none leading-relaxed"></textarea>
             </div>
 
             <div class="space-y-1.5">
-                <label class="text-xs font-bold text-slate-800">Metas Prioritárias para o Próximo Mês</label>
+                <label class="text-xs font-semibold text-slate-700">Metas Prioritárias para o Próximo Mês</label>
                 <textarea name="metas_proximo_mes" rows="2" placeholder="Principais metas e compromissos firmados para a próxima reunião de alinhamento..."
-                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl p-3.5 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"></textarea>
+                          class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none leading-relaxed"></textarea>
             </div>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-2">
             <a href="{{ url_for('equipe_multi.listar_planos_acao', municipio_slug=g.municipio.slug) }}"
-               class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition-all">
+               class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs transition-all">
                 Cancelar
             </a>
             <button type="submit" onclick="prepararEnvioJson()"
-                    class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-extrabold rounded-xl text-xs transition-all shadow-md transform hover:scale-[1.01]">
-                Homologar Reunião Mensal & Salvar Plano
+                    class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold px-6 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all">
+                <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                <span>Homologar Reunião Mensal & Salvar Plano</span>
             </button>
         </div>
 
@@ -203,24 +223,24 @@
 function adicionarLinhaCaso() {
     const container = document.getElementById('container-casos');
     const div = document.createElement('div');
-    div.className = 'p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3 item-caso';
+    div.className = 'p-4 bg-slate-50/70 rounded-xl border border-slate-200/80 space-y-3 item-caso';
     div.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div class="space-y-1 md:col-span-2">
-                <label class="text-[9px] font-bold uppercase text-slate-500">Nome do Estudante / Escola</label>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="space-y-1.5 md:col-span-2">
+                <label class="text-xs font-semibold text-slate-700">Nome do Estudante / Escola</label>
                 <input type="text" name="caso_aluno_nome[]" placeholder="Nome do aluno e escola..."
-                       class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 font-semibold">
+                       class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none font-medium">
             </div>
-            <div class="space-y-1">
-                <label class="text-[9px] font-bold uppercase text-slate-500">Diagnóstico / Situação</label>
+            <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-700">Diagnóstico / Situação</label>
                 <input type="text" name="caso_aluno_diag[]" placeholder="Ex: TEA nível 2 / Em investigação..."
-                       class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
+                       class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none">
             </div>
         </div>
-        <div class="space-y-1">
-            <label class="text-[9px] font-bold uppercase text-slate-500">Síntese do Caso e Encaminhamento Definido na Reunião</label>
+        <div class="space-y-1.5">
+            <label class="text-xs font-semibold text-slate-700">Síntese do Caso e Encaminhamento Definido na Reunião</label>
             <textarea name="caso_aluno_sintese[]" rows="2" placeholder="Resumo dos desafios observados e o plano de ação acordado em conjunto pela equipe..."
-                      class="w-full bg-white border border-slate-200 rounded-xl p-2.5 text-xs outline-none focus:ring-2 focus:ring-purple-500 leading-relaxed"></textarea>
+                      class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none leading-relaxed"></textarea>
         </div>
     `;
     container.appendChild(div);

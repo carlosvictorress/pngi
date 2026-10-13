@@ -2,64 +2,111 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Espelho de Dados Censo Escolar INEP / Fundeb — Gestoor 360</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espelho de Dados Censo Escolar INEP / Fundeb — ORBI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    },
+                    colors: {
+                        orbi: {
+                            navy: '#0A2540',
+                            blue: '#0084CE',
+                            'blue-hover': '#006DAE',
+                            50: '#F0F7FF',
+                            100: '#E0F0FE'
+                        },
+                        brand: {
+                            50: '#F0F7FF',
+                            600: '#0084CE',
+                            700: '#006DAE'
+                        }
+                    },
+                    boxShadow: {
+                        'xs': '0 1px 2px 0 rgba(15, 23, 42, 0.04)'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         @media print {
             .no-print { display: none !important; }
+            body { padding: 0 !important; background: #FFFFFF !important; }
         }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 min-h-screen p-4 sm:p-8">
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen p-4 sm:p-8 font-sans antialiased">
 
-    <div class="max-w-6xl mx-auto mb-6 flex items-center justify-between no-print bg-slate-900 text-white p-4 rounded-2xl shadow-lg">
-        <div class="flex items-center gap-2">
-            <span class="text-blue-400 font-extrabold text-sm">📊 Espelho de Exportação do Censo Escolar INEP / Fundeb</span>
+    <div class="max-w-6xl mx-auto mb-6 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4 no-print">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                <i data-lucide="table" class="w-4 h-4"></i>
+            </div>
+            <div>
+                <span class="text-slate-900 font-bold text-sm block">Espelho de Exportação do Censo Escolar INEP / Fundeb</span>
+                <span class="text-slate-500 text-xs block">Visualização padronizada para conferência e alimentação do Educacenso</span>
+            </div>
         </div>
-        <button onclick="window.print()" class="bg-brand-600 hover:bg-brand-700 text-white font-extrabold px-5 py-2 rounded-xl text-xs shadow-md transition-all">
-            🖨️ Imprimir / Copiar Tabela
+        <button onclick="window.print()" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs transition-all inline-flex items-center gap-2">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>Imprimir / Copiar Tabela</span>
         </button>
     </div>
 
-    <div class="max-w-6xl mx-auto bg-white p-8 rounded-3xl shadow-xl border border-slate-200 space-y-6">
+    <div class="max-w-6xl mx-auto bg-white p-6 sm:p-8 rounded-2xl shadow-xs border border-slate-200/80 space-y-6">
         
-        <div>
-            <h1 class="text-lg font-extrabold text-slate-900 uppercase">Censo Escolar INEP — Descritores de Educação Especial</h1>
-            <p class="text-xs text-slate-500">Município de {{ g.municipio.nome }} — {{ g.municipio.estado }} • Total de Estudantes Mapeados: {{ alunos|length }}</p>
+        <div class="border-b border-slate-200/80 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+                <span class="bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider inline-block mb-1.5">Educacenso / MEC</span>
+                <h1 class="text-lg font-bold text-slate-900 tracking-tight">Censo Escolar INEP — Descritores de Educação Especial</h1>
+                <p class="text-xs text-slate-500 mt-0.5">Município de {{ g.municipio.nome }} — {{ g.municipio.estado }}</p>
+            </div>
+            <div class="bg-slate-50 border border-slate-200/80 px-4 py-2.5 rounded-xl text-xs">
+                <span class="text-slate-500 font-medium">Total de Estudantes Mapeados:</span>
+                <strong class="font-mono font-bold text-slate-900 ml-1">{{ alunos|length }}</strong>
+            </div>
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border border-slate-300">
-                <thead class="bg-slate-100 text-slate-800 uppercase text-[9px] font-bold border-b border-slate-300">
-                    <tr>
-                        <th class="p-2 border-r border-slate-300">Cód. INEP Aluno</th>
-                        <th class="p-2 border-r border-slate-300">Estudante</th>
-                        <th class="p-2 border-r border-slate-300">CPF</th>
-                        <th class="p-2 border-r border-slate-300">Escola</th>
-                        <th class="p-2 border-r border-slate-300">Turma</th>
-                        <th class="p-2 border-r border-slate-300">Deficiência / Transtorno</th>
-                        <th class="p-2 border-r border-slate-300">Recursos SAEB</th>
-                        <th class="p-2">Local AEE</th>
+        <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th class="py-3 px-3.5 border-r border-slate-200/70">Cód. INEP Aluno</th>
+                        <th class="py-3 px-3.5 border-r border-slate-200/70">Estudante</th>
+                        <th class="py-3 px-3.5 border-r border-slate-200/70">CPF</th>
+                        <th class="py-3 px-3.5 border-r border-slate-200/70">Escola</th>
+                        <th class="py-3 px-3.5 border-r border-slate-200/70">Turma</th>
+                        <th class="py-3 px-3.5 border-r border-slate-200/70">Deficiência / Transtorno</th>
+                        <th class="py-3 px-3.5 border-r border-slate-200/70">Recursos SAEB</th>
+                        <th class="py-3 px-3.5">Local AEE</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-200 font-medium text-[11px]">
+                <tbody class="divide-y divide-slate-100 text-[11px]">
                     {% for a in alunos %}
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-2 border-r border-slate-200 font-mono text-slate-600">{{ a.codigo_inep or 'Sem código' }}</td>
-                        <td class="p-2 border-r border-slate-200 font-bold text-slate-900">{{ a.nome }}</td>
-                        <td class="p-2 border-r border-slate-200 font-mono text-slate-500">{{ a.cpf or 'Não informado' }}</td>
-                        <td class="p-2 border-r border-slate-200">{{ a.escola.nome if a.escola else 'Não informada' }}</td>
-                        <td class="p-2 border-r border-slate-200">{{ a.turma }}</td>
-                        <td class="p-2 border-r border-slate-200 font-bold text-slate-800">{{ a.tipo_deficiencia }}</td>
-                        <td class="p-2 border-r border-slate-200">
-                            {% if a.recurso_ledor %}<span class="inline-block bg-blue-50 text-blue-700 px-1 rounded text-[9px]">Ledor</span>{% endif %}
-                            {% if a.recurso_transcritor %}<span class="inline-block bg-blue-50 text-blue-700 px-1 rounded text-[9px]">Transcritor</span>{% endif %}
-                            {% if a.recurso_libras %}<span class="inline-block bg-blue-50 text-blue-700 px-1 rounded text-[9px]">Libras</span>{% endif %}
-                            {% if a.recurso_ampliado %}<span class="inline-block bg-blue-50 text-blue-700 px-1 rounded text-[9px]">Ampliada</span>{% endif %}
+                    <tr class="hover:bg-slate-50/70 transition-colors">
+                        <td class="py-2.5 px-3.5 border-r border-slate-100 font-mono text-slate-600">{{ a.codigo_inep or 'Sem código' }}</td>
+                        <td class="py-2.5 px-3.5 border-r border-slate-100 font-bold text-slate-900">{{ a.nome }}</td>
+                        <td class="py-2.5 px-3.5 border-r border-slate-100 font-mono text-slate-500">{{ a.cpf or 'Não informado' }}</td>
+                        <td class="py-2.5 px-3.5 border-r border-slate-100 text-slate-700">{{ a.escola.nome if a.escola else 'Não informada' }}</td>
+                        <td class="py-2.5 px-3.5 border-r border-slate-100 text-slate-700">{{ a.turma }}</td>
+                        <td class="py-2.5 px-3.5 border-r border-slate-100 font-semibold text-slate-800">{{ a.tipo_deficiencia }}</td>
+                        <td class="py-2.5 px-3.5 border-r border-slate-100 space-x-1">
+                            {% if a.recurso_ledor %}<span class="inline-block bg-orbi-50 text-orbi-blue border border-orbi-100 px-1.5 py-0.5 rounded font-semibold text-[10px]">Ledor</span>{% endif %}
+                            {% if a.recurso_transcritor %}<span class="inline-block bg-orbi-50 text-orbi-blue border border-orbi-100 px-1.5 py-0.5 rounded font-semibold text-[10px]">Transcritor</span>{% endif %}
+                            {% if a.recurso_libras %}<span class="inline-block bg-orbi-50 text-orbi-blue border border-orbi-100 px-1.5 py-0.5 rounded font-semibold text-[10px]">Libras</span>{% endif %}
+                            {% if a.recurso_ampliado %}<span class="inline-block bg-orbi-50 text-orbi-blue border border-orbi-100 px-1.5 py-0.5 rounded font-semibold text-[10px]">Ampliada</span>{% endif %}
                         </td>
-                        <td class="p-2 text-slate-600">{{ a.local_aee or 'SRM Escola Polo' }}</td>
+                        <td class="py-2.5 px-3.5 text-slate-600">{{ a.local_aee or 'SRM Escola Polo' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -68,5 +115,10 @@
 
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
 </html>

@@ -2,114 +2,159 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dossiê Consolidação Educação Especial Inclusiva — Ministério Público</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    },
+                    colors: {
+                        orbi: {
+                            navy: '#0A2540',
+                            blue: '#0084CE',
+                            'blue-hover': '#006DAE',
+                            50: '#F0F7FF',
+                            100: '#E0F0FE'
+                        },
+                        brand: {
+                            50: '#F0F7FF',
+                            600: '#0084CE'
+                        }
+                    },
+                    boxShadow: {
+                        'xs': '0 1px 2px 0 rgba(15, 23, 42, 0.04)'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         @media print {
             .no-print { display: none !important; }
-            body { padding: 0; background: white; }
+            body { padding: 0 !important; background: #FFFFFF !important; }
             .page-break { page-break-after: always; }
         }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900 min-h-screen p-4 sm:p-8">
+<body class="bg-[#F8FAFC] text-slate-900 min-h-screen p-4 sm:p-8 font-sans antialiased">
 
-    <!-- BARRA DE AÇÃO FLUTUANTE (NÃO IMPRIMÍVEL) -->
-    <div class="max-w-5xl mx-auto mb-6 flex items-center justify-between no-print bg-slate-900 text-white p-4 rounded-2xl shadow-lg">
-        <div class="flex items-center gap-2">
-            <span class="text-amber-400 font-extrabold text-sm">🛡️ Relatório Timbrado para o Ministério Público</span>
+    <!-- BARRA DE AÇÃO EXECUTIVA (NÃO IMPRIMÍVEL) -->
+    <div class="max-w-5xl mx-auto mb-6 bg-white border border-slate-200/80 rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4 no-print">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-orbi-50 border border-orbi-100 text-orbi-blue flex items-center justify-center shrink-0">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+            </div>
+            <div>
+                <span class="text-slate-900 font-bold text-sm block">Relatório Timbrado para o Ministério Público</span>
+                <span class="text-slate-500 text-xs block">Dossiê administrativo auditado de Educação Especial Inclusiva</span>
+            </div>
         </div>
-        <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold px-5 py-2 rounded-xl text-xs shadow-md transition-all">
-            🖨️ Imprimir / Salvar em PDF
+        <button onclick="window.print()" class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs transition-all inline-flex items-center gap-2">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>Imprimir / Salvar em PDF</span>
         </button>
     </div>
 
     <!-- DOCUMENTO TIMBRADO OFICIAL -->
-    <div class="max-w-5xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-200 space-y-8">
+    <div class="max-w-5xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-xs border border-slate-200/80 space-y-8">
         
         <!-- CABEÇALHO GOVERNAMENTAL -->
-        <div class="border-b-2 border-slate-900 pb-6 flex items-center justify-between">
+        <div class="border-b-2 border-slate-900 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 {% if g.municipio.brasao_url %}
                 <img src="{{ g.municipio.brasao_url }}" alt="Brasão" class="w-16 h-16 object-contain">
                 {% else %}
-                <div class="w-14 h-14 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-extrabold text-xl">
+                <div class="w-14 h-14 bg-orbi-navy text-white rounded-2xl flex items-center justify-center font-extrabold text-xl shrink-0">
                     {{ g.municipio.estado }}
                 </div>
                 {% endif %}
                 <div>
-                    <h1 class="text-base font-extrabold text-slate-900 uppercase">Prefeitura Municipal de {{ g.municipio.nome }} — {{ g.municipio.estado }}</h1>
+                    <h1 class="text-base font-extrabold text-slate-900 uppercase tracking-tight">Prefeitura Municipal de {{ g.municipio.nome }} — {{ g.municipio.estado }}</h1>
                     <h2 class="text-xs font-bold text-slate-600 uppercase tracking-wider">Secretaria Municipal de Educação • Coordenação de Educação Especial Inclusiva</h2>
-                    <span class="text-[10px] text-slate-500 block">SISTEMA GESTOOR 360 — PLATAFORMA DE GOVERNANÇA E AUDITORIA PÚBLICA</span>
+                    <span class="text-[10px] text-slate-500 block mt-0.5">PLATAFORMA ORBI — GOVERNANÇA E AUDITORIA PÚBLICA DA EDUCAÇÃO ESPECIAL</span>
                 </div>
             </div>
 
-            <div class="text-right border-l border-slate-200 pl-4">
-                <span class="text-[10px] text-slate-400 font-bold uppercase block">Emissão Oficial</span>
-                <span class="text-xs font-mono font-extrabold text-slate-900 block">{{ data_emissao }}</span>
-                <span class="text-[9px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded font-extrabold border border-emerald-200 inline-block mt-1">
-                    ✓ Autenticidade Auditada
+            <div class="sm:text-right sm:border-l border-slate-200 sm:pl-4 shrink-0">
+                <span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Emissão Oficial</span>
+                <span class="text-xs font-mono font-bold text-slate-900 block">{{ data_emissao }}</span>
+                <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-semibold border border-emerald-200/70 inline-flex items-center gap-1 mt-1">
+                    <i data-lucide="check-circle-2" class="w-3 h-3"></i>
+                    <span>Autenticidade Auditada</span>
                 </span>
             </div>
         </div>
 
-        <!-- TÍTULO DARESPOSTA AO MP -->
-        <div class="space-y-2 text-center bg-slate-50 p-6 rounded-2xl border border-slate-200">
-            <span class="text-[10px] font-extrabold text-brand-600 uppercase tracking-widest bg-blue-50 px-3 py-1 rounded-md">
-                DOSSIÊ TÉCNICO E CONSOLIDADO DE ATENDIMENTO
+        <!-- TÍTULO DA RESPOSTA AO MP -->
+        <div class="space-y-2 text-center bg-slate-50/80 p-6 rounded-2xl border border-slate-200/80">
+            <span class="text-[10px] font-semibold text-orbi-blue uppercase tracking-wider bg-orbi-50 border border-orbi-100 px-3 py-1 rounded-full inline-block">
+                Dossiê Técnico e Consolidado de Atendimento
             </span>
-            <h2 class="text-lg font-extrabold text-slate-900 uppercase">Relatório de Atendimento aos Estudantes da Educação Especial Inclusiva</h2>
-            <p class="text-xs text-slate-600 max-w-3xl mx-auto">
+            <h2 class="text-lg font-bold text-slate-900 uppercase tracking-tight">Relatório de Atendimento aos Estudantes da Educação Especial Inclusiva</h2>
+            <p class="text-xs text-slate-600 max-w-3xl mx-auto leading-relaxed">
                 Documento administrativo expedido para instrução de procedimentos administrativos, notícias de fato e Notificações Recomendatórias junto à Promotoria de Justiça da Infância e Juventude.
             </p>
         </div>
 
         <!-- TABELA DOSSIÊ COMPLETO -->
-        <div class="space-y-4">
-            <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">RELAÇÃO DE ESTUDANTES ATENDIDOS E RECURSOS ALOCADOS (TOTAL: {{ dossie_alunos|length }})</h3>
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Relação de Estudantes Atendidos e Recursos Alocados</h3>
+                <span class="text-xs font-mono font-bold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg">Total: {{ dossie_alunos|length }}</span>
+            </div>
             
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border border-slate-300">
-                    <thead class="bg-slate-100 text-slate-800 uppercase text-[9px] font-extrabold border-b border-slate-300">
-                        <tr>
-                            <th class="p-2.5 border-r border-slate-300">Estudante / CPF</th>
-                            <th class="p-2.5 border-r border-slate-300">Escola / Turma</th>
-                            <th class="p-2.5 border-r border-slate-300">Diagnóstico / CID</th>
-                            <th class="p-2.5 border-r border-slate-300">Situação PEI</th>
-                            <th class="p-2.5">Ciência Família</th>
+            <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            <th class="py-3 px-4 border-r border-slate-200/70">Estudante / CPF</th>
+                            <th class="py-3 px-4 border-r border-slate-200/70">Escola / Turma</th>
+                            <th class="py-3 px-4 border-r border-slate-200/70">Diagnóstico / CID</th>
+                            <th class="py-3 px-4 border-r border-slate-200/70">Situação PEI</th>
+                            <th class="py-3 px-4">Ciência Família</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-200">
+                    <tbody class="divide-y divide-slate-100">
                         {% for item in dossie_alunos %}
-                        <tr class="hover:bg-slate-50">
-                            <td class="p-2.5 border-r border-slate-200">
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-3 px-4 border-r border-slate-100">
                                 <span class="font-bold block text-slate-900">{{ item.aluno.nome }}</span>
                                 <span class="text-[10px] text-slate-500 font-mono">Matrícula: {{ item.aluno.matricula }}</span>
                             </td>
-                            <td class="p-2.5 border-r border-slate-200">
+                            <td class="py-3 px-4 border-r border-slate-100">
                                 <span class="font-semibold block text-slate-800">{{ item.escola_nome }}</span>
                                 <span class="text-[10px] text-slate-500">{{ item.aluno.turma }}</span>
                             </td>
-                            <td class="p-2.5 border-r border-slate-200">
-                                <span class="font-bold text-slate-900 block">{{ item.aluno.tipo_deficiencia }}</span>
-                                <span class="text-[10px] text-brand-600 font-mono">CID: {{ item.aluno.cid or 'Em Investigação' }}</span>
+                            <td class="py-3 px-4 border-r border-slate-100">
+                                <span class="font-semibold text-slate-900 block">{{ item.aluno.tipo_deficiencia }}</span>
+                                <span class="text-[10px] text-orbi-blue font-mono font-medium">CID: {{ item.aluno.cid or 'Em Investigação' }}</span>
                             </td>
-                            <td class="p-2.5 border-r border-slate-200">
+                            <td class="py-3 px-4 border-r border-slate-100">
                                 {% if item.pei %}
-                                <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/70">
                                     {{ item.pei.status }}
                                 </span>
                                 {% else %}
-                                <span class="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                                <span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/70">
                                     Em Elaboração
                                 </span>
                                 {% endif %}
                             </td>
-                            <td class="p-2.5">
+                            <td class="py-3 px-4">
                                 {% if item.pei and item.pei.assinado_familia %}
-                                <span class="text-[10px] font-bold text-emerald-700">✓ Assinado em {{ item.pei.assinado_familia_em.strftime('%d/%m/%Y') }}</span>
+                                <span class="text-[10px] font-semibold text-emerald-700 inline-flex items-center gap-1">
+                                    <i data-lucide="check" class="w-3 h-3"></i>
+                                    <span>Assinado em {{ item.pei.assinado_familia_em.strftime('%d/%m/%Y') }}</span>
+                                </span>
                                 {% else %}
                                 <span class="text-[10px] text-slate-400">Pendente de Coleta</span>
                                 {% endif %}
@@ -128,13 +173,13 @@
             </p>
 
             <div class="pt-12 grid grid-cols-2 gap-8 text-center">
-                <div class="border-t border-slate-400 pt-2 space-y-0.5">
-                    <span class="font-extrabold text-slate-900 block text-xs">Secretaria Municipal de Educação</span>
+                <div class="border-t border-slate-300 pt-2.5 space-y-0.5">
+                    <span class="font-bold text-slate-900 block text-xs">Secretaria Municipal de Educação</span>
                     <span class="text-[10px] text-slate-500 block">Prefeitura de {{ g.municipio.nome }}</span>
                 </div>
 
-                <div class="border-t border-slate-400 pt-2 space-y-0.5">
-                    <span class="font-extrabold text-slate-900 block text-xs">Coordenação de Educação Especial Inclusiva</span>
+                <div class="border-t border-slate-300 pt-2.5 space-y-0.5">
+                    <span class="font-bold text-slate-900 block text-xs">Coordenação de Educação Especial Inclusiva</span>
                     <span class="text-[10px] text-slate-500 block">Responsável Técnico AEE</span>
                 </div>
             </div>
@@ -142,5 +187,10 @@
 
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+        });
+    </script>
 </body>
 </html>

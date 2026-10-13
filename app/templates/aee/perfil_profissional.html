@@ -1,155 +1,167 @@
 {% extends 'base.html' %}
 
-{% block title %}Perfil Profissional — {{ profissional.nome }} (Gestoor 360){% endblock %}
+{% block title %}Perfil Profissional — {{ profissional.nome }} — ORBI{% endblock %}
 {% block header_title %}Ficha 360º de Atuação do Especialista do AEE{% endblock %}
 
 {% block content %}
-<div class="space-y-8 pb-12">
+<div class="space-y-6 pb-12">
 
     <!-- CABEÇALHO DO PROFISSIONAL -->
-    <div class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center md:items-start justify-between gap-6">
-        <div class="flex flex-col md:flex-row items-center md:items-start gap-5 text-center md:text-left">
-            <div class="w-20 h-20 bg-blue-50 text-brand-600 rounded-2xl flex items-center justify-center font-extrabold text-3xl shadow-inner border border-blue-200 shrink-0">
-                👤
+    <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+            <div class="w-14 h-14 bg-orbi-50 text-orbi-blue rounded-2xl flex items-center justify-center border border-orbi-100 shrink-0 shadow-xs">
+                <i data-lucide="user-check" class="w-6 h-6"></i>
             </div>
 
             <div class="space-y-1">
-                <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                    <span class="bg-blue-50 text-brand-600 text-[10px] font-extrabold px-3 py-0.5 rounded-full border border-blue-200 uppercase">
+                <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                    <span class="bg-orbi-50 text-orbi-blue text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-orbi-100 uppercase tracking-wider">
                         {{ profissional.cargo }}
                     </span>
-                    <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-3 py-0.5 rounded-full border border-emerald-200">
-                        Status: {{ profissional.status or 'Ativo' }}
+                    <span class="bg-emerald-50 text-emerald-700 text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-emerald-200/70 inline-flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Status: {{ profissional.status or 'Ativo' }}</span>
                     </span>
                 </div>
-                <h1 class="text-2xl font-extrabold text-slate-900">{{ profissional.nome }}</h1>
-                <p class="text-xs text-slate-500 font-medium">Escola Polo: <strong>{{ profissional.escola_polo }}</strong></p>
+                <h1 class="text-xl font-bold text-slate-900 tracking-tight">{{ profissional.nome }}</h1>
+                <p class="text-xs text-slate-500 font-medium">Escola Polo: <strong class="text-slate-700 font-semibold">{{ profissional.escola_polo }}</strong></p>
                 <p class="text-xs text-slate-400">CPF: <span class="font-mono">{{ profissional.cpf }}</span> • Tel: {{ profissional.telefone or 'Não informado' }}</p>
             </div>
         </div>
 
-        <div class="flex items-center gap-3">
-            <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug) }}" class="text-xs font-bold text-slate-600 hover:underline bg-slate-100 px-4 py-2 rounded-xl">
-                ← Voltar ao Quadro de Profissionais
+        <div class="flex items-center justify-center sm:justify-start gap-3 shrink-0">
+            <a href="{{ url_for('core.gerenciar_profissionais', municipio_slug=g.municipio.slug) }}" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all">
+                <i data-lucide="arrow-left" class="w-4 h-4 text-slate-500"></i>
+                <span>Voltar ao Quadro de Profissionais</span>
             </a>
         </div>
     </div>
 
     <!-- ABAS DE NAVEGAÇÃO INTERNA DO PROFISSIONAL -->
-    <div class="space-y-6">
+    <div class="space-y-5">
 
-        <div class="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
-            <button onclick="alternarAbaProf('alunos')" id="btn-prof-alunos" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-900 text-white shadow-sm flex items-center gap-2 shrink-0">
-                <span>👤</span> Alunos Atendidos ({{ alunos_atendidos|length }})
+        <div class="bg-white p-2 rounded-2xl border border-slate-200/80 shadow-xs flex items-center gap-1.5 overflow-x-auto">
+            <button onclick="alternarAbaProf('alunos')" id="btn-prof-alunos" class="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all bg-orbi-blue text-white shadow-xs inline-flex items-center gap-2 shrink-0">
+                <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
+                <span>Alunos Atendidos ({{ alunos_atendidos|length }})</span>
             </button>
-            <button onclick="alternarAbaProf('agenda')" id="btn-prof-agenda" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 border border-slate-200">
-                <span>🗓️</span> Agenda SRM ({{ agenda|length }})
+            <button onclick="alternarAbaProf('agenda')" id="btn-prof-agenda" class="px-3.5 py-2 rounded-xl text-xs font-medium transition-all bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 inline-flex items-center gap-2 shrink-0 border border-slate-200/80">
+                <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span>Agenda SRM ({{ agenda|length }})</span>
             </button>
-            <button onclick="alternarAbaProf('evolucoes')" id="btn-prof-evolucoes" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 border border-slate-200">
-                <span>📝</span> Diários de Evolução SOAP ({{ evolucoes|length }})
+            <button onclick="alternarAbaProf('evolucoes')" id="btn-prof-evolucoes" class="px-3.5 py-2 rounded-xl text-xs font-medium transition-all bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 inline-flex items-center gap-2 shrink-0 border border-slate-200/80">
+                <i data-lucide="clipboard-pen" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span>Diários de Evolução SOAP ({{ evolucoes|length }})</span>
             </button>
-            <button onclick="alternarAbaProf('encaminhamentos')" id="btn-prof-encaminhamentos" class="px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 border border-slate-200">
-                <span>🏥</span> Guias SUS ({{ encaminhamentos|length }})
+            <button onclick="alternarAbaProf('encaminhamentos')" id="btn-prof-encaminhamentos" class="px-3.5 py-2 rounded-xl text-xs font-medium transition-all bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 inline-flex items-center gap-2 shrink-0 border border-slate-200/80">
+                <i data-lucide="hospital" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span>Guias SUS ({{ encaminhamentos|length }})</span>
             </button>
         </div>
 
         <!-- ABA 1: ALUNOS ATENDIDOS POR ESTE ESPECIALISTA -->
-        <div id="painel-prof-alunos" class="bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-4">
-            <h2 class="text-base font-extrabold text-slate-900">Estudantes Vinculados e Atendidos</h2>
+        <div id="painel-prof-alunos" class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+            <h2 class="text-sm font-bold text-slate-900">Estudantes Vinculados e Atendidos</h2>
             
             {% if alunos_atendidos %}
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {% for a in alunos_atendidos %}
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
-                    <span class="font-extrabold text-slate-900 block text-xs">{{ a.nome }}</span>
-                    <span class="text-[10px] text-slate-500 font-mono block">MAT: {{ a.matricula }}</span>
-                    <span class="text-[10px] text-brand-600 font-bold bg-blue-50 px-2 py-0.5 rounded inline-block">{{ a.tipo_deficiencia }}</span>
+                <div class="p-4 bg-slate-50/70 border border-slate-200/80 rounded-xl space-y-1.5">
+                    <span class="font-bold text-slate-900 block text-xs">{{ a.nome }}</span>
+                    <span class="text-[11px] text-slate-500 font-mono block">MAT: {{ a.matricula }}</span>
+                    <span class="text-[11px] text-orbi-blue font-semibold bg-orbi-50 border border-orbi-100 px-2.5 py-0.5 rounded-md inline-block">{{ a.tipo_deficiencia }}</span>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="py-8 text-center text-slate-400 text-xs font-normal">
+            <div class="py-10 text-center text-slate-400 text-xs">
                 Nenhum estudante atribuído a este profissional no momento.
             </div>
             {% endif %}
         </div>
 
         <!-- ABA 2: AGENDA SRM -->
-        <div id="painel-prof-agenda" class="hidden bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-4">
-            <h2 class="text-base font-extrabold text-slate-900">Grade Horária e Reservas na Sala de Recursos</h2>
+        <div id="painel-prof-agenda" class="hidden bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div class="p-5 border-b border-slate-100">
+                <h2 class="text-sm font-bold text-slate-900">Grade Horária e Reservas na Sala de Recursos</h2>
+            </div>
             
             {% if agenda %}
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border border-slate-200">
-                    <thead class="bg-slate-50 uppercase text-[9px] font-bold text-slate-600">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead class="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                         <tr>
-                            <th class="p-2.5">Dia da Semana</th>
-                            <th class="p-2.5">Horário</th>
-                            <th class="p-2.5">Estudante</th>
-                            <th class="p-2.5">Sala de Recursos</th>
+                            <th class="py-3 px-4">Dia da Semana</th>
+                            <th class="py-3 px-4">Horário</th>
+                            <th class="py-3 px-4">Estudante</th>
+                            <th class="py-3 px-4">Sala de Recursos</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         {% for ag in agenda %}
-                        <tr>
-                            <td class="p-2.5 font-bold text-slate-900">{{ ag.dia_semana }}</td>
-                            <td class="p-2.5 font-mono text-slate-600">{{ ag.horario_inicio }} - {{ ag.horario_fim }}</td>
-                            <td class="p-2.5 font-semibold text-slate-800">{{ ag.aluno.nome if ag.aluno else 'Não informado' }}</td>
-                            <td class="p-2.5 text-slate-600">{{ ag.sala_recurso or 'SRM Escola Polo' }}</td>
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="py-3 px-4 font-semibold text-slate-900">{{ ag.dia_semana }}</td>
+                            <td class="py-3 px-4 font-mono text-slate-600">{{ ag.horario_inicio }} - {{ ag.horario_fim }}</td>
+                            <td class="py-3 px-4 font-medium text-slate-800">{{ ag.aluno.nome if ag.aluno else 'Não informado' }}</td>
+                            <td class="py-3 px-4 text-slate-600">{{ ag.sala_recurso or 'SRM Escola Polo' }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
             {% else %}
-            <div class="py-8 text-center text-slate-400 text-xs">
+            <div class="py-10 text-center text-slate-400 text-xs">
                 Nenhum agendamento de sala cadastrado para este profissional.
             </div>
             {% endif %}
         </div>
 
         <!-- ABA 3: EVOLUÇÕES SOAP -->
-        <div id="painel-prof-evolucoes" class="hidden bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-4">
-            <h2 class="text-base font-extrabold text-slate-900">Diários de Evolução Registrados (SOAP)</h2>
+        <div id="painel-prof-evolucoes" class="hidden bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+            <h2 class="text-sm font-bold text-slate-900">Diários de Evolução Registrados (SOAP)</h2>
             
             {% if evolucoes %}
             <div class="space-y-3">
                 {% for ev in evolucoes %}
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1.5 text-xs">
+                <div class="p-4 bg-slate-50/70 border border-slate-200/80 rounded-xl space-y-1.5 text-xs">
                     <div class="flex items-center justify-between">
-                        <span class="font-extrabold text-slate-900">{{ ev.aluno.nome if ev.aluno else 'Estudante' }}</span>
-                        <span class="text-[10px] text-slate-500 font-mono">{{ ev.data_atendimento.strftime('%d/%m/%Y') }}</span>
+                        <span class="font-bold text-slate-900">{{ ev.aluno.nome if ev.aluno else 'Estudante' }}</span>
+                        <span class="text-[11px] text-slate-500 font-mono">{{ ev.data_atendimento.strftime('%d/%m/%Y') }}</span>
                     </div>
-                    <p class="text-slate-700"><strong>Atividade:</strong> {{ ev.atividade_trabalhada }}</p>
-                    <p class="text-slate-600"><strong>Evolução Observada:</strong> {{ ev.evolucao_observada }}</p>
+                    <p class="text-slate-700"><strong class="text-slate-800">Atividade:</strong> {{ ev.atividade_trabalhada }}</p>
+                    <p class="text-slate-600"><strong class="text-slate-800">Evolução Observada:</strong> {{ ev.evolucao_observada }}</p>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="py-8 text-center text-slate-400 text-xs">
+            <div class="py-10 text-center text-slate-400 text-xs">
                 Nenhuma evolução diária lançada por este profissional.
             </div>
             {% endif %}
         </div>
 
         <!-- ABA 4: ENCAMINHAMENTOS -->
-        <div id="painel-prof-encaminhamentos" class="hidden bg-white rounded-3xl p-6 md:p-8 border border-slate-200 shadow-sm space-y-4">
-            <h2 class="text-base font-extrabold text-slate-900">Guias de Encaminhamento Emitidas para o SUS/CRAS</h2>
+        <div id="painel-prof-encaminhamentos" class="hidden bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+            <h2 class="text-sm font-bold text-slate-900">Guias de Encaminhamento Emitidas para o SUS/CRAS</h2>
             
             {% if encaminhamentos %}
             <div class="space-y-3">
                 {% for enc in encaminhamentos %}
-                <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl space-y-1 text-xs">
+                <div class="p-4 bg-slate-50/70 border border-slate-200/80 rounded-xl space-y-1.5 text-xs">
                     <div class="flex items-center justify-between">
-                        <span class="font-extrabold text-slate-900">{{ enc.aluno.nome if enc.aluno else 'Estudante' }} &rarr; {{ enc.destino_rede }}</span>
-                        <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">{{ enc.status }}</span>
+                        <span class="font-bold text-slate-900 inline-flex items-center gap-1.5">
+                            <span>{{ enc.aluno.nome if enc.aluno else 'Estudante' }}</span>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                            <span class="text-orbi-blue">{{ enc.destino_rede }}</span>
+                        </span>
+                        <span class="text-[11px] font-semibold text-orbi-blue bg-orbi-50 border border-orbi-100 px-2.5 py-0.5 rounded-md">{{ enc.status }}</span>
                     </div>
-                    <p class="text-slate-600"><strong>Motivo:</strong> {{ enc.motivo_encaminhamento }}</p>
+                    <p class="text-slate-600"><strong class="text-slate-800">Motivo:</strong> {{ enc.motivo_encaminhamento }}</p>
                 </div>
                 {% endfor %}
             </div>
             {% else %}
-            <div class="py-8 text-center text-slate-400 text-xs">
+            <div class="py-10 text-center text-slate-400 text-xs">
                 Nenhuma guia de encaminhamento emitida por este profissional.
             </div>
             {% endif %}
@@ -164,12 +176,12 @@
         ['alunos', 'agenda', 'evolucoes', 'encaminhamentos'].forEach(a => {
             document.getElementById('painel-prof-' + a).classList.add('hidden');
             const btn = document.getElementById('btn-prof-' + a);
-            btn.className = "px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white text-slate-600 hover:bg-slate-100 flex items-center gap-2 shrink-0 border border-slate-200";
+            btn.className = "px-3.5 py-2 rounded-xl text-xs font-medium transition-all bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900 inline-flex items-center gap-2 shrink-0 border border-slate-200/80";
         });
 
         document.getElementById('painel-prof-' + aba).classList.remove('hidden');
         const btnAtivo = document.getElementById('btn-prof-' + aba);
-        btnAtivo.className = "px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-slate-900 text-white shadow-sm flex items-center gap-2 shrink-0";
+        btnAtivo.className = "px-3.5 py-2 rounded-xl text-xs font-semibold transition-all bg-orbi-blue text-white shadow-xs inline-flex items-center gap-2 shrink-0";
     }
 </script>
 {% endblock %}

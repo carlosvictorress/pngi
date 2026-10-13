@@ -4,56 +4,65 @@
 {% block header_title %}Atendimentos Multiprofissionais (Metodologia SOAP){% endblock %}
 
 {% block content %}
-<div class="space-y-6 pb-12 font-sans">
+<div class="space-y-6">
 
-    <!-- CABEÇALHO -->
-    <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <div class="inline-flex items-center gap-2 bg-purple-50 text-purple-700 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full border border-purple-200">
-                PRONTUÁRIO MULTIPROFISSIONAL • LEI 13.935/2019
+    <!-- CABEÇALHO EXECUTIVO -->
+    <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-5">
+        <div class="space-y-1.5">
+            <div class="flex items-center gap-2">
+                <span class="bg-orbi-50 text-orbi-blue border border-orbi-100 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wider inline-flex items-center gap-1.5">
+                    <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i>
+                    <span>Prontuário Multiprofissional</span>
+                </span>
+                <span class="text-[11px] font-medium text-slate-400">Lei 13.935/2019</span>
             </div>
-            <h1 class="text-xl md:text-2xl font-black text-slate-900 tracking-tight mt-1">
+            <h1 class="text-xl font-bold text-slate-900 tracking-tight">
                 Registros de Atendimento SOAP Institucional
             </h1>
-            <p class="text-xs text-slate-500">
+            <p class="text-xs text-slate-500 leading-relaxed">
                 Acompanhamento clínico-institucional categorizado por Psicologia, Psicopedagogia e Serviço Social.
             </p>
         </div>
 
-        <div class="flex gap-2 shrink-0">
+        <div class="flex flex-wrap items-center gap-2.5 shrink-0">
             <a href="{{ url_for('equipe_multi.novo_atendimento_soap', municipio_slug=g.municipio.slug) }}"
-               class="bg-purple-600 hover:bg-purple-700 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs shadow-md transition-all flex items-center gap-2 transform hover:scale-[1.02]">
-                <span>➕</span> Novo Atendimento SOAP
+               class="bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Novo Atendimento SOAP</span>
             </a>
             <a href="{{ url_for('equipe_multi.dashboard', municipio_slug=g.municipio.slug) }}"
-               class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
-                Painel Multi
+               class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all">
+                <i data-lucide="layout-dashboard" class="w-4 h-4 text-slate-500"></i>
+                <span>Painel Multi</span>
             </a>
         </div>
     </div>
 
     <!-- FILTROS -->
-    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
         <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Buscar Estudante ou Texto</label>
-                <input type="text" name="busca" value="{{ busca }}" placeholder="Nome do aluno, queixa, CPF..."
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
+            <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-700">Buscar Estudante ou Texto</label>
+                <div class="relative">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                    <input type="text" name="busca" value="{{ busca }}" placeholder="Nome do aluno, queixa, CPF..."
+                           class="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-3.5 py-2.5 text-xs text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
+                </div>
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Especialidade Técnica</label>
-                <select name="especialidade" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500 font-bold">
+            <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-700">Especialidade Técnica</label>
+                <select name="especialidade" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                     <option value="">Todas as especialidades</option>
-                    <option value="psicologo" {% if especialidade_filtro == 'psicologo' %}selected{% endif %}>🧠 Psicologia Escolar</option>
-                    <option value="psicopedagogo" {% if especialidade_filtro == 'psicopedagogo' %}selected{% endif %}>🧩 Psicopedagogia</option>
-                    <option value="assistente_social" {% if especialidade_filtro == 'assistente_social' %}selected{% endif %}>🤝 Serviço Social</option>
+                    <option value="psicologo" {% if especialidade_filtro == 'psicologo' %}selected{% endif %}>Psicologia Escolar</option>
+                    <option value="psicopedagogo" {% if especialidade_filtro == 'psicopedagogo' %}selected{% endif %}>Psicopedagogia</option>
+                    <option value="assistente_social" {% if especialidade_filtro == 'assistente_social' %}selected{% endif %}>Serviço Social</option>
                 </select>
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Filtrar por Estudante</label>
-                <select name="aluno_id" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-2 focus:ring-purple-500">
+            <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-slate-700">Filtrar por Estudante</label>
+                <select name="aluno_id" class="w-full bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-900 focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 focus:outline-none transition-all">
                     <option value="">Todos os estudantes</option>
                     {% for al in alunos %}
                     <option value="{{ al.id }}" {% if aluno_filtro == al.id %}selected{% endif %}>{{ al.nome }}</option>
@@ -62,11 +71,12 @@
             </div>
 
             <div class="flex gap-2">
-                <button type="submit" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-2 rounded-xl text-xs transition-all shadow-sm">
-                    Filtrar
+                <button type="submit" class="flex-1 bg-orbi-blue hover:bg-orbi-blue-hover text-white font-semibold py-2.5 rounded-xl text-xs transition-all shadow-xs inline-flex items-center justify-center gap-1.5">
+                    <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                    <span>Filtrar</span>
                 </button>
                 <a href="{{ url_for('equipe_multi.listar_atendimentos', municipio_slug=g.municipio.slug) }}" 
-                   class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all text-center">
+                   class="px-3.5 py-2.5 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200/90 rounded-xl text-xs font-semibold transition-all text-center inline-flex items-center justify-center">
                     Limpar
                 </a>
             </div>
@@ -76,109 +86,121 @@
     <!-- LISTAGEM DE ATENDIMENTOS -->
     <div class="space-y-4">
         {% for at in atendimentos %}
-        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4 hover:border-purple-200 transition-all">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+        <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs space-y-4 hover:border-slate-300 transition-all">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
                 <div class="flex items-center gap-3">
                     {% if at.especialidade == 'psicologo' %}
-                    <span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-xs font-black px-3 py-1 rounded-full border border-indigo-200">
-                        <span>🧠</span> Psicologia Escolar
+                    <span class="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-xs font-semibold px-3 py-1 rounded-full border border-indigo-200/80">
+                        <i data-lucide="brain" class="w-3.5 h-3.5"></i>
+                        <span>Psicologia Escolar</span>
                     </span>
                     {% elif at.especialidade == 'psicopedagogo' %}
-                    <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-black px-3 py-1 rounded-full border border-emerald-200">
-                        <span>🧩</span> Psicopedagogia
+                    <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1 rounded-full border border-emerald-200/80">
+                        <i data-lucide="blocks" class="w-3.5 h-3.5"></i>
+                        <span>Psicopedagogia</span>
                     </span>
                     {% else %}
-                    <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-xs font-black px-3 py-1 rounded-full border border-amber-200">
-                        <span>🤝</span> Serviço Social
+                    <span class="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full border border-amber-200/80">
+                        <i data-lucide="heart-handshake" class="w-3.5 h-3.5"></i>
+                        <span>Serviço Social</span>
                     </span>
                     {% endif %}
 
                     <div>
-                        <h2 class="text-sm font-extrabold text-slate-900">{{ at.aluno.nome }}</h2>
-                        <span class="text-[10px] text-slate-400">Modalidade: {{ at.tipo_sessao }} • {{ at.aluno.turma }} ({{ at.aluno.escola.nome if at.aluno.escola else 'Rede Municipal' }})</span>
+                        <h2 class="text-sm font-bold text-slate-900">{{ at.aluno.nome }}</h2>
+                        <span class="text-[11px] text-slate-400">Modalidade: {{ at.tipo_sessao }} • {{ at.aluno.turma }} ({{ at.aluno.escola.nome if at.aluno.escola else 'Rede Municipal' }})</span>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-bold text-slate-700 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
-                        📅 {{ at.data_atendimento.strftime('%d/%m/%Y') }}
+                <div class="flex items-center gap-2.5">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200/80 font-mono">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <span>{{ at.data_atendimento.strftime('%d/%m/%Y') }}</span>
                     </span>
                     <a href="{{ url_for('equipe_multi.imprimir_atendimento_soap', municipio_slug=g.municipio.slug, id=at.id) }}" target="_blank"
-                       class="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold px-3 py-1.5 rounded-lg transition-all">
-                        <span>🖨️</span> Imprimir SOAP
+                       class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/90 text-xs font-semibold px-3.5 py-1.5 rounded-xl shadow-xs inline-flex items-center gap-1.5 transition-all">
+                        <i data-lucide="printer" class="w-3.5 h-3.5 text-slate-500"></i>
+                        <span>Imprimir SOAP</span>
                     </a>
                 </div>
             </div>
 
             <!-- ESTRUTURA SOAP 4 COLUNAS/QUADROS -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 text-xs">
                 
                 <!-- S -->
-                <div class="bg-blue-50/40 p-3.5 rounded-2xl border border-blue-100 space-y-1">
-                    <div class="text-[10px] font-black uppercase text-blue-800 tracking-wider flex items-center gap-1">
-                        <span class="w-4 h-4 rounded bg-blue-600 text-white flex items-center justify-center font-mono text-[9px]">S</span>
-                        Subjetivo
+                <div class="bg-sky-50/50 p-4 rounded-xl border border-sky-100 space-y-1.5">
+                    <div class="text-[11px] font-bold uppercase text-sky-900 tracking-wider flex items-center gap-1.5">
+                        <span class="w-5 h-5 rounded-md bg-sky-600 text-white flex items-center justify-center font-mono text-[10px]">S</span>
+                        <span>Subjetivo</span>
                     </div>
-                    <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line text-[11px]">
+                    <p class="text-slate-700 leading-relaxed whitespace-pre-line text-xs">
                         {{ at.soap_subjetivo }}
                     </p>
                 </div>
 
                 <!-- O -->
-                <div class="bg-emerald-50/40 p-3.5 rounded-2xl border border-emerald-100 space-y-1">
-                    <div class="text-[10px] font-black uppercase text-emerald-800 tracking-wider flex items-center gap-1">
-                        <span class="w-4 h-4 rounded bg-emerald-600 text-white flex items-center justify-center font-mono text-[9px]">O</span>
-                        Objetivo
+                <div class="bg-emerald-50/50 p-4 rounded-xl border border-emerald-100 space-y-1.5">
+                    <div class="text-[11px] font-bold uppercase text-emerald-900 tracking-wider flex items-center gap-1.5">
+                        <span class="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center font-mono text-[10px]">O</span>
+                        <span>Objetivo</span>
                     </div>
-                    <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line text-[11px]">
+                    <p class="text-slate-700 leading-relaxed whitespace-pre-line text-xs">
                         {{ at.soap_objetivo }}
                     </p>
                 </div>
 
                 <!-- A -->
-                <div class="bg-amber-50/40 p-3.5 rounded-2xl border border-amber-100 space-y-1">
-                    <div class="text-[10px] font-black uppercase text-amber-800 tracking-wider flex items-center gap-1">
-                        <span class="w-4 h-4 rounded bg-amber-600 text-white flex items-center justify-center font-mono text-[9px]">A</span>
-                        Avaliação Técnica
+                <div class="bg-amber-50/50 p-4 rounded-xl border border-amber-100 space-y-1.5">
+                    <div class="text-[11px] font-bold uppercase text-amber-900 tracking-wider flex items-center gap-1.5">
+                        <span class="w-5 h-5 rounded-md bg-amber-600 text-white flex items-center justify-center font-mono text-[10px]">A</span>
+                        <span>Avaliação Técnica</span>
                     </div>
-                    <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line text-[11px]">
+                    <p class="text-slate-700 leading-relaxed whitespace-pre-line text-xs">
                         {{ at.soap_avaliacao }}
                     </p>
                 </div>
 
                 <!-- P -->
-                <div class="bg-purple-50/40 p-3.5 rounded-2xl border border-purple-100 space-y-1">
-                    <div class="text-[10px] font-black uppercase text-purple-800 tracking-wider flex items-center gap-1">
-                        <span class="w-4 h-4 rounded bg-purple-600 text-white flex items-center justify-center font-mono text-[9px]">P</span>
-                        Plano de Intervenção
+                <div class="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 space-y-1.5">
+                    <div class="text-[11px] font-bold uppercase text-indigo-900 tracking-wider flex items-center gap-1.5">
+                        <span class="w-5 h-5 rounded-md bg-indigo-600 text-white flex items-center justify-center font-mono text-[10px]">P</span>
+                        <span>Plano de Intervenção</span>
                     </div>
-                    <p class="text-slate-700 leading-relaxed font-normal whitespace-pre-line text-[11px]">
+                    <p class="text-slate-700 leading-relaxed whitespace-pre-line text-xs">
                         {{ at.soap_plano }}
                     </p>
                 </div>
             </div>
 
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-2 border-t border-slate-100 text-[10px] text-slate-500">
-                <div>
-                    Profissional Relator: <strong class="text-slate-700">{{ at.profissional.nome }}</strong> ({{ at.profissional.perfil|upper }})
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-3 border-t border-slate-100 text-[11px] text-slate-500">
+                <div class="flex items-center gap-1.5">
+                    <i data-lucide="user-check" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <span>Profissional Relator: <strong class="text-slate-800">{{ at.profissional.nome }}</strong> ({{ at.profissional.perfil|upper }})</span>
                 </div>
 
                 {% if at.encaminhamento_sugerido %}
-                <div class="bg-purple-50 text-purple-800 px-2.5 py-0.5 rounded-md font-semibold border border-purple-200">
-                    Encaminhamento Sugerido: {{ at.encaminhamento_sugerido }}
+                <div class="bg-orbi-50 text-orbi-blue px-2.5 py-1 rounded-lg font-semibold border border-orbi-100 inline-flex items-center gap-1.5">
+                    <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+                    <span>Encaminhamento Sugerido: {{ at.encaminhamento_sugerido }}</span>
                 </div>
                 {% endif %}
 
                 {% if at.sigilo_etico %}
-                <span class="text-rose-600 font-bold">🔒 Prontuário sob sigilo ético</span>
+                <span class="inline-flex items-center gap-1 text-rose-600 font-semibold">
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                    <span>Prontuário sob sigilo ético</span>
+                </span>
                 {% endif %}
             </div>
         </div>
         {% else %}
-        <div class="bg-white p-12 text-center rounded-3xl border border-slate-200 text-slate-400 text-xs space-y-2">
-            <span class="text-3xl block">📝</span>
-            <span class="font-bold text-slate-700 block">Nenhum atendimento SOAP localizado com os filtros atuais.</span>
-            <p class="text-[11px] text-slate-400">Clique em "+ Novo Atendimento SOAP" para lançar o primeiro atendimento multiprofissional.</p>
+        <div class="bg-white p-12 text-center rounded-2xl border border-slate-200/80 shadow-xs text-slate-400 text-xs space-y-3">
+            <div class="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-center mx-auto text-slate-400">
+                <i data-lucide="clipboard-list" class="w-6 h-6"></i>
+            </div>
+            <span class="font-bold text-slate-700 block text-sm">Nenhum atendimento SOAP localizado com os filtros atuais.</span>
+            <p class="text-xs text-slate-400">Clique em "Novo Atendimento SOAP" para lançar o primeiro atendimento multiprofissional.</p>
         </div>
         {% endfor %}
     </div>
