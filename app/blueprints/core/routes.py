@@ -16,8 +16,12 @@ def pull_municipio_slug(endpoint, values):
 @core_bp.before_app_request
 def carregar_contexto_municipio():
     """Garante o carregamento correto do município no contexto global 'g' para Multitenancy."""
+    # Redirecionamento conveniente de rotas administrativas acessadas diretamente na raiz
+    if request.path in ['/login-admin-global', '/setup-sistema-global']:
+        return redirect(f"/auth{request.path}")
+
     # Ignora a raiz mestre, arquivos estáticos, PWA e rotas globais de autenticação administrativa
-    if request.path == '/' or request.path.startswith('/static/') or request.path in ['/manifest.json', '/sw.js'] or request.path.startswith('/auth/login-admin-global') or request.path.startswith('/auth/admin-global'):
+    if request.path == '/' or request.path.startswith('/static/') or request.path in ['/manifest.json', '/sw.js'] or request.path.startswith('/auth/'):
         return
 
     # Extrai o slug do município direto da URL (primeira parte da rota)

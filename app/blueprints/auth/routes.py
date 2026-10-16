@@ -32,11 +32,11 @@ def login_admin_global():
     return render_template('publico/login_admin_global.html', erro=erro)
 
 # -------------------------------------------------------------------------
-# SETUP GLOBAL
+# SETUP GLOBAL & RECUPERAÇÃO DO SUPERADMIN
 # -------------------------------------------------------------------------
 @auth_bp.route('/setup-sistema-global')
 def setup_inicial():
-    """Gera o SuperAdmin Global da plataforma diretamente no banco de dados."""
+    """Gera ou redefine o SuperAdmin Global da plataforma diretamente no banco de dados."""
     admin_existente = Usuario.query.filter_by(perfil='superadmin').first()
     
     if not admin_existente:
@@ -48,6 +48,12 @@ def setup_inicial():
         )
         global_admin.set_senha("master123")
         db.session.add(global_admin)
+        db.session.commit()
+    else:
+        # Garante que o acesso padrão carlos@plataforma.com com senha master123 seja sempre restaurado com sucesso
+        admin_existente.email = "carlos@plataforma.com"
+        admin_existente.set_senha("master123")
+        admin_existente.municipio_id = None
         db.session.commit()
     
     return render_template('publico/setup_sucesso.html')
