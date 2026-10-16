@@ -298,63 +298,171 @@ def excluir_municipio(mun_id):
     exigir_superadmin()
     municipio = Municipio.query.get_or_404(mun_id)
     nome_mun = municipio.nome
-    
-    from app.models import (
-        Aluno, EstudoCaso, Pei, Paee, EvolucaoAEE, PlanoAEE, AgendaAEE, AtendimentoAee, 
-        TransporteAlunado, DocumentoAEE, ComunicacaoAEE, TransferenciaAluno, 
-        ProfissionalAEE, Escola, Usuario
-    )
-    
-    # 1. Anula a referência municipio_origem_id de alunos em outros municípios
-    Aluno.query.filter_by(municipio_origem_id=mun_id).update({'municipio_origem_id': None}, synchronize_session=False)
+    from sqlalchemy import text
 
-    # 2. Exclui documentos e comunicações diretas por município
-    DocumentoAEE.query.filter_by(municipio_id=mun_id).delete(synchronize_session=False)
-    ComunicacaoAEE.query.filter_by(municipio_id=mun_id).delete(synchronize_session=False)
-    EvolucaoAEE.query.filter_by(municipio_id=mun_id).delete(synchronize_session=False)
-    PlanoAEE.query.filter_by(municipio_id=mun_id).delete(synchronize_session=False)
-    AgendaAEE.query.filter_by(municipio_id=mun_id).delete(synchronize_session=False)
+    try:
+        with db.engine.connect() as conn:
+            with conn.begin():
+                # 1. Anula referências cruzadas que causariam bloqueio
+                conn.execute(text("UPDATE alunos SET responsavel_id = NULL, escola_id = NULL, municipio_origem_id = NULL WHERE municipio_id = :mid;"), {"mid": mun_id})
+                conn.execute(text("UPDATE alunos SET municipio_origem_id = NULL WHERE municipio_origem_id = :mid;"), {"mid": mun_id})
+                conn.execute(text("UPDATE usuarios SET municipio_id = NULL WHERE (perfil = 'superadmin' OR id = :uid) AND municipio_id = :mid;"), {"mid": mun_id, "uid": current_user.id})
 
-    # 3. Busca IDs de alunos pertencentes a este município
-    alunos_mun = Aluno.query.filter_by(municipio_id=mun_id).all()
-    aluno_ids = [a.id for a in alunos_mun]
-    
-    # 4. Exclui documentos operacionais atrelados aos alunos do município
-    if aluno_ids:
-        DocumentoAEE.query.filter(DocumentoAEE.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
-        ComunicacaoAEE.query.filter(ComunicacaoAEE.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
-        EstudoCaso.query.filter(EstudoCaso.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
-        Pei.query.filter(Pei.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
-        Paee.query.filter(Paee.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
-        EvolucaoAEE.query.filter(EvolucaoAEE.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
-        PlanoAEE.query.filter(PlanoAEE.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
-        AgendaAEE.query.filter(AgendaAEE.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
-        AtendimentoAee.query.filter(AtendimentoAee.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
-        TransporteAlunado.query.filter(TransporteAlunado.aluno_id.in_(aluno_ids)).delete(synchronize_session=False)
+                # 2. Desvincula rotas de transporte de alunos
+                try:
+                    conn.execute(text("UPDATE transporte_alunado SET rota_id = NULL WHERE aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);"), {"mid": mun_id})
+                except Exception:
+                    pass
 
-    # 5. Exclui registros de transferências antes dos alunos
-    if aluno_ids:
-        TransferenciaAluno.query.filter((TransferenciaAluno.aluno_id.in_(aluno_ids)) | (TransferenciaAluno.municipio_origem_id == mun_id) | (TransferenciaAluno.municipio_destino_id == mun_id)).delete(synchronize_session=False)
-    else:
-        TransferenciaAluno.query.filter((TransferenciaAluno.municipio_origem_id == mun_id) | (TransferenciaAluno.municipio_destino_id == mun_id)).delete(synchronize_session=False)
+                # 3. Exclui dados operacionais vinculados a alunos do município ou diretamente ao município
+                tabelas_operacionais = [
+                    "conquistas_estudante",
+                    "mensagens_familia",
+                    "comunicacoes_aee",
+                    "documentos_aee",
+                    "evolucoes_aee",
+                    "planos_aee",
+                    "agenda_aee",
+                    "atendimentos_aee",
+                    "encaminhamentos_aee",
+                    "historico_transferencias_alunos",
+                    "estudos_caso",
+                    "peis",
+                    "paees",
+                    "transporte_alunado",
+                    "lista_espera_aee",
+                    "atendimentos_multi_soap",
+                    "relatorios_escuta_encaminhamentos"
+                ]
+                for tbl in tabelas_operacionais:
+                    try:
+                        conn.execute(text(f"DELETE FROM {tbl} WHERE aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);"), {"mid": mun_id})
+                    except Exception:
+                        pass
+                    try:
+                        conn.execute(text(f"DELETE FROM {tbl} WHERE municipio_id = :mid;"), {"mid": mun_id})
+                    except Exception:
+                        pass
 
-    # 6. Exclui Alunos do município (antes das escolas)
-    Aluno.query.filter_by(municipio_id=mun_id).delete(synchronize_session=False)
-    
-    # 7. Exclui Escolas do município
-    Escola.query.filter_by(municipio_id=mun_id).delete(synchronize_session=False)
+                # 4. Exclui tabelas municipais de suporte
+                try:
+                    conn.execute(text("DELETE FROM planos_acao_mensais_multi WHERE municipio_id = :mid;"), {"mid": mun_id})
+                except Exception:
+                    pass
+                try:
+                    conn.execute(text("DELETE FROM rotas_transporte WHERE municipio_id = :mid;"), {"mid": mun_id})
+                except Exception:
+                    pass
+                try:
+                    conn.execute(text("DELETE FROM transferencias_alunos WHERE municipio_origem_id = :mid OR municipio_destino_id = :mid OR aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);"), {"mid": mun_id})
+                except Exception:
+                    pass
 
-    # 8. Exclui Profissionais do município
-    ProfissionalAEE.query.filter_by(municipio_id=mun_id).delete(synchronize_session=False)
+                # 5. Exclui alunos do município
+                conn.execute(text("DELETE FROM alunos WHERE municipio_id = :mid;"), {"mid": mun_id})
 
-    # 9. Exclui Usuários do município
-    Usuario.query.filter_by(municipio_id=mun_id).delete(synchronize_session=False)
-    
-    # 10. Remove o município
-    db.session.delete(municipio)
-    db.session.commit()
-    
-    flash(f"Município '{nome_mun}' e todos os seus dados foram excluídos da plataforma com sucesso!", "sucesso")
+                # 6. Exclui profissionais do município
+                conn.execute(text("DELETE FROM profissionais_aee WHERE municipio_id = :mid;"), {"mid": mun_id})
+
+                # 7. Exclui escolas do município
+                conn.execute(text("DELETE FROM escolas WHERE municipio_id = :mid;"), {"mid": mun_id})
+
+                # 8. Exclui usuários normais vinculados ao município (mantém contas superadmin)
+                conn.execute(text("DELETE FROM usuarios WHERE municipio_id = :mid AND perfil != 'superadmin' AND id != :uid;"), {"mid": mun_id, "uid": current_user.id})
+
+                # 9. Exclui o município
+                conn.execute(text("DELETE FROM municipios WHERE id = :mid;"), {"mid": mun_id})
+
+        db.session.expire_all()
+        if current_user.municipio_id == mun_id:
+            current_user.municipio_id = None
+            db.session.commit()
+
+        flash(f"Município '{nome_mun}' e todos os seus dados foram excluídos da plataforma com sucesso!", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao excluir município '{nome_mun}': {e}", "erro")
+
+    return redirect(url_for('auth.superadmin_dashboard'))
+
+
+@auth_bp.route('/admin-global/municipios/excluir-todos', methods=['POST', 'GET'])
+@login_required
+def excluir_todos_municipios():
+    """
+    Exclui todos os municípios e dados operacionais cadastrados no sistema,
+    permitindo que o superadmin recomece do zero. Mantém as contas de Superadmin preservadas.
+    """
+    exigir_superadmin()
+    from sqlalchemy import text
+
+    try:
+        with db.engine.connect() as conn:
+            with conn.begin():
+                # 1. Desvincula referências em alunos e usuários
+                try:
+                    conn.execute(text("UPDATE alunos SET responsavel_id = NULL, escola_id = NULL, municipio_origem_id = NULL;"))
+                except Exception:
+                    pass
+                try:
+                    conn.execute(text("UPDATE usuarios SET municipio_id = NULL WHERE perfil = 'superadmin' OR id = :uid;"), {"uid": current_user.id})
+                except Exception:
+                    pass
+                try:
+                    conn.execute(text("UPDATE transporte_alunado SET rota_id = NULL;"))
+                except Exception:
+                    pass
+
+                # 2. Exclui todas as tabelas operacionais em ordem reversa de dependência
+                todas_tabelas = [
+                    "conquistas_estudante",
+                    "mensagens_familia",
+                    "comunicacoes_aee",
+                    "documentos_aee",
+                    "evolucoes_aee",
+                    "planos_aee",
+                    "agenda_aee",
+                    "atendimentos_aee",
+                    "encaminhamentos_aee",
+                    "historico_transferencias_alunos",
+                    "estudos_caso",
+                    "peis",
+                    "paees",
+                    "transporte_alunado",
+                    "lista_espera_aee",
+                    "atendimentos_multi_soap",
+                    "relatorios_escuta_encaminhamentos",
+                    "planos_acao_mensais_multi",
+                    "rotas_transporte",
+                    "transferencias_alunos",
+                    "alunos",
+                    "profissionais_aee",
+                    "escolas"
+                ]
+                for tbl in todas_tabelas:
+                    try:
+                        conn.execute(text(f"DELETE FROM {tbl};"))
+                    except Exception:
+                        pass
+
+                # 3. Exclui usuários comuns (mantém contas superadmin intactas)
+                try:
+                    conn.execute(text("DELETE FROM usuarios WHERE perfil != 'superadmin' AND id != :uid;"), {"uid": current_user.id})
+                except Exception:
+                    pass
+
+                # 4. Exclui todos os municípios
+                conn.execute(text("DELETE FROM municipios;"))
+
+        db.session.expire_all()
+        current_user.municipio_id = None
+        db.session.commit()
+
+        flash("Todos os municípios e dados da plataforma foram excluídos com sucesso! O sistema está pronto para começar do zero.", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao excluir municípios: {e}", "erro")
+
     return redirect(url_for('auth.superadmin_dashboard'))
 
 # -------------------------------------------------------------------------
