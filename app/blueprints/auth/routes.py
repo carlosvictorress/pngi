@@ -600,32 +600,33 @@ def acesso_rapido_familia():
         elif aluno.data_nascimento and aluno.data_nascimento != data_nascimento:
             erro = "A data de nascimento informada não confere com o cadastro oficial."
         else:
-            if aluno.responsavel_id:
-                usuario_familia = Usuario.query.get(aluno.responsavel_id)
-            else:
-                usuario_familia = None
-
+            email_fam = f"familia.{aluno.matricula}@gestoor.local"
+            usuario_familia = Usuario.query.filter_by(email=email_fam).first()
             if not usuario_familia:
-                email_fam = f"familia.{aluno.matricula}@gestoor.local"
-                usuario_familia = Usuario.query.filter_by(email=email_fam).first()
-                if not usuario_familia:
-                    usuario_familia = Usuario(
-                        nome=f"Família de {aluno.nome}",
-                        email=email_fam,
-                        perfil='familia',
-                        municipio_id=municipio.id,
-                        ativo=True
-                    )
-                    usuario_familia.set_senha(aluno.matricula)
-                    db.session.add(usuario_familia)
-                    db.session.commit()
-                
-                aluno.responsavel_id = usuario_familia.id
+                usuario_familia = Usuario(
+                    nome=f"Família de {aluno.nome}",
+                    email=email_fam,
+                    perfil='familia',
+                    municipio_id=municipio.id,
+                    ativo=True
+                )
+                usuario_familia.set_senha(aluno.matricula)
+                db.session.add(usuario_familia)
                 db.session.commit()
+            else:
+                usuario_familia.perfil = 'familia'
+                usuario_familia.ativo = True
                 
+            aluno.responsavel_id = usuario_familia.id
+            db.session.commit()
+            
+            # Limpa qualquer resquício e grava a sessão exclusiva deste aluno
+            session.clear()
+            session['familia_aluno_id'] = aluno.id
+            
             login_user(usuario_familia)
             flash(f"Bem-vindo(a) ao Portal da Família de {aluno.nome}!", "sucesso")
-            return redirect(url_for('core.familia_dashboard', municipio_slug=municipio_slug))
+            return redirect(url_for('core.familia_dashboard', municipio_slug=municipio_slug, aluno_id=aluno.id))
             
     return render_template('familia/acesso_rapido.html', municipio=municipio, erro=erro)
 
@@ -635,6 +636,7 @@ def acesso_rapido_familia():
 @auth_bp.route('/logout')
 @login_required
 def logout():
+    session.pop('familia_aluno_id', None)
     logout_user()
     flash("Sessão encerrada com segurança.", "sucesso")
     return redirect(url_for('auth.landing_page'))

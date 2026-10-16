@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Blueprint, render_template, request, redirect, url_for, g, abort, flash
+from flask import Blueprint, render_template, request, redirect, url_for, g, abort, flash, session
 from flask_login import login_required, current_user
 from app import db
 from app.models import Municipio, Aluno, ProfissionalAEE, Usuario, Escola, Pei
@@ -459,82 +459,91 @@ def familia_dashboard():
     )
     from flask import flash
     
-    # Busca os alunos associados ao usuário logado
-    if current_user.perfil == 'familia':
-        alunos = Aluno.query.filter_by(responsavel_id=current_user.id, municipio_id=g.municipio.id).all()
-        if not alunos:
-            matricula_temp = current_user.email.replace('familia.', '').replace('@gestoor.local', '')
-            alunos = Aluno.query.filter_by(matricula=matricula_temp, municipio_id=g.municipio.id).all()
-    else:
-        alunos = Aluno.query.filter_by(municipio_id=g.municipio.id).limit(10).all()
-
-    aluno_selecionado_id = request.args.get('aluno_id', type=int)
     aluno_ativo = None
-    if aluno_selecionado_id:
-        aluno_ativo = next((a for a in alunos if a.id == aluno_selecionado_id), None)
     
-    if not aluno_ativo and alunos:
-        aluno_ativo = alunos[0]
-
-    pei_atual = None
-    comunicacoes = []
-    atendimentos_aee = []
-    agenda_horarios = []
-    conquistas = []
-    mensagens = []
-    transporte = None
-
-    total_realizadas = 0
-    total_faltas = 0
-    taxa_frequencia = 100
-    comunicados_novos = 0
-    proximo_atendimento = None
-
-    if aluno_ativo:
-        pei_atual = Pei.query.filter_by(aluno_id=aluno_ativo.id).order_by(Pei.id.desc()).first()
+    # 1. Usuário com perfil 'familia' (Acesso da Família restrito 100% ao seu próprio estudante)
+    if current_user.perfil == 'familia':
+        # Prioridade 1: ID da sessão gravado no login da família
+        fam_aluno_id = session.get('familia_aluno_id')
+        if fam_aluno_id:
+            aluno_ativo = Aluno.query.filter_by(id=fam_aluno_id, municipio_id=g.municipio.id).first()
         
-        # Comunicados direcionados ao aluno ou comunicados gerais da rede
-        try:
-            comunicacoes = ComunicacaoAEE.query.filter(
-                (ComunicacaoAEE.aluno_id == aluno_ativo.id) | 
-                ((ComunicacaoAEE.aluno_id.is_(None)) & (ComunicacaoAEE.municipio_id == g.municipio.id))
-            ).order_by(ComunicacaoAEE.id.desc()).all()
-        except Exception:
-            comunicacoes = []
+        # Prioridade 2: Vínculo direto de responsavel_id com o usuário logado
+        if not aluno_ativo:
+            aluno_ativo = Aluno.query.filter_by(responsavel_id=current_user.id, municipio_id=g.municipio.id).first()
+            
+        # Prioridade 3: Pela matrícula extraída do e-mail 'familia.<matricula>@gestoor.local'
+        if not aluno_ativo and current_user.email:
+            matricula_temp = current_user.email.replace('familia.', '').replace('@gestoor.local', '')
+            aluno_ativo = Aluno.query.filter_by(matricula=matricula_temp, municipio_id=g.municipio.id).first()
+            
+        if aluno_ativo:
+            session['familia_aluno_id'] = aluno_ativo.id
+            if aluno_ativo.responsavel_id != current_user.id:
+                aluno_ativo.responsavel_id = current_user.id
+                db.session.commit()
+        else:
+            flash("Nenhum estudante vinculado ao seu cadastro familiar foi localizado.", "erro")
+            return redirect(url_for('auth.acesso_rapido_familia', municipio_slug=g.municipio.slug))
+            
+    # 2. Usuário da rede escolar (Secretaria, Diretor, Professor, Especialista AEE) visualizando o portal de um aluno
+    else:
+        aluno_selecionado_id = request.args.get('aluno_id', type=int)
+        if aluno_selecionado_id:
+            aluno_ativo = Aluno.query.filter_by(id=aluno_selecionado_id, municipio_id=g.municipio.id).first_or_404()
+        else:
+            aluno_ativo = Aluno.query.filter_by(municipio_id=g.municipio.id, ativo=True).first()
+            
+    if not aluno_ativo:
+        flash("Estudante não localizado.", "erro")
+        return redirect(url_for('core.dashboard', municipio_slug=g.municipio.slug))
 
-        try:
-            atendimentos_aee = AtendimentoAee.query.filter_by(aluno_id=aluno_ativo.id).order_by(AtendimentoAee.data_atendimento.desc(), AtendimentoAee.id.desc()).all()
-        except Exception:
-            atendimentos_aee = []
+    # A lista enviada para o template contém ESTRITAMENTE o estudante ativo (sem vazar outros alunos)
+    alunos = [aluno_ativo]
 
-        try:
-            agenda_horarios = AgendaAEE.query.filter_by(aluno_id=aluno_ativo.id, ativo=True).order_by(AgendaAEE.id.desc()).all()
-        except Exception:
-            agenda_horarios = []
+    pei_atual = Pei.query.filter_by(aluno_id=aluno_ativo.id).order_by(Pei.id.desc()).first()
+    
+    # Comunicados estritamente deste estudante no município
+    try:
+        comunicacoes = ComunicacaoAEE.query.filter_by(
+            aluno_id=aluno_ativo.id,
+            municipio_id=g.municipio.id
+        ).order_by(ComunicacaoAEE.id.desc()).all()
+    except Exception:
+        comunicacoes = []
 
-        try:
-            transporte = TransporteAlunado.query.filter_by(aluno_id=aluno_ativo.id).first()
-        except Exception:
-            transporte = None
+    try:
+        atendimentos_aee = AtendimentoAee.query.filter_by(aluno_id=aluno_ativo.id).order_by(AtendimentoAee.data_atendimento.desc(), AtendimentoAee.id.desc()).all()
+    except Exception:
+        atendimentos_aee = []
 
-        try:
-            conquistas = ConquistaEstudante.query.filter_by(aluno_id=aluno_ativo.id).order_by(ConquistaEstudante.data_registro.desc()).all()
-        except Exception:
-            conquistas = []
+    try:
+        agenda_horarios = AgendaAEE.query.filter_by(aluno_id=aluno_ativo.id, ativo=True).order_by(AgendaAEE.id.desc()).all()
+    except Exception:
+        agenda_horarios = []
 
-        try:
-            mensagens = MensagemFamilia.query.filter_by(aluno_id=aluno_ativo.id).order_by(MensagemFamilia.data_envio.desc()).all()
-        except Exception:
-            mensagens = []
+    try:
+        transporte = TransporteAlunado.query.filter_by(aluno_id=aluno_ativo.id).first()
+    except Exception:
+        transporte = None
 
-        sessoes_feitas = [s for s in atendimentos_aee if getattr(s, 'compareceu', False) or getattr(s, 'frequencia', False)]
-        total_realizadas = len(sessoes_feitas)
-        total_faltas = len(atendimentos_aee) - total_realizadas
-        taxa_frequencia = int((total_realizadas / len(atendimentos_aee) * 100)) if atendimentos_aee else 100
-        comunicados_novos = sum(1 for c in comunicacoes if not getattr(c, 'ciencia_familia', False))
+    try:
+        conquistas = ConquistaEstudante.query.filter_by(aluno_id=aluno_ativo.id).order_by(ConquistaEstudante.data_registro.desc()).all()
+    except Exception:
+        conquistas = []
 
-        if agenda_horarios:
-            proximo_atendimento = agenda_horarios[0]
+    try:
+        mensagens = MensagemFamilia.query.filter_by(aluno_id=aluno_ativo.id).order_by(MensagemFamilia.data_envio.desc()).all()
+    except Exception:
+        mensagens = []
+
+    sessoes_feitas = [s for s in atendimentos_aee if getattr(s, 'compareceu', False) or getattr(s, 'frequencia', False)]
+    total_realizadas = len(sessoes_feitas)
+    total_faltas = len(atendimentos_aee) - total_realizadas
+    taxa_frequencia = int((total_realizadas / len(atendimentos_aee) * 100)) if atendimentos_aee else 100
+    comunicados_novos = sum(1 for c in comunicacoes if not getattr(c, 'ciencia_familia', False))
+
+    proximo_atendimento = agenda_horarios[0] if agenda_horarios else None
 
     return render_template(
         'familia/dashboard.html',
@@ -566,6 +575,11 @@ def dar_ciencia_pei(pei_id):
     if pei.aluno.municipio_id != g.municipio.id:
         abort(403)
 
+    if current_user.perfil == 'familia':
+        fam_aluno_id = session.get('familia_aluno_id')
+        if fam_aluno_id and pei.aluno_id != fam_aluno_id:
+            abort(403)
+
     pei.assinado_familia = True
     pei.assinado_familia_em = datetime.utcnow()
     db.session.commit()
@@ -584,6 +598,11 @@ def dar_ciencia_comunicacao(comunicacao_id):
     comunicacao = ComunicacaoAEE.query.get_or_404(comunicacao_id)
     if comunicacao.municipio_id != g.municipio.id:
         abort(403)
+
+    if current_user.perfil == 'familia':
+        fam_aluno_id = session.get('familia_aluno_id')
+        if fam_aluno_id and comunicacao.aluno_id and comunicacao.aluno_id != fam_aluno_id:
+            abort(403)
 
     comunicacao.ciencia_familia = True
     comunicacao.ciencia_data = datetime.utcnow()
@@ -605,6 +624,11 @@ def familia_enviar_mensagem(aluno_id):
     from flask import flash
 
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    if current_user.perfil == 'familia':
+        fam_aluno_id = session.get('familia_aluno_id')
+        if fam_aluno_id and aluno.id != fam_aluno_id:
+            abort(403)
+
     assunto = request.form.get('assunto', '').strip() or 'Mensagem da Família'
     texto = request.form.get('mensagem', '').strip()
 
@@ -637,6 +661,11 @@ def familia_notificar_ausencia(aluno_id):
     from flask import flash
 
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    if current_user.perfil == 'familia':
+        fam_aluno_id = session.get('familia_aluno_id')
+        if fam_aluno_id and aluno.id != fam_aluno_id:
+            abort(403)
+
     data_str = request.form.get('data_ausencia')
     motivo = request.form.get('motivo_ausencia', '').strip() or 'Imprevisto Familiar / Consulta Médica'
     detalhes = request.form.get('detalhes', '').strip()
