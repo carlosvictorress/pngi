@@ -453,7 +453,10 @@ def excluir_profissional(id):
 @core_bp.route('/familia/dashboard')
 @login_required
 def familia_dashboard():
-    from app.models import Aluno, Pei, ComunicacaoAEE, AtendimentoAee, TransporteAlunado
+    from app.models import (
+        Aluno, Pei, ComunicacaoAEE, AtendimentoAee, TransporteAlunado,
+        AgendaAEE, MensagemFamilia, ConquistaEstudante
+    )
     from flask import flash
     
     # Busca os alunos associados ao usuário logado
@@ -463,7 +466,7 @@ def familia_dashboard():
             matricula_temp = current_user.email.replace('familia.', '').replace('@gestoor.local', '')
             alunos = Aluno.query.filter_by(matricula=matricula_temp, municipio_id=g.municipio.id).all()
     else:
-        alunos = Aluno.query.filter_by(municipio_id=g.municipio.id).limit(5).all()
+        alunos = Aluno.query.filter_by(municipio_id=g.municipio.id).limit(10).all()
 
     aluno_selecionado_id = request.args.get('aluno_id', type=int)
     aluno_ativo = None
@@ -476,13 +479,62 @@ def familia_dashboard():
     pei_atual = None
     comunicacoes = []
     atendimentos_aee = []
+    agenda_horarios = []
+    conquistas = []
+    mensagens = []
     transporte = None
+
+    total_realizadas = 0
+    total_faltas = 0
+    taxa_frequencia = 100
+    comunicados_novos = 0
+    proximo_atendimento = None
 
     if aluno_ativo:
         pei_atual = Pei.query.filter_by(aluno_id=aluno_ativo.id).order_by(Pei.id.desc()).first()
-        comunicacoes = ComunicacaoAEE.query.filter_by(aluno_id=aluno_ativo.id).order_by(ComunicacaoAEE.id.desc()).all()
-        atendimentos_aee = AtendimentoAee.query.filter_by(aluno_id=aluno_ativo.id).order_by(AtendimentoAee.id.desc()).all()
-        transporte = TransporteAlunado.query.filter_by(aluno_id=aluno_ativo.id).first()
+        
+        # Comunicados direcionados ao aluno ou comunicados gerais da rede
+        try:
+            comunicacoes = ComunicacaoAEE.query.filter(
+                (ComunicacaoAEE.aluno_id == aluno_ativo.id) | 
+                ((ComunicacaoAEE.aluno_id.is_(None)) & (ComunicacaoAEE.municipio_id == g.municipio.id))
+            ).order_by(ComunicacaoAEE.id.desc()).all()
+        except Exception:
+            comunicacoes = []
+
+        try:
+            atendimentos_aee = AtendimentoAee.query.filter_by(aluno_id=aluno_ativo.id).order_by(AtendimentoAee.data_atendimento.desc(), AtendimentoAee.id.desc()).all()
+        except Exception:
+            atendimentos_aee = []
+
+        try:
+            agenda_horarios = AgendaAEE.query.filter_by(aluno_id=aluno_ativo.id, ativo=True).order_by(AgendaAEE.id.desc()).all()
+        except Exception:
+            agenda_horarios = []
+
+        try:
+            transporte = TransporteAlunado.query.filter_by(aluno_id=aluno_ativo.id).first()
+        except Exception:
+            transporte = None
+
+        try:
+            conquistas = ConquistaEstudante.query.filter_by(aluno_id=aluno_ativo.id).order_by(ConquistaEstudante.data_registro.desc()).all()
+        except Exception:
+            conquistas = []
+
+        try:
+            mensagens = MensagemFamilia.query.filter_by(aluno_id=aluno_ativo.id).order_by(MensagemFamilia.data_envio.desc()).all()
+        except Exception:
+            mensagens = []
+
+        sessoes_feitas = [s for s in atendimentos_aee if getattr(s, 'compareceu', False) or getattr(s, 'frequencia', False)]
+        total_realizadas = len(sessoes_feitas)
+        total_faltas = len(atendimentos_aee) - total_realizadas
+        taxa_frequencia = int((total_realizadas / len(atendimentos_aee) * 100)) if atendimentos_aee else 100
+        comunicados_novos = sum(1 for c in comunicacoes if not getattr(c, 'ciencia_familia', False))
+
+        if agenda_horarios:
+            proximo_atendimento = agenda_horarios[0]
 
     return render_template(
         'familia/dashboard.html',
@@ -491,7 +543,15 @@ def familia_dashboard():
         pei_atual=pei_atual,
         comunicacoes=comunicacoes,
         atendimentos_aee=atendimentos_aee,
-        transporte=transporte
+        agenda_horarios=agenda_horarios,
+        conquistas=conquistas,
+        mensagens=mensagens,
+        transporte=transporte,
+        total_realizadas=total_realizadas,
+        total_faltas=total_faltas,
+        taxa_frequencia=taxa_frequencia,
+        comunicados_novos=comunicados_novos,
+        proximo_atendimento=proximo_atendimento
     )
 
 @core_bp.route('/familia/pei/<int:pei_id>/dar-ciencia', methods=['POST'])
@@ -522,7 +582,7 @@ def dar_ciencia_comunicacao(comunicacao_id):
     from flask import flash
 
     comunicacao = ComunicacaoAEE.query.get_or_404(comunicacao_id)
-    if comunicacao.aluno.municipio_id != g.municipio.id:
+    if comunicacao.municipio_id != g.municipio.id:
         abort(403)
 
     comunicacao.ciencia_familia = True
@@ -532,8 +592,73 @@ def dar_ciencia_comunicacao(comunicacao_id):
         comunicacao.observacoes_familia = obs
 
     db.session.commit()
-    flash("Confirmação de leitura e observações registradas!", "sucesso")
-    return redirect(url_for('core.familia_dashboard', municipio_slug=g.municipio.slug, aluno_id=comunicacao.aluno_id))
+    flash("Confirmação de leitura e observações registradas com sucesso!", "sucesso")
+    alvo_aluno_id = request.form.get('aluno_id') or comunicacao.aluno_id
+    return redirect(url_for('core.familia_dashboard', municipio_slug=g.municipio.slug, aluno_id=alvo_aluno_id))
+
+@core_bp.route('/familia/aluno/<int:aluno_id>/enviar-mensagem', methods=['POST'])
+@login_required
+def familia_enviar_mensagem(aluno_id):
+    from app.models import Aluno, MensagemFamilia
+    from app import db
+    from datetime import datetime
+    from flask import flash
+
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    assunto = request.form.get('assunto', '').strip() or 'Mensagem da Família'
+    texto = request.form.get('mensagem', '').strip()
+
+    if not texto:
+        flash("A mensagem não pode ser vazia.", "erro")
+        return redirect(url_for('core.familia_dashboard', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+    nova_msg = MensagemFamilia(
+        municipio_id=g.municipio.id,
+        aluno_id=aluno.id,
+        remetente_tipo='familia',
+        remetente_nome=current_user.nome or f"Família de {aluno.nome}",
+        destinatario_nome="Equipe Escolar / AEE",
+        assunto=assunto,
+        mensagem=texto,
+        data_envio=datetime.utcnow(),
+        lida=False
+    )
+    db.session.add(nova_msg)
+    db.session.commit()
+    flash("Mensagem enviada com sucesso para a equipe escolar!", "sucesso")
+    return redirect(url_for('core.familia_dashboard', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+@core_bp.route('/familia/aluno/<int:aluno_id>/notificar-ausencia', methods=['POST'])
+@login_required
+def familia_notificar_ausencia(aluno_id):
+    from app.models import Aluno, ComunicacaoAEE, MensagemFamilia
+    from app import db
+    from datetime import datetime
+    from flask import flash
+
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    data_str = request.form.get('data_ausencia')
+    motivo = request.form.get('motivo_ausencia', '').strip() or 'Imprevisto Familiar / Consulta Médica'
+    detalhes = request.form.get('detalhes', '').strip()
+
+    texto_msg = f"Aviso de Ausência/Falta em {data_str}. Motivo: {motivo}. Observações: {detalhes or 'Sem observações adicionais.'}"
+
+    nova_msg = MensagemFamilia(
+        municipio_id=g.municipio.id,
+        aluno_id=aluno.id,
+        remetente_tipo='familia',
+        remetente_nome=current_user.nome or f"Família de {aluno.nome}",
+        destinatario_nome="Profissional da Sala de Recursos / AEE",
+        assunto=f"Aviso de Ausência: {aluno.nome} ({data_str or 'Próxima Sessão'})",
+        mensagem=texto_msg,
+        data_envio=datetime.utcnow(),
+        lida=False
+    )
+    db.session.add(nova_msg)
+    db.session.commit()
+    flash("Aviso de ausência registrado com sucesso! A equipe escolar foi notificada.", "sucesso")
+    return redirect(url_for('core.familia_dashboard', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
 
 # -------------------------------------------------------------------------
 # PAINEL DE BLINDAGEM JURÍDICA (MINISTÉRIO PÚBLICO & CENSO INEP)

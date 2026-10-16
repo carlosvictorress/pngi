@@ -229,7 +229,18 @@ def create_app():
                     "ALTER TABLE profissionais_aee ADD COLUMN IF NOT EXISTS usuario_id INTEGER;",
                     "ALTER TABLE profissionais_aee ALTER COLUMN cpf DROP NOT NULL;",
                     "ALTER TABLE profissionais_aee ALTER COLUMN escola_polo DROP NOT NULL;",
-                    "ALTER TABLE profissionais_aee ALTER COLUMN cargo DROP NOT NULL;"
+                    "ALTER TABLE profissionais_aee ALTER COLUMN cargo DROP NOT NULL;",
+
+                    # 8. comunicacoes_aee, mensagens_familia e conquistas_estudante
+                    "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS titulo VARCHAR(200);",
+                    "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20) DEFAULT 'Normal';",
+                    "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS autor_nome VARCHAR(150);",
+                    "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS autor_cargo VARCHAR(100);",
+                    "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+                    "ALTER TABLE comunicacoes_aee ALTER COLUMN aluno_id DROP NOT NULL;",
+                    "ALTER TABLE agenda_aee ADD COLUMN IF NOT EXISTS sala_recurso VARCHAR(100);",
+                    "ALTER TABLE agenda_aee ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'Agendado';",
+                    "ALTER TABLE agenda_aee ADD COLUMN IF NOT EXISTS ativo BOOLEAN DEFAULT TRUE;"
                 ]
                 for ddl in ddl_comandos:
                     try:
@@ -253,6 +264,16 @@ def create_app():
                         conn.execute(text("ALTER TABLE profissionais_aee ADD COLUMN usuario_id INTEGER;"))
                     except Exception:
                         pass
+                    for col in ['titulo', 'prioridade', 'autor_nome', 'autor_cargo', 'criado_em']:
+                        try:
+                            conn.execute(text(f"ALTER TABLE comunicacoes_aee ADD COLUMN {col} VARCHAR(200);"))
+                        except Exception:
+                            pass
+                    for col in ['sala_recurso', 'status', 'ativo']:
+                        try:
+                            conn.execute(text(f"ALTER TABLE agenda_aee ADD COLUMN {col} VARCHAR(100);"))
+                        except Exception:
+                            pass
 
             # Sincronização automática inicial de usuários existentes para o quadro de profissionais
             try:

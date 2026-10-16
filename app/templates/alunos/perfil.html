@@ -93,6 +93,16 @@
                         <span>Criar PAEE</span>
                     </a>
                     {% endif %}
+                    <a href="{{ url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio_slug, aluno_id=aluno.id) }}" 
+                       class="bg-orbi-50 hover:bg-orbi-100 text-orbi-blue border border-orbi-100 font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all">
+                        <i data-lucide="clipboard-pen-line" class="w-4 h-4"></i>
+                        <span>Sala de AEE & Agenda</span>
+                    </a>
+                    <a href="{{ url_for('core.familia_dashboard', municipio_slug=g.municipio_slug, aluno_id=aluno.id) }}" target="_blank"
+                       class="bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200/80 font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all" title="Ver como a família enxerga o estudante no Portal">
+                        <i data-lucide="eye" class="w-4 h-4 text-emerald-600"></i>
+                        <span>Ver Portal da Família</span>
+                    </a>
                     <a href="{{ url_for('alunos.remanejar_escola_interna', municipio_slug=g.municipio_slug, id=aluno.id) }}" 
                        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-semibold px-4 py-2.5 rounded-xl text-xs shadow-xs inline-flex items-center gap-2 transition-all">
                         <i data-lucide="arrow-left-right" class="w-4 h-4 text-slate-500"></i>

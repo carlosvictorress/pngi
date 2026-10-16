@@ -622,19 +622,72 @@ class ComunicacaoAEE(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False)
-    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=True) # Pode ser nulo se for comunicado geral
     
-    tipo_registro = db.Column(db.String(50), nullable=False) # 'Reunião Familiar', 'Orientação', 'Encaminhamento'
-    data_registro = db.Column(db.Date, nullable=False)
+    titulo = db.Column(db.String(200), nullable=True, default='Comunicado da Equipe')
+    tipo_registro = db.Column(db.String(50), nullable=False) # 'Comunicado Geral', 'Reunião Familiar', 'Orientação', 'Encaminhamento', 'Atividade em Casa', 'Aviso Importante'
+    prioridade = db.Column(db.String(20), nullable=True, default='Normal') # 'Normal', 'Importante', 'Urgente'
+    data_registro = db.Column(db.Date, nullable=False, default=datetime.utcnow)
     relato_descritivo = db.Column(db.Text, nullable=False)
-    compartilhado_com_familia = db.Column(db.Boolean, default=False)
+    compartilhado_com_familia = db.Column(db.Boolean, default=True)
     
+    # Autor do comunicado
+    autor_nome = db.Column(db.String(150), nullable=True, default='Equipe Escolar')
+    autor_cargo = db.Column(db.String(100), nullable=True, default='Especialista AEE')
+
     # Ciência & Feedback do Responsável (Portal da Família)
     ciencia_familia = db.Column(db.Boolean, default=False)
     ciencia_data = db.Column(db.DateTime, nullable=True)
     observacoes_familia = db.Column(db.Text, nullable=True)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
 
     aluno = db.relationship('Aluno', backref=db.backref('comunicacoes', lazy=True, order_by='ComunicacaoAEE.id.desc()'))
+
+
+class MensagemFamilia(db.Model):
+    """
+    Canal de diálogo direto e mensagens entre a família do estudante e a equipe escolar (AEE / Multiprofissional).
+    """
+    __tablename__ = 'mensagens_familia'
+
+    id = db.Column(db.Integer, primary_key=True)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False)
+    
+    remetente_tipo = db.Column(db.String(20), nullable=False) # 'familia' ou 'escola'
+    remetente_nome = db.Column(db.String(150), nullable=False)
+    destinatario_nome = db.Column(db.String(150), nullable=True)
+    assunto = db.Column(db.String(200), nullable=True)
+    mensagem = db.Column(db.Text, nullable=False)
+    data_envio = db.Column(db.DateTime, default=datetime.utcnow)
+    lida = db.Column(db.Boolean, default=False)
+    lida_em = db.Column(db.DateTime, nullable=True)
+
+    aluno = db.relationship('Aluno', backref=db.backref('mensagens_familia', lazy=True, order_by='MensagemFamilia.id.desc()'))
+
+
+class ConquistaEstudante(db.Model):
+    """
+    Mural de Conquistas e Marcos de Desenvolvimento Inclusivo do Estudante.
+    Permite registrar pequenos e grandes avanços (autonomia, socialização, cognição, linguagem)
+    visíveis diretamente para a família no Portal.
+    """
+    __tablename__ = 'conquistas_estudante'
+
+    id = db.Column(db.Integer, primary_key=True)
+    municipio_id = db.Column(db.Integer, db.ForeignKey('municipios.id'), nullable=False)
+    aluno_id = db.Column(db.Integer, db.ForeignKey('alunos.id'), nullable=False)
+    
+    profissional_nome = db.Column(db.String(150), nullable=True)
+    titulo = db.Column(db.String(200), nullable=False)
+    descricao = db.Column(db.Text, nullable=False)
+    categoria = db.Column(db.String(50), default='Autonomia') # 'Cognitiva', 'Autonomia', 'Comunicação', 'Socialização', 'Motora'
+    icone = db.Column(db.String(50), default='award') # Lucide icon name
+    data_registro = db.Column(db.Date, default=datetime.utcnow)
+    criado_em = db.Column(db.DateTime, default=datetime.utcnow)
+
+    aluno = db.relationship('Aluno', backref=db.backref('conquistas', lazy=True, order_by='ConquistaEstudante.id.desc()'))
+
     
 class Escola(db.Model):
     """

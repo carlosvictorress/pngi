@@ -6,7 +6,7 @@ from app import db
 from app.models import (
     Municipio, Aluno, ProfissionalAEE, PlanoAEE, 
     AgendaAEE, EvolucaoAEE, DocumentoAEE, EncaminhamentoAEE, Escola,
-    AtendimentoAee, ListaEsperaAEE
+    AtendimentoAee, ListaEsperaAEE, ComunicacaoAEE, MensagemFamilia, ConquistaEstudante
 )
 
 aee_bp = Blueprint('aee', __name__)
@@ -435,7 +435,8 @@ def prontuario_aluno_aee(aluno_id):
     """
     Prontuário Individual do Aluno na Sala de AEE.
     Apresenta dados pessoais completos, pais, endereço, escola, série, CID ou investigação,
-    quantas sessões já foram realizadas e o histórico com o que foi feito e como foi feito.
+    quantas sessões já foram realizadas e o histórico com o que foi feito e como foi feito,
+    além de agenda sincronizada com a família, comunicados emitidos e conquistas do estudante.
     """
     _garantir_tabela_atendimentos_aee()
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
@@ -460,6 +461,26 @@ def prontuario_aluno_aee(aluno_id):
         db.session.rollback()
         profissionais = []
 
+    try:
+        agenda_horarios = AgendaAEE.query.filter_by(aluno_id=aluno.id, ativo=True).order_by(AgendaAEE.id.desc()).all()
+    except Exception:
+        agenda_horarios = []
+
+    try:
+        comunicados_familia = ComunicacaoAEE.query.filter_by(aluno_id=aluno.id).order_by(ComunicacaoAEE.id.desc()).all()
+    except Exception:
+        comunicados_familia = []
+
+    try:
+        conquistas = ConquistaEstudante.query.filter_by(aluno_id=aluno.id).order_by(ConquistaEstudante.data_registro.desc()).all()
+    except Exception:
+        conquistas = []
+
+    try:
+        mensagens_familia = MensagemFamilia.query.filter_by(aluno_id=aluno.id).order_by(MensagemFamilia.data_envio.desc()).all()
+    except Exception:
+        mensagens_familia = []
+
     return render_template(
         'aee/prontuario_aluno.html',
         aluno=aluno,
@@ -468,8 +489,162 @@ def prontuario_aluno_aee(aluno_id):
         total_faltas=total_faltas,
         taxa_presenca=taxa_presenca,
         profissionais=profissionais,
+        agenda_horarios=agenda_horarios,
+        comunicados_familia=comunicados_familia,
+        conquistas=conquistas,
+        mensagens_familia=mensagens_familia,
         now=datetime.utcnow()
     )
+
+
+@aee_bp.route('/aluno/<int:aluno_id>/agenda/adicionar', methods=['POST'])
+@login_required
+def aluno_adicionar_agenda(aluno_id):
+    """Vincula um horário semanal de atendimento do aluno e sincroniza no Portal da Família."""
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    dia_semana = request.form.get('dia_semana')
+    horario_inicio = request.form.get('horario_inicio')
+    horario_fim = request.form.get('horario_fim')
+    sala_recurso = request.form.get('sala_recurso', 'Sala de Recursos Multifuncionais')
+    profissional_id = request.form.get('profissional_id', type=int)
+    quantidade_sessoes = request.form.get('quantidade_sessoes', 1, type=int)
+
+    if not dia_semana or not horario_inicio or not horario_fim:
+        flash("Preencha o dia da semana e os horários de início e término.", "erro")
+        return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+    nova_agenda = AgendaAEE(
+        municipio_id=g.municipio.id,
+        aluno_id=aluno.id,
+        profissional_id=profissional_id,
+        dia_semana=dia_semana,
+        horario_inicio=horario_inicio,
+        horario_fim=horario_fim,
+        sala_recurso=sala_recurso,
+        quantidade_sessoes=quantidade_sessoes,
+        status='Agendado',
+        ativo=True
+    )
+    db.session.add(nova_agenda)
+    db.session.commit()
+    flash(f"Horário de atendimento ({dia_semana} às {horario_inicio}) adicionado com sucesso e sincronizado no Portal da Família!", "sucesso")
+    return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+
+@aee_bp.route('/aluno/<int:aluno_id>/agenda/<int:agenda_id>/remover', methods=['POST', 'GET'])
+@login_required
+def aluno_remover_agenda(aluno_id, agenda_id):
+    """Desativa um agendamento da grade do estudante."""
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    item = AgendaAEE.query.filter_by(id=agenda_id, aluno_id=aluno.id, municipio_id=g.municipio.id).first_or_404()
+    item.ativo = False
+    item.status = 'Cancelado'
+    db.session.commit()
+    flash("Horário de atendimento removido da grade e atualizado para a família.", "sucesso")
+    return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+
+@aee_bp.route('/aluno/<int:aluno_id>/comunicado/novo', methods=['POST'])
+@login_required
+def aluno_adicionar_comunicado(aluno_id):
+    """Publica um novo comunicado/orientação direcionado para os pais no Portal da Família."""
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    titulo = request.form.get('titulo', '').strip() or 'Comunicado da Equipe de AEE'
+    tipo_registro = request.form.get('tipo_registro', 'Orientação')
+    prioridade = request.form.get('prioridade', 'Normal')
+    relato = request.form.get('relato_descritivo', '').strip()
+    data_str = request.form.get('data_registro')
+    
+    try:
+        data_registro = datetime.strptime(data_str, '%Y-%m-%d').date() if data_str else datetime.utcnow().date()
+    except Exception:
+        data_registro = datetime.utcnow().date()
+
+    if not relato:
+        flash("O texto do comunicado/orientação não pode ficar vazio.", "erro")
+        return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+    novo_comunicado = ComunicacaoAEE(
+        municipio_id=g.municipio.id,
+        aluno_id=aluno.id,
+        titulo=titulo,
+        tipo_registro=tipo_registro,
+        prioridade=prioridade,
+        data_registro=data_registro,
+        relato_descritivo=relato,
+        compartilhado_com_familia=True,
+        autor_nome=current_user.nome,
+        autor_cargo=getattr(current_user, 'cargo', 'Especialista AEE') or 'Especialista AEE'
+    )
+    db.session.add(novo_comunicado)
+    db.session.commit()
+    flash(f"Comunicado '{titulo}' publicado no Portal da Família de {aluno.nome}!", "sucesso")
+    return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+
+@aee_bp.route('/aluno/<int:aluno_id>/conquista/nova', methods=['POST'])
+@login_required
+def aluno_adicionar_conquista(aluno_id):
+    """Registra uma vitória pedagógica ou marco de desenvolvimento inclusivo no mural."""
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    titulo = request.form.get('titulo', '').strip()
+    descricao = request.form.get('descricao', '').strip()
+    categoria = request.form.get('categoria', 'Autonomia')
+    icone = request.form.get('icone', 'award')
+
+    if not titulo or not descricao:
+        flash("Informe o título e a descrição da conquista/marco.", "erro")
+        return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+    nova_conquista = ConquistaEstudante(
+        municipio_id=g.municipio.id,
+        aluno_id=aluno.id,
+        profissional_nome=current_user.nome,
+        titulo=titulo,
+        descricao=descricao,
+        categoria=categoria,
+        icone=icone,
+        data_registro=datetime.utcnow().date()
+    )
+    db.session.add(nova_conquista)
+    db.session.commit()
+    flash("Marco de desenvolvimento / conquista registrado com sucesso e já visível para a família!", "sucesso")
+    return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+
+@aee_bp.route('/aluno/<int:aluno_id>/mensagem/responder', methods=['POST'])
+@login_required
+def aluno_responder_mensagem(aluno_id):
+    """Responde a uma mensagem enviada pela família pelo Portal."""
+    aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
+    msg_id = request.form.get('mensagem_origem_id', type=int)
+    texto = request.form.get('resposta', '').strip()
+
+    if not texto:
+        flash("O texto da resposta não pode ficar em branco.", "erro")
+        return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
+
+    if msg_id:
+        msg_origem = MensagemFamilia.query.get(msg_id)
+        if msg_origem:
+            msg_origem.lida = True
+            msg_origem.lida_em = datetime.utcnow()
+
+    resposta = MensagemFamilia(
+        municipio_id=g.municipio.id,
+        aluno_id=aluno.id,
+        remetente_tipo='escola',
+        remetente_nome=f"{current_user.nome} ({getattr(current_user, 'cargo', 'Equipe Escolar')})",
+        destinatario_nome=aluno.nome_mae or aluno.nome_pai or 'Família',
+        assunto=request.form.get('assunto', 'Resposta da Equipe Escolar'),
+        mensagem=texto,
+        data_envio=datetime.utcnow(),
+        lida=False
+    )
+    db.session.add(resposta)
+    db.session.commit()
+    flash(f"Resposta enviada para a família de {aluno.nome}!", "sucesso")
+    return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
 
 @aee_bp.route('/aluno/<int:aluno_id>/sessao/nova', methods=['POST'])
