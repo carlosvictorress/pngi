@@ -232,10 +232,63 @@ def create_app():
                     "ALTER TABLE profissionais_aee ALTER COLUMN cargo DROP NOT NULL;",
 
                     # 8. comunicacoes_aee, mensagens_familia e conquistas_estudante
+                    "ALTER TABLE atendimentos_aee DROP CONSTRAINT IF EXISTS atendimentos_aee_profissional_id_fkey;",
+                    "ALTER TABLE agenda_aee DROP CONSTRAINT IF EXISTS agenda_aee_profissional_id_fkey;",
+                    """
+                    CREATE TABLE IF NOT EXISTS comunicacoes_aee (
+                        id SERIAL PRIMARY KEY,
+                        municipio_id INTEGER NOT NULL REFERENCES municipios(id) ON DELETE CASCADE,
+                        aluno_id INTEGER REFERENCES alunos(id) ON DELETE CASCADE,
+                        titulo VARCHAR(200) DEFAULT 'Comunicado da Equipe',
+                        tipo_registro VARCHAR(50) NOT NULL DEFAULT 'Orientação',
+                        prioridade VARCHAR(20) DEFAULT 'Normal',
+                        data_registro DATE NOT NULL DEFAULT CURRENT_DATE,
+                        relato_descritivo TEXT NOT NULL,
+                        compartilhado_com_familia BOOLEAN DEFAULT TRUE,
+                        autor_nome VARCHAR(150) DEFAULT 'Equipe Escolar',
+                        autor_cargo VARCHAR(100) DEFAULT 'Especialista AEE',
+                        ciencia_familia BOOLEAN DEFAULT FALSE,
+                        ciencia_data TIMESTAMP,
+                        observacoes_familia TEXT,
+                        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                    """,
+                    """
+                    CREATE TABLE IF NOT EXISTS conquistas_estudante (
+                        id SERIAL PRIMARY KEY,
+                        municipio_id INTEGER NOT NULL REFERENCES municipios(id) ON DELETE CASCADE,
+                        aluno_id INTEGER NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+                        profissional_nome VARCHAR(150),
+                        titulo VARCHAR(150) NOT NULL,
+                        descricao TEXT NOT NULL,
+                        categoria VARCHAR(50) DEFAULT 'Autonomia',
+                        icone VARCHAR(50) DEFAULT 'award',
+                        data_registro DATE NOT NULL DEFAULT CURRENT_DATE,
+                        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    );
+                    """,
+                    """
+                    CREATE TABLE IF NOT EXISTS mensagens_familia (
+                        id SERIAL PRIMARY KEY,
+                        municipio_id INTEGER NOT NULL REFERENCES municipios(id) ON DELETE CASCADE,
+                        aluno_id INTEGER NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+                        remetente_tipo VARCHAR(20) NOT NULL DEFAULT 'familia',
+                        remetente_nome VARCHAR(150) NOT NULL,
+                        destinatario_nome VARCHAR(150),
+                        assunto VARCHAR(200),
+                        mensagem TEXT NOT NULL,
+                        data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        lida BOOLEAN DEFAULT FALSE,
+                        lida_em TIMESTAMP
+                    );
+                    """,
                     "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS titulo VARCHAR(200);",
                     "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20) DEFAULT 'Normal';",
                     "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS autor_nome VARCHAR(150);",
                     "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS autor_cargo VARCHAR(100);",
+                    "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS ciencia_familia BOOLEAN DEFAULT FALSE;",
+                    "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS ciencia_data TIMESTAMP;",
+                    "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS observacoes_familia TEXT;",
                     "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
                     "ALTER TABLE comunicacoes_aee ALTER COLUMN aluno_id DROP NOT NULL;",
                     "ALTER TABLE agenda_aee ADD COLUMN IF NOT EXISTS sala_recurso VARCHAR(100);",
@@ -264,7 +317,55 @@ def create_app():
                         conn.execute(text("ALTER TABLE profissionais_aee ADD COLUMN usuario_id INTEGER;"))
                     except Exception:
                         pass
-                    for col in ['titulo', 'prioridade', 'autor_nome', 'autor_cargo', 'criado_em']:
+                    conn.execute(text("""
+                        CREATE TABLE IF NOT EXISTS comunicacoes_aee (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            municipio_id INTEGER NOT NULL,
+                            aluno_id INTEGER,
+                            titulo VARCHAR(200),
+                            tipo_registro VARCHAR(50),
+                            prioridade VARCHAR(20),
+                            data_registro DATE,
+                            relato_descritivo TEXT,
+                            compartilhado_com_familia BOOLEAN,
+                            autor_nome VARCHAR(150),
+                            autor_cargo VARCHAR(100),
+                            ciencia_familia BOOLEAN,
+                            ciencia_data TIMESTAMP,
+                            observacoes_familia TEXT,
+                            criado_em TIMESTAMP
+                        );
+                    """))
+                    conn.execute(text("""
+                        CREATE TABLE IF NOT EXISTS conquistas_estudante (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            municipio_id INTEGER NOT NULL,
+                            aluno_id INTEGER NOT NULL,
+                            profissional_nome VARCHAR(150),
+                            titulo VARCHAR(150),
+                            descricao TEXT,
+                            categoria VARCHAR(50),
+                            icone VARCHAR(50),
+                            data_registro DATE,
+                            criado_em TIMESTAMP
+                        );
+                    """))
+                    conn.execute(text("""
+                        CREATE TABLE IF NOT EXISTS mensagens_familia (
+                            id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            municipio_id INTEGER NOT NULL,
+                            aluno_id INTEGER NOT NULL,
+                            remetente_tipo VARCHAR(20),
+                            remetente_nome VARCHAR(150),
+                            destinatario_nome VARCHAR(150),
+                            assunto VARCHAR(200),
+                            mensagem TEXT,
+                            data_envio TIMESTAMP,
+                            lida BOOLEAN,
+                            lida_em TIMESTAMP
+                        );
+                    """))
+                    for col in ['titulo', 'prioridade', 'autor_nome', 'autor_cargo', 'criado_em', 'ciencia_familia', 'observacoes_familia']:
                         try:
                             conn.execute(text(f"ALTER TABLE comunicacoes_aee ADD COLUMN {col} VARCHAR(200);"))
                         except Exception:

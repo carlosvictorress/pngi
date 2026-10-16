@@ -400,12 +400,13 @@ def sala_recursos():
     )
 
 
-def _garantir_tabela_atendimentos_aee():
-    """Garante colunas e relaxamento de constraints para atendimentos_aee no PostgreSQL."""
+def _garantir_tabelas_prontuario_aee():
+    """Garante tabelas, colunas e relaxamento de constraints para o prontuário AEE e Portal da Família."""
     try:
         from sqlalchemy import text
         with db.engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
             ddls = [
+                # Atendimentos AEE
                 "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS municipio_id INTEGER;",
                 "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS compareceu BOOLEAN DEFAULT TRUE;",
                 "ALTER TABLE atendimentos_aee ADD COLUMN IF NOT EXISTS o_que_foi_feito TEXT;",
@@ -418,15 +419,145 @@ def _garantir_tabela_atendimentos_aee():
                 "ALTER TABLE atendimentos_aee ALTER COLUMN horario_fim DROP NOT NULL;",
                 "ALTER TABLE atendimentos_aee ALTER COLUMN plano_sessao DROP NOT NULL;",
                 "ALTER TABLE atendimentos_aee ALTER COLUMN evolucao_registro DROP NOT NULL;",
-                "ALTER TABLE atendimentos_aee ALTER COLUMN frequencia DROP NOT NULL;"
+                "ALTER TABLE atendimentos_aee ALTER COLUMN frequencia DROP NOT NULL;",
+                "ALTER TABLE atendimentos_aee DROP CONSTRAINT IF EXISTS atendimentos_aee_profissional_id_fkey;",
+
+                # Agenda AEE
+                "ALTER TABLE agenda_aee DROP CONSTRAINT IF EXISTS agenda_aee_profissional_id_fkey;",
+                "ALTER TABLE agenda_aee ALTER COLUMN profissional_id DROP NOT NULL;",
+                "ALTER TABLE agenda_aee ADD COLUMN IF NOT EXISTS sala_recurso VARCHAR(100);",
+                "ALTER TABLE agenda_aee ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'Agendado';",
+                "ALTER TABLE agenda_aee ADD COLUMN IF NOT EXISTS ativo BOOLEAN DEFAULT TRUE;",
+
+                # Comunicados AEE
+                """
+                CREATE TABLE IF NOT EXISTS comunicacoes_aee (
+                    id SERIAL PRIMARY KEY,
+                    municipio_id INTEGER NOT NULL REFERENCES municipios(id) ON DELETE CASCADE,
+                    aluno_id INTEGER REFERENCES alunos(id) ON DELETE CASCADE,
+                    titulo VARCHAR(200) DEFAULT 'Comunicado da Equipe',
+                    tipo_registro VARCHAR(50) NOT NULL DEFAULT 'Orientação',
+                    prioridade VARCHAR(20) DEFAULT 'Normal',
+                    data_registro DATE NOT NULL DEFAULT CURRENT_DATE,
+                    relato_descritivo TEXT NOT NULL,
+                    compartilhado_com_familia BOOLEAN DEFAULT TRUE,
+                    autor_nome VARCHAR(150) DEFAULT 'Equipe Escolar',
+                    autor_cargo VARCHAR(100) DEFAULT 'Especialista AEE',
+                    ciencia_familia BOOLEAN DEFAULT FALSE,
+                    ciencia_data TIMESTAMP,
+                    observacoes_familia TEXT,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+                """,
+                "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS titulo VARCHAR(200);",
+                "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS prioridade VARCHAR(20) DEFAULT 'Normal';",
+                "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS autor_nome VARCHAR(150);",
+                "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS autor_cargo VARCHAR(100);",
+                "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS ciencia_familia BOOLEAN DEFAULT FALSE;",
+                "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS ciencia_data TIMESTAMP;",
+                "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS observacoes_familia TEXT;",
+                "ALTER TABLE comunicacoes_aee ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
+                "ALTER TABLE comunicacoes_aee ALTER COLUMN aluno_id DROP NOT NULL;",
+
+                # Conquistas do Estudante
+                """
+                CREATE TABLE IF NOT EXISTS conquistas_estudante (
+                    id SERIAL PRIMARY KEY,
+                    municipio_id INTEGER NOT NULL REFERENCES municipios(id) ON DELETE CASCADE,
+                    aluno_id INTEGER NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+                    profissional_nome VARCHAR(150),
+                    titulo VARCHAR(150) NOT NULL,
+                    descricao TEXT NOT NULL,
+                    categoria VARCHAR(50) DEFAULT 'Autonomia',
+                    icone VARCHAR(50) DEFAULT 'award',
+                    data_registro DATE NOT NULL DEFAULT CURRENT_DATE,
+                    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+                """,
+
+                # Mensagens com a Família
+                """
+                CREATE TABLE IF NOT EXISTS mensagens_familia (
+                    id SERIAL PRIMARY KEY,
+                    municipio_id INTEGER NOT NULL REFERENCES municipios(id) ON DELETE CASCADE,
+                    aluno_id INTEGER NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+                    remetente_tipo VARCHAR(20) NOT NULL DEFAULT 'familia',
+                    remetente_nome VARCHAR(150) NOT NULL,
+                    destinatario_nome VARCHAR(150),
+                    assunto VARCHAR(200),
+                    mensagem TEXT NOT NULL,
+                    data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    lida BOOLEAN DEFAULT FALSE,
+                    lida_em TIMESTAMP
+                );
+                """
             ]
             for cmd in ddls:
                 try:
                     conn.execute(text(cmd))
                 except Exception:
                     pass
+
+            if conn.dialect.name == 'sqlite':
+                sqlite_ddls = [
+                    """
+                    CREATE TABLE IF NOT EXISTS comunicacoes_aee (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        municipio_id INTEGER NOT NULL,
+                        aluno_id INTEGER,
+                        titulo VARCHAR(200),
+                        tipo_registro VARCHAR(50),
+                        prioridade VARCHAR(20),
+                        data_registro DATE,
+                        relato_descritivo TEXT,
+                        compartilhado_com_familia BOOLEAN,
+                        autor_nome VARCHAR(150),
+                        autor_cargo VARCHAR(100),
+                        ciencia_familia BOOLEAN,
+                        ciencia_data TIMESTAMP,
+                        observacoes_familia TEXT,
+                        criado_em TIMESTAMP
+                    );
+                    """,
+                    """
+                    CREATE TABLE IF NOT EXISTS conquistas_estudante (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        municipio_id INTEGER NOT NULL,
+                        aluno_id INTEGER NOT NULL,
+                        profissional_nome VARCHAR(150),
+                        titulo VARCHAR(150),
+                        descricao TEXT,
+                        categoria VARCHAR(50),
+                        icone VARCHAR(50),
+                        data_registro DATE,
+                        criado_em TIMESTAMP
+                    );
+                    """,
+                    """
+                    CREATE TABLE IF NOT EXISTS mensagens_familia (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        municipio_id INTEGER NOT NULL,
+                        aluno_id INTEGER NOT NULL,
+                        remetente_tipo VARCHAR(20),
+                        remetente_nome VARCHAR(150),
+                        destinatario_nome VARCHAR(150),
+                        assunto VARCHAR(200),
+                        mensagem TEXT,
+                        data_envio TIMESTAMP,
+                        lida BOOLEAN,
+                        lida_em TIMESTAMP
+                    );
+                    """
+                ]
+                for s_ddl in sqlite_ddls:
+                    try:
+                        conn.execute(text(s_ddl))
+                    except Exception:
+                        pass
     except Exception:
         db.session.rollback()
+
+_garantir_tabela_atendimentos_aee = _garantir_tabelas_prontuario_aee
 
 
 @aee_bp.route('/aluno/<int:aluno_id>/prontuario')
@@ -438,7 +569,7 @@ def prontuario_aluno_aee(aluno_id):
     quantas sessões já foram realizadas e o histórico com o que foi feito e como foi feito,
     além de agenda sincronizada com a família, comunicados emitidos e conquistas do estudante.
     """
-    _garantir_tabela_atendimentos_aee()
+    _garantir_tabelas_prontuario_aee()
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
     
     # Histórico de Atendimentos na Sala de Recursos
@@ -501,6 +632,7 @@ def prontuario_aluno_aee(aluno_id):
 @login_required
 def aluno_adicionar_agenda(aluno_id):
     """Vincula um horário semanal de atendimento do aluno e sincroniza no Portal da Família."""
+    _garantir_tabelas_prontuario_aee()
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
     dia_semana = request.form.get('dia_semana')
     horario_inicio = request.form.get('horario_inicio')
@@ -513,21 +645,31 @@ def aluno_adicionar_agenda(aluno_id):
         flash("Preencha o dia da semana e os horários de início e término.", "erro")
         return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
-    nova_agenda = AgendaAEE(
-        municipio_id=g.municipio.id,
-        aluno_id=aluno.id,
-        profissional_id=profissional_id,
-        dia_semana=dia_semana,
-        horario_inicio=horario_inicio,
-        horario_fim=horario_fim,
-        sala_recurso=sala_recurso,
-        quantidade_sessoes=quantidade_sessoes,
-        status='Agendado',
-        ativo=True
-    )
-    db.session.add(nova_agenda)
-    db.session.commit()
-    flash(f"Horário de atendimento ({dia_semana} às {horario_inicio}) adicionado com sucesso e sincronizado no Portal da Família!", "sucesso")
+    if profissional_id:
+        p_obj = ProfissionalAEE.query.get(profissional_id)
+        if not p_obj:
+            profissional_id = None
+
+    try:
+        nova_agenda = AgendaAEE(
+            municipio_id=g.municipio.id,
+            aluno_id=aluno.id,
+            profissional_id=profissional_id,
+            dia_semana=dia_semana,
+            horario_inicio=horario_inicio,
+            horario_fim=horario_fim,
+            sala_recurso=sala_recurso,
+            quantidade_sessoes=quantidade_sessoes,
+            status='Agendado',
+            ativo=True
+        )
+        db.session.add(nova_agenda)
+        db.session.commit()
+        flash(f"Horário de atendimento ({dia_semana} às {horario_inicio}) adicionado com sucesso e sincronizado no Portal da Família!", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao salvar horário na agenda: {e}", "erro")
+
     return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
 
@@ -537,10 +679,15 @@ def aluno_remover_agenda(aluno_id, agenda_id):
     """Desativa um agendamento da grade do estudante."""
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
     item = AgendaAEE.query.filter_by(id=agenda_id, aluno_id=aluno.id, municipio_id=g.municipio.id).first_or_404()
-    item.ativo = False
-    item.status = 'Cancelado'
-    db.session.commit()
-    flash("Horário de atendimento removido da grade e atualizado para a família.", "sucesso")
+    try:
+        item.ativo = False
+        item.status = 'Cancelado'
+        db.session.commit()
+        flash("Horário de atendimento removido da grade e atualizado para a família.", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao remover horário da agenda: {e}", "erro")
+
     return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
 
@@ -548,6 +695,7 @@ def aluno_remover_agenda(aluno_id, agenda_id):
 @login_required
 def aluno_adicionar_comunicado(aluno_id):
     """Publica um novo comunicado/orientação direcionado para os pais no Portal da Família."""
+    _garantir_tabelas_prontuario_aee()
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
     titulo = request.form.get('titulo', '').strip() or 'Comunicado da Equipe de AEE'
     tipo_registro = request.form.get('tipo_registro', 'Orientação')
@@ -564,21 +712,26 @@ def aluno_adicionar_comunicado(aluno_id):
         flash("O texto do comunicado/orientação não pode ficar vazio.", "erro")
         return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
-    novo_comunicado = ComunicacaoAEE(
-        municipio_id=g.municipio.id,
-        aluno_id=aluno.id,
-        titulo=titulo,
-        tipo_registro=tipo_registro,
-        prioridade=prioridade,
-        data_registro=data_registro,
-        relato_descritivo=relato,
-        compartilhado_com_familia=True,
-        autor_nome=current_user.nome,
-        autor_cargo=getattr(current_user, 'cargo', 'Especialista AEE') or 'Especialista AEE'
-    )
-    db.session.add(novo_comunicado)
-    db.session.commit()
-    flash(f"Comunicado '{titulo}' publicado no Portal da Família de {aluno.nome}!", "sucesso")
+    try:
+        novo_comunicado = ComunicacaoAEE(
+            municipio_id=g.municipio.id,
+            aluno_id=aluno.id,
+            titulo=titulo,
+            tipo_registro=tipo_registro,
+            prioridade=prioridade,
+            data_registro=data_registro,
+            relato_descritivo=relato,
+            compartilhado_com_familia=True,
+            autor_nome=current_user.nome,
+            autor_cargo=getattr(current_user, 'cargo', 'Especialista AEE') or 'Especialista AEE'
+        )
+        db.session.add(novo_comunicado)
+        db.session.commit()
+        flash(f"Comunicado '{titulo}' publicado no Portal da Família de {aluno.nome}!", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao salvar comunicado: {e}", "erro")
+
     return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
 
@@ -586,6 +739,7 @@ def aluno_adicionar_comunicado(aluno_id):
 @login_required
 def aluno_adicionar_conquista(aluno_id):
     """Registra uma vitória pedagógica ou marco de desenvolvimento inclusivo no mural."""
+    _garantir_tabelas_prontuario_aee()
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
     titulo = request.form.get('titulo', '').strip()
     descricao = request.form.get('descricao', '').strip()
@@ -596,19 +750,24 @@ def aluno_adicionar_conquista(aluno_id):
         flash("Informe o título e a descrição da conquista/marco.", "erro")
         return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
-    nova_conquista = ConquistaEstudante(
-        municipio_id=g.municipio.id,
-        aluno_id=aluno.id,
-        profissional_nome=current_user.nome,
-        titulo=titulo,
-        descricao=descricao,
-        categoria=categoria,
-        icone=icone,
-        data_registro=datetime.utcnow().date()
-    )
-    db.session.add(nova_conquista)
-    db.session.commit()
-    flash("Marco de desenvolvimento / conquista registrado com sucesso e já visível para a família!", "sucesso")
+    try:
+        nova_conquista = ConquistaEstudante(
+            municipio_id=g.municipio.id,
+            aluno_id=aluno.id,
+            profissional_nome=current_user.nome,
+            titulo=titulo,
+            descricao=descricao,
+            categoria=categoria,
+            icone=icone,
+            data_registro=datetime.utcnow().date()
+        )
+        db.session.add(nova_conquista)
+        db.session.commit()
+        flash("Marco de desenvolvimento / conquista registrado com sucesso e já visível para a família!", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao salvar conquista: {e}", "erro")
+
     return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
 
@@ -616,6 +775,7 @@ def aluno_adicionar_conquista(aluno_id):
 @login_required
 def aluno_responder_mensagem(aluno_id):
     """Responde a uma mensagem enviada pela família pelo Portal."""
+    _garantir_tabelas_prontuario_aee()
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
     msg_id = request.form.get('mensagem_origem_id', type=int)
     texto = request.form.get('resposta', '').strip()
@@ -624,26 +784,31 @@ def aluno_responder_mensagem(aluno_id):
         flash("O texto da resposta não pode ficar em branco.", "erro")
         return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
-    if msg_id:
-        msg_origem = MensagemFamilia.query.get(msg_id)
-        if msg_origem:
-            msg_origem.lida = True
-            msg_origem.lida_em = datetime.utcnow()
+    try:
+        if msg_id:
+            msg_origem = MensagemFamilia.query.get(msg_id)
+            if msg_origem:
+                msg_origem.lida = True
+                msg_origem.lida_em = datetime.utcnow()
 
-    resposta = MensagemFamilia(
-        municipio_id=g.municipio.id,
-        aluno_id=aluno.id,
-        remetente_tipo='escola',
-        remetente_nome=f"{current_user.nome} ({getattr(current_user, 'cargo', 'Equipe Escolar')})",
-        destinatario_nome=aluno.nome_mae or aluno.nome_pai or 'Família',
-        assunto=request.form.get('assunto', 'Resposta da Equipe Escolar'),
-        mensagem=texto,
-        data_envio=datetime.utcnow(),
-        lida=False
-    )
-    db.session.add(resposta)
-    db.session.commit()
-    flash(f"Resposta enviada para a família de {aluno.nome}!", "sucesso")
+        resposta = MensagemFamilia(
+            municipio_id=g.municipio.id,
+            aluno_id=aluno.id,
+            remetente_tipo='escola',
+            remetente_nome=f"{current_user.nome} ({getattr(current_user, 'cargo', 'Equipe Escolar')})",
+            destinatario_nome=aluno.nome_mae or aluno.nome_pai or 'Família',
+            assunto=request.form.get('assunto', 'Resposta da Equipe Escolar'),
+            mensagem=texto,
+            data_envio=datetime.utcnow(),
+            lida=False
+        )
+        db.session.add(resposta)
+        db.session.commit()
+        flash(f"Resposta enviada para a família de {aluno.nome}!", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao enviar resposta: {e}", "erro")
+
     return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
 
@@ -651,7 +816,7 @@ def aluno_responder_mensagem(aluno_id):
 @login_required
 def lancar_sessao_aee(aluno_id):
     """Registra uma nova sessão de atendimento ou falta na Sala de AEE."""
-    _garantir_tabela_atendimentos_aee()
+    _garantir_tabelas_prontuario_aee()
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
 
     data_str = request.form.get('data_atendimento')
@@ -685,6 +850,19 @@ def lancar_sessao_aee(aluno_id):
         p_obj = ProfissionalAEE.query.get(profissional_id)
         if p_obj:
             prof_nome = p_obj.nome
+        else:
+            profissional_id = None
+    else:
+        # Se não forneceu profissional_id, tenta encontrar o ProfissionalAEE associado ao current_user
+        try:
+            p_user = ProfissionalAEE.query.filter_by(usuario_id=current_user.id).first()
+            if p_user:
+                profissional_id = p_user.id
+                prof_nome = p_user.nome
+            else:
+                profissional_id = None
+        except Exception:
+            profissional_id = None
 
     if not compareceu:
         if not justificativa_falta:
@@ -707,9 +885,9 @@ def lancar_sessao_aee(aluno_id):
             como_foi_feito=como_foi_feito,
             recursos_utilizados=recursos_utilizados,
             justificativa_falta=justificativa_falta,
-            plano_sessao=o_que_foi_feito,
-            evolucao_registro=como_foi_feito,
-            profissional_id=profissional_id or current_user.id,
+            plano_sessao=o_que_foi_feito or "Atendimento AEE",
+            evolucao_registro=como_foi_feito or ("Falta registrada" if not compareceu else "Sessão realizada"),
+            profissional_id=profissional_id,
             profissional_nome=prof_nome
         )
         db.session.add(nova_sessao)
@@ -729,25 +907,30 @@ def atualizar_dados_aee(aluno_id):
     """Atualização rápida dos dados pessoais e clínicos do estudante diretamente no prontuário AEE."""
     aluno = Aluno.query.filter_by(id=aluno_id, municipio_id=g.municipio.id).first_or_404()
 
-    aluno.nome = request.form.get('nome', aluno.nome).strip()
-    aluno.cpf = request.form.get('cpf', aluno.cpf).strip()
-    aluno.data_nascimento = request.form.get('data_nascimento', aluno.data_nascimento)
-    aluno.nome_mae = request.form.get('nome_mae', aluno.nome_mae).strip()
-    aluno.nome_pai = request.form.get('nome_pai', aluno.nome_pai).strip()
-    aluno.endereco = request.form.get('endereco', aluno.endereco).strip()
-    aluno.bairro = request.form.get('bairro', aluno.bairro).strip()
-    aluno.turma = request.form.get('turma', aluno.turma).strip()
-    aluno.etapa_ensino = request.form.get('etapa_ensino', aluno.etapa_ensino).strip()
-    
-    # Diagnóstico e Investigação
-    aluno.cid = request.form.get('cid', aluno.cid).strip()
-    aluno.em_investigacao = request.form.get('em_investigacao') == 'on' or request.form.get('em_investigacao') == 'true'
-    aluno.hipotese_diagnostica = request.form.get('hipotese_diagnostica', aluno.hipotese_diagnostica).strip()
-    if request.form.get('tipo_deficiencia'):
-        aluno.tipo_deficiencia = request.form.get('tipo_deficiencia')
+    try:
+        aluno.nome = request.form.get('nome', aluno.nome).strip()
+        aluno.cpf = request.form.get('cpf', aluno.cpf).strip()
+        aluno.data_nascimento = request.form.get('data_nascimento', aluno.data_nascimento)
+        aluno.nome_mae = request.form.get('nome_mae', aluno.nome_mae).strip()
+        aluno.nome_pai = request.form.get('nome_pai', aluno.nome_pai).strip()
+        aluno.endereco = request.form.get('endereco', aluno.endereco).strip()
+        aluno.bairro = request.form.get('bairro', aluno.bairro).strip()
+        aluno.turma = request.form.get('turma', aluno.turma).strip()
+        aluno.etapa_ensino = request.form.get('etapa_ensino', aluno.etapa_ensino).strip()
+        
+        # Diagnóstico e Investigação
+        aluno.cid = request.form.get('cid', aluno.cid).strip()
+        aluno.em_investigacao = request.form.get('em_investigacao') == 'on' or request.form.get('em_investigacao') == 'true'
+        aluno.hipotese_diagnostica = request.form.get('hipotese_diagnostica', aluno.hipotese_diagnostica).strip()
+        if request.form.get('tipo_deficiencia'):
+            aluno.tipo_deficiencia = request.form.get('tipo_deficiencia')
 
-    db.session.commit()
-    flash(f"Ficha cadastral de {aluno.nome} atualizada no prontuário da Sala de Recursos!", "sucesso")
+        db.session.commit()
+        flash(f"Ficha cadastral de {aluno.nome} atualizada no prontuário da Sala de Recursos!", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao atualizar dados: {e}", "erro")
+
     return redirect(url_for('aee.prontuario_aluno_aee', municipio_slug=g.municipio.slug, aluno_id=aluno.id))
 
 
