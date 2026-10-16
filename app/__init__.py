@@ -424,6 +424,25 @@ def create_app():
             except Exception as e:
                 db.session.rollback()
                 print(f"[INFO] Auto-sync profissionais notice: {e}")
+
+            # Garante que o SuperAdmin Global da plataforma exista no banco de dados
+            try:
+                from app.models import Usuario
+                superadmin = Usuario.query.filter_by(perfil='superadmin').first()
+                if not superadmin:
+                    superadmin = Usuario(
+                        nome="Carlos Admin Global",
+                        email="carlos@plataforma.com",
+                        perfil="superadmin",
+                        municipio_id=None
+                    )
+                    superadmin.set_senha("master123")
+                    db.session.add(superadmin)
+                    db.session.commit()
+                    print("[INFO] Superadmin global inicializado: carlos@plataforma.com")
+            except Exception as e:
+                db.session.rollback()
+                print(f"[INFO] Superadmin auto-seed notice: {e}")
         except Exception as e:
             print(f"[INFO] DDL schema notice: {e}")
 
