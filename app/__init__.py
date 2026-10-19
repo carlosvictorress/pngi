@@ -214,7 +214,11 @@ def create_app():
                     "ALTER TABLE atendimentos_aee ALTER COLUMN evolucao_registro DROP NOT NULL;",
                     "ALTER TABLE atendimentos_aee ALTER COLUMN frequencia DROP NOT NULL;",
 
-                    # 6. municipios (Módulos contratados por município)
+                    # 6. municipios (Módulos contratados por município e campos de configuração)
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS brasao_url VARCHAR(255);",
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS ativo BOOLEAN DEFAULT TRUE;",
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS limite_alunos INTEGER DEFAULT 500;",
+                    "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP;",
                     "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_pei BOOLEAN DEFAULT TRUE;",
                     "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_aee BOOLEAN DEFAULT TRUE;",
                     "ALTER TABLE municipios ADD COLUMN IF NOT EXISTS modulo_equipe_multi BOOLEAN DEFAULT TRUE;",
@@ -303,9 +307,9 @@ def create_app():
 
                 # Suporte para SQLite local
                 if conn.dialect.name == 'sqlite':
-                    for col in ['modulo_pei', 'modulo_aee', 'modulo_equipe_multi', 'modulo_transporte', 'modulo_blindagem_juridica']:
+                    for col in ['brasao_url', 'limite_alunos', 'ativo', 'modulo_pei', 'modulo_aee', 'modulo_equipe_multi', 'modulo_transporte', 'modulo_blindagem_juridica']:
                         try:
-                            conn.execute(text(f"ALTER TABLE municipios ADD COLUMN {col} BOOLEAN DEFAULT 1;"))
+                            conn.execute(text(f"ALTER TABLE municipios ADD COLUMN {col} VARCHAR(255);"))
                         except Exception:
                             pass
                     for col in ['cpf', 'telefone', 'cargo', 'escola_polo']:

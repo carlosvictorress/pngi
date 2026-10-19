@@ -10,8 +10,19 @@ def landing_page():
     try:
         municipios = Municipio.query.order_by(Municipio.nome).all()
     except Exception as e:
-        print(f"[AVISO] Não foi possível carregar municípios: {e}")
-        municipios = []
+        print(f"[AVISO] Tentando sincronização de schema para carregar municípios: {e}")
+        try:
+            from app import db
+            from sqlalchemy import text
+            with db.engine.connect() as conn:
+                with conn.begin():
+                    conn.execute(text("ALTER TABLE municipios ADD COLUMN IF NOT EXISTS brasao_url VARCHAR(255);"))
+                    conn.execute(text("ALTER TABLE municipios ADD COLUMN IF NOT EXISTS limite_alunos INTEGER DEFAULT 500;"))
+                    conn.execute(text("ALTER TABLE municipios ADD COLUMN IF NOT EXISTS ativo BOOLEAN DEFAULT TRUE;"))
+            municipios = Municipio.query.order_by(Municipio.nome).all()
+        except Exception as e2:
+            print(f"[ERRO CRÍTICO] Falha ao carregar municípios: {e2}")
+            municipios = []
     return render_template('publico/landing.html', municipios=municipios)
 
 @publico_bp.route('/solicitar-implantacao', methods=['POST'])

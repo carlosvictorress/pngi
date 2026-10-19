@@ -326,22 +326,41 @@ def excluir_municipio(mun_id):
     nome_mun = municipio.nome
     from sqlalchemy import text
 
+    def exec_safe(conn, sql, params=None):
+        try:
+            with conn.begin_nested():
+                conn.execute(text(sql), params or {})
+        except Exception as e:
+            # Falha silenciosa isolada em SAVEPOINT sem abortar a transação PostgreSQL
+            pass
+
     try:
         with db.engine.connect() as conn:
             with conn.begin():
-                # 1. Anula referências cruzadas que causariam bloqueio
-                conn.execute(text("UPDATE alunos SET responsavel_id = NULL, escola_id = NULL, municipio_origem_id = NULL WHERE municipio_id = :mid;"), {"mid": mun_id})
-                conn.execute(text("UPDATE alunos SET municipio_origem_id = NULL WHERE municipio_origem_id = :mid;"), {"mid": mun_id})
-                conn.execute(text("UPDATE usuarios SET municipio_id = NULL WHERE (perfil = 'superadmin' OR id = :uid) AND municipio_id = :mid;"), {"mid": mun_id, "uid": current_user.id})
+                # 1. Anula referências cruzadas que causariam bloqueio de integridade
+                exec_safe(conn, "UPDATE usuarios SET municipio_id = NULL WHERE (perfil = 'superadmin' OR id = :uid) AND municipio_id = :mid;", {"mid": mun_id, "uid": current_user.id})
+                exec_safe(conn, "UPDATE alunos SET responsavel_id = NULL, escola_id = NULL, municipio_origem_id = NULL WHERE municipio_id = :mid;", {"mid": mun_id})
+                exec_safe(conn, "UPDATE alunos SET municipio_origem_id = NULL WHERE municipio_origem_id = :mid;", {"mid": mun_id})
+                exec_safe(conn, "UPDATE transporte_alunado SET rota_id = NULL WHERE aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);", {"mid": mun_id})
+                exec_safe(conn, "UPDATE historico_transferencias_alunos SET escola_origem_id = NULL, escola_destino_id = NULL WHERE municipio_id = :mid OR aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);", {"mid": mun_id})
+                exec_safe(conn, "UPDATE transferencias_alunos SET usuario_id = NULL WHERE municipio_origem_id = :mid OR municipio_destino_id = :mid OR aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);", {"mid": mun_id})
+                exec_safe(conn, "UPDATE profissionais_aee SET usuario_id = NULL WHERE municipio_id = :mid;", {"mid": mun_id})
+                exec_safe(conn, "UPDATE atendimentos_multi_soap SET usuario_id = NULL, profissional_id = NULL WHERE municipio_id = :mid OR aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);", {"mid": mun_id})
+                exec_safe(conn, "UPDATE relatorios_escuta_encaminhamentos SET usuario_id = NULL, profissional_id = NULL WHERE municipio_id = :mid OR aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);", {"mid": mun_id})
+                exec_safe(conn, "UPDATE planos_acao_mensais_multi SET usuario_coordenador_id = NULL, coordenador_reuniao_id = NULL WHERE municipio_id = :mid;", {"mid": mun_id})
 
-                # 2. Desvincula rotas de transporte de alunos
-                try:
-                    conn.execute(text("UPDATE transporte_alunado SET rota_id = NULL WHERE aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);"), {"mid": mun_id})
-                except Exception:
-                    pass
+                # 2. Exclui registros filhos de alunos (tabelas que NÃO possuem coluna municipio_id)
+                tabelas_somente_aluno = [
+                    "transporte_alunado",
+                    "peis",
+                    "paees",
+                    "estudos_caso",
+                ]
+                for tbl in tabelas_somente_aluno:
+                    exec_safe(conn, f"DELETE FROM {tbl} WHERE aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);", {"mid": mun_id})
 
-                # 3. Exclui dados operacionais vinculados a alunos do município ou diretamente ao município
-                tabelas_operacionais = [
+                # 3. Exclui registros operacionais que possuem aluno_id e/ou municipio_id
+                tabelas_operacionais_mistas = [
                     "conquistas_estudante",
                     "mensagens_familia",
                     "comunicacoes_aee",
@@ -352,52 +371,36 @@ def excluir_municipio(mun_id):
                     "atendimentos_aee",
                     "encaminhamentos_aee",
                     "historico_transferencias_alunos",
-                    "estudos_caso",
-                    "peis",
-                    "paees",
-                    "transporte_alunado",
                     "lista_espera_aee",
                     "atendimentos_multi_soap",
-                    "relatorios_escuta_encaminhamentos"
+                    "relatorios_escuta_encaminhamentos",
                 ]
-                for tbl in tabelas_operacionais:
-                    try:
-                        conn.execute(text(f"DELETE FROM {tbl} WHERE aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);"), {"mid": mun_id})
-                    except Exception:
-                        pass
-                    try:
-                        conn.execute(text(f"DELETE FROM {tbl} WHERE municipio_id = :mid;"), {"mid": mun_id})
-                    except Exception:
-                        pass
+                for tbl in tabelas_operacionais_mistas:
+                    exec_safe(conn, f"DELETE FROM {tbl} WHERE aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);", {"mid": mun_id})
+                    exec_safe(conn, f"DELETE FROM {tbl} WHERE municipio_id = :mid;", {"mid": mun_id})
 
-                # 4. Exclui tabelas municipais de suporte
-                try:
-                    conn.execute(text("DELETE FROM planos_acao_mensais_multi WHERE municipio_id = :mid;"), {"mid": mun_id})
-                except Exception:
-                    pass
-                try:
-                    conn.execute(text("DELETE FROM rotas_transporte WHERE municipio_id = :mid;"), {"mid": mun_id})
-                except Exception:
-                    pass
-                try:
-                    conn.execute(text("DELETE FROM transferencias_alunos WHERE municipio_origem_id = :mid OR municipio_destino_id = :mid OR aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);"), {"mid": mun_id})
-                except Exception:
-                    pass
+                # 4. Exclui transferências intermunicipais
+                exec_safe(conn, "DELETE FROM transferencias_alunos WHERE municipio_origem_id = :mid OR municipio_destino_id = :mid OR aluno_id IN (SELECT id FROM alunos WHERE municipio_id = :mid);", {"mid": mun_id})
 
-                # 5. Exclui alunos do município
-                conn.execute(text("DELETE FROM alunos WHERE municipio_id = :mid;"), {"mid": mun_id})
+                # 5. Exclui suporte municipal
+                exec_safe(conn, "DELETE FROM planos_acao_mensais_multi WHERE municipio_id = :mid;", {"mid": mun_id})
+                exec_safe(conn, "DELETE FROM rotas_transporte WHERE municipio_id = :mid;", {"mid": mun_id})
 
-                # 6. Exclui profissionais do município
-                conn.execute(text("DELETE FROM profissionais_aee WHERE municipio_id = :mid;"), {"mid": mun_id})
+                # 6. Exclui alunos do município
+                exec_safe(conn, "DELETE FROM alunos WHERE municipio_id = :mid;", {"mid": mun_id})
 
-                # 7. Exclui escolas do município
-                conn.execute(text("DELETE FROM escolas WHERE municipio_id = :mid;"), {"mid": mun_id})
+                # 7. Exclui profissionais do município
+                exec_safe(conn, "DELETE FROM profissionais_aee WHERE municipio_id = :mid;", {"mid": mun_id})
 
-                # 8. Exclui usuários normais vinculados ao município (mantém contas superadmin)
-                conn.execute(text("DELETE FROM usuarios WHERE municipio_id = :mid AND perfil != 'superadmin' AND id != :uid;"), {"mid": mun_id, "uid": current_user.id})
+                # 8. Exclui escolas do município
+                exec_safe(conn, "DELETE FROM escolas WHERE municipio_id = :mid;", {"mid": mun_id})
 
-                # 9. Exclui o município
-                conn.execute(text("DELETE FROM municipios WHERE id = :mid;"), {"mid": mun_id})
+                # 9. Exclui usuários operacionais vinculados ao município (preservando superadmins)
+                exec_safe(conn, "DELETE FROM usuarios WHERE municipio_id = :mid AND perfil != 'superadmin' AND id != :uid;", {"mid": mun_id, "uid": current_user.id})
+                exec_safe(conn, "UPDATE usuarios SET municipio_id = NULL WHERE municipio_id = :mid;", {"mid": mun_id})
+
+                # 10. Exclui o município
+                exec_safe(conn, "DELETE FROM municipios WHERE id = :mid;", {"mid": mun_id})
 
         db.session.expire_all()
         if current_user.municipio_id == mun_id:
@@ -422,22 +425,26 @@ def excluir_todos_municipios():
     exigir_superadmin()
     from sqlalchemy import text
 
+    def exec_safe(conn, sql, params=None):
+        try:
+            with conn.begin_nested():
+                conn.execute(text(sql), params or {})
+        except Exception:
+            pass
+
     try:
         with db.engine.connect() as conn:
             with conn.begin():
                 # 1. Desvincula referências em alunos e usuários
-                try:
-                    conn.execute(text("UPDATE alunos SET responsavel_id = NULL, escola_id = NULL, municipio_origem_id = NULL;"))
-                except Exception:
-                    pass
-                try:
-                    conn.execute(text("UPDATE usuarios SET municipio_id = NULL WHERE perfil = 'superadmin' OR id = :uid;"), {"uid": current_user.id})
-                except Exception:
-                    pass
-                try:
-                    conn.execute(text("UPDATE transporte_alunado SET rota_id = NULL;"))
-                except Exception:
-                    pass
+                exec_safe(conn, "UPDATE alunos SET responsavel_id = NULL, escola_id = NULL, municipio_origem_id = NULL;")
+                exec_safe(conn, "UPDATE usuarios SET municipio_id = NULL WHERE perfil = 'superadmin' OR id = :uid;", {"uid": current_user.id})
+                exec_safe(conn, "UPDATE transporte_alunado SET rota_id = NULL;")
+                exec_safe(conn, "UPDATE historico_transferencias_alunos SET escola_origem_id = NULL, escola_destino_id = NULL;")
+                exec_safe(conn, "UPDATE transferencias_alunos SET usuario_id = NULL;")
+                exec_safe(conn, "UPDATE profissionais_aee SET usuario_id = NULL;")
+                exec_safe(conn, "UPDATE atendimentos_multi_soap SET usuario_id = NULL, profissional_id = NULL;")
+                exec_safe(conn, "UPDATE relatorios_escuta_encaminhamentos SET usuario_id = NULL, profissional_id = NULL;")
+                exec_safe(conn, "UPDATE planos_acao_mensais_multi SET usuario_coordenador_id = NULL, coordenador_reuniao_id = NULL;")
 
                 # 2. Exclui todas as tabelas operacionais em ordem reversa de dependência
                 todas_tabelas = [
@@ -466,19 +473,14 @@ def excluir_todos_municipios():
                     "escolas"
                 ]
                 for tbl in todas_tabelas:
-                    try:
-                        conn.execute(text(f"DELETE FROM {tbl};"))
-                    except Exception:
-                        pass
+                    exec_safe(conn, f"DELETE FROM {tbl};")
 
                 # 3. Exclui usuários comuns (mantém contas superadmin intactas)
-                try:
-                    conn.execute(text("DELETE FROM usuarios WHERE perfil != 'superadmin' AND id != :uid;"), {"uid": current_user.id})
-                except Exception:
-                    pass
+                exec_safe(conn, "DELETE FROM usuarios WHERE perfil != 'superadmin' AND id != :uid;", {"uid": current_user.id})
+                exec_safe(conn, "UPDATE usuarios SET municipio_id = NULL;")
 
                 # 4. Exclui todos os municípios
-                conn.execute(text("DELETE FROM municipios;"))
+                exec_safe(conn, "DELETE FROM municipios;")
 
         db.session.expire_all()
         current_user.municipio_id = None
@@ -560,13 +562,42 @@ def toggle_status_usuario(user_id):
 @login_required
 def excluir_usuario_global(user_id):
     exigir_superadmin()
+    if user_id == current_user.id:
+        flash("Você não pode excluir sua própria conta de administrador enquanto estiver conectado nela.", "erro")
+        return redirect(url_for('auth.superadmin_dashboard'))
+
     usuario = Usuario.query.get_or_404(user_id)
     nome_u = usuario.nome
-    if usuario.profissional_aee:
-        usuario.profissional_aee.usuario_id = None
-    db.session.delete(usuario)
-    db.session.commit()
-    flash(f"Conta de '{nome_u}' excluída permanentemente.", "sucesso")
+    from sqlalchemy import text
+
+    def exec_safe(conn, sql, params=None):
+        try:
+            with conn.begin_nested():
+                conn.execute(text(sql), params or {})
+        except Exception:
+            pass
+
+    try:
+        with db.engine.connect() as conn:
+            with conn.begin():
+                exec_safe(conn, "UPDATE alunos SET responsavel_id = NULL WHERE responsavel_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "UPDATE profissionais_aee SET usuario_id = NULL WHERE usuario_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "UPDATE atendimentos_multi_soap SET usuario_id = NULL WHERE usuario_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "UPDATE atendimentos_multi_soap SET profissional_id = NULL WHERE profissional_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "UPDATE relatorios_escuta_encaminhamentos SET usuario_id = NULL WHERE usuario_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "UPDATE relatorios_escuta_encaminhamentos SET profissional_id = NULL WHERE profissional_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "UPDATE planos_acao_mensais_multi SET usuario_coordenador_id = NULL WHERE usuario_coordenador_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "UPDATE planos_acao_mensais_multi SET coordenador_reuniao_id = NULL WHERE coordenador_reuniao_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "UPDATE transferencias_alunos SET usuario_id = NULL WHERE usuario_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "UPDATE estudos_caso SET professor_id = NULL WHERE professor_id = :uid;", {"uid": user_id})
+                exec_safe(conn, "DELETE FROM usuarios WHERE id = :uid;", {"uid": user_id})
+
+        db.session.expire_all()
+        flash(f"Conta de '{nome_u}' excluída permanentemente.", "sucesso")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erro ao excluir usuário '{nome_u}': {e}", "erro")
+
     return redirect(url_for('auth.superadmin_dashboard'))
 
 # -------------------------------------------------------------------------

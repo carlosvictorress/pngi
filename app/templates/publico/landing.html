@@ -821,14 +821,17 @@
             <div id="grid-cidades" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {% if municipios %}
                     {% for m in municipios %}
-                    <div class="cidade-card group relative bg-white border border-slate-200/90 hover:border-orbi-blue/40 rounded-2xl p-5 shadow-xs hover:shadow-stripe-card transition-all flex flex-col justify-between space-y-4 text-left" data-nome="{{ m.nome|lower }}" data-uf="{{ m.estado|lower }}">
+                    <div class="cidade-card group relative bg-white border border-slate-200/90 hover:border-orbi-blue/40 rounded-2xl p-5 shadow-xs hover:shadow-stripe-card transition-all flex flex-col justify-between space-y-4 text-left" data-nome="{{ (m.nome or '')|lower }}" data-uf="{{ (m.estado or '')|lower }}">
                         
                         <!-- TOPO: BRASÃO OFICIAL + TAGS -->
                         <div class="flex items-start justify-between gap-3">
                             <!-- BRASÃO DO MUNICÍPIO -->
-                            <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200/80 p-2 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                            <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200/80 p-2 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform overflow-hidden relative">
                                 {% if m.brasao_url %}
-                                    <img src="{{ m.brasao_url }}" alt="Brasão de {{ m.nome }}" class="w-full h-full object-contain">
+                                    <img src="{{ m.brasao_url }}" alt="Brasão de {{ m.nome or 'Município' }}" class="w-full h-full object-contain" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.classList.remove('hidden');">
+                                    <div class="hidden absolute inset-0 w-full h-full rounded-2xl bg-orbi-50 flex items-center justify-center text-orbi-blue">
+                                        <i data-lucide="landmark" class="w-6 h-6 text-orbi-blue"></i>
+                                    </div>
                                 {% else %}
                                     <div class="w-full h-full rounded-xl bg-orbi-50 flex flex-col items-center justify-center text-orbi-blue">
                                         <i data-lucide="landmark" class="w-6 h-6 text-orbi-blue"></i>
