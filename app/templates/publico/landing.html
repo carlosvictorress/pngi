@@ -783,99 +783,127 @@
     </section>
 
     <!-- =================================================================== -->
-    <!-- 6. SEÇÃO DARK NO PADRÃO STRIPE (A REDE MUNICIPAL & PORTAL DE ACESSO)-->
+    <!-- 6. PORTAL DE PREFEITURAS CONVENIADAS (DELICADO, INSTITUCIONAL & BRASÃO) -->
     <!-- =================================================================== -->
-    <section id="prefeituras" class="relative py-24 md:py-32 px-4 md:px-8 bg-[#061729] text-white border-y border-white/10 overflow-hidden">
+    <section id="prefeituras" class="relative py-20 md:py-28 px-4 md:px-8 bg-gradient-to-b from-slate-50/80 via-white to-slate-50/80 border-y border-slate-200/80 overflow-hidden">
         
-        <!-- GLOWS AMBIENTAIS DE FUNDO -->
-        <div class="absolute -top-40 left-1/4 w-[600px] h-[600px] rounded-full bg-[#0084CE]/20 blur-[120px] pointer-events-none"></div>
-        <div class="absolute -bottom-40 right-1/4 w-[500px] h-[500px] rounded-full bg-sky-500/15 blur-[120px] pointer-events-none"></div>
-        <div class="stripe-mesh-grid"></div>
-
-        <div class="relative z-10 max-w-[1360px] mx-auto space-y-12">
+        <div class="relative z-10 max-w-[1360px] mx-auto space-y-10">
             
-            <!-- HEADER DA SEÇÃO DARK -->
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/10 pb-8 text-left">
-                <div class="space-y-3 max-w-2xl">
-                    <div class="inline-flex items-center gap-2 bg-sky-500/15 text-sky-300 px-3 py-1 rounded-full text-xs font-mono font-bold border border-sky-400/30">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        <span>ÁREA DO SERVIDOR PÚBLICO MUNICIPAL</span>
+            <!-- HEADER DA SEÇÃO -->
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-slate-200/70 pb-6 text-left">
+                <div class="space-y-2 max-w-2xl">
+                    <div class="inline-flex items-center gap-2 bg-orbi-50 text-orbi-blue px-3 py-1 rounded-full text-[11px] font-mono font-bold border border-orbi-100">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>PORTAL OFICIAL DO SERVIDOR PÚBLICO</span>
                     </div>
-                    <h2 class="stripe-section-title text-3xl sm:text-4xl font-extrabold text-white">
-                        Portal de Acesso das Prefeituras Conveniadas
+                    <h2 class="stripe-section-title text-2xl sm:text-3xl lg:text-4xl font-extrabold text-orbi-navy">
+                        Prefeituras Conveniadas
                     </h2>
-                    <p class="text-sm sm:text-base text-slate-400 font-body">
-                        Selecione seu município para entrar diretamente no ambiente de trabalho homologado com suas credenciais seguras.
+                    <p class="text-xs sm:text-sm text-slate-500 font-body leading-relaxed">
+                        Selecione seu município para acessar o ambiente operacional com autenticação segura, criptografia e dados em tempo real.
                     </p>
                 </div>
 
-                <!-- BUSCADOR EM TEMPO REAL STRIPE STYLE -->
+                <!-- BUSCADOR DELICADO EM TEMPO REAL -->
                 <div class="w-full md:w-80">
                     <div class="relative">
-                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5"></i>
+                        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
                         <input type="text" 
                                id="filtro-cidades" 
                                oninput="filtrarCidades()" 
-                               placeholder="Buscar prefeitura por nome ou UF..." 
-                               class="w-full bg-[#081D33] border border-white/15 rounded-xl pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/20 transition-all font-body">
+                               placeholder="Filtrar sua cidade por nome ou UF..." 
+                               class="w-full bg-white border border-slate-200 rounded-full pl-10 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-orbi-blue focus:ring-2 focus:ring-orbi-blue/15 shadow-2xs transition-all font-body">
                     </div>
                 </div>
             </div>
 
-            <!-- GRID DAS CIDADES CONVENIADAS -->
-            <div id="grid-cidades" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- GRID DELICADO DAS CIDADES COM BRASÃO -->
+            <div id="grid-cidades" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {% if municipios %}
                     {% for m in municipios %}
-                    <div class="cidade-card stripe-dark-card p-5 flex flex-col justify-between space-y-4 text-left" data-nome="{{ m.nome|lower }}" data-uf="{{ m.estado|lower }}">
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="bg-white/10 text-sky-300 text-[10px] font-bold px-2.5 py-1 rounded-md font-mono border border-white/10">
-                                    {{ m.estado }}
-                                </span>
-                                <span class="inline-flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <div class="cidade-card group relative bg-white border border-slate-200/90 hover:border-orbi-blue/40 rounded-2xl p-5 shadow-xs hover:shadow-stripe-card transition-all flex flex-col justify-between space-y-4 text-left" data-nome="{{ m.nome|lower }}" data-uf="{{ m.estado|lower }}">
+                        
+                        <!-- TOPO: BRASÃO OFICIAL + TAGS -->
+                        <div class="flex items-start justify-between gap-3">
+                            <!-- BRASÃO DO MUNICÍPIO -->
+                            <div class="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200/80 p-2 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
+                                {% if m.brasao_url %}
+                                    <img src="{{ m.brasao_url }}" alt="Brasão de {{ m.nome }}" class="w-full h-full object-contain">
+                                {% else %}
+                                    <div class="w-full h-full rounded-xl bg-orbi-50 flex flex-col items-center justify-center text-orbi-blue">
+                                        <i data-lucide="landmark" class="w-6 h-6 text-orbi-blue"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- TAGS DE ESTADO E STATUS -->
+                            <div class="flex flex-col items-end gap-1.5">
+                                <span class="inline-flex items-center gap-1.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200/70 px-2.5 py-0.5 rounded-full font-mono">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                     <span>Instância Ativa</span>
                                 </span>
+                                <span class="bg-slate-100 text-slate-700 text-[10px] font-bold font-mono px-2 py-0.5 rounded-md border border-slate-200/80">
+                                    {{ m.estado }}
+                                </span>
                             </div>
-                            <h3 class="text-base font-bold text-white tracking-tight">{{ m.nome }}</h3>
-                            <span class="text-[11px] text-slate-400 font-mono block">Domínio: orbipiaui.com.br/{{ m.slug }}</span>
                         </div>
 
-                        <a href="/auth/{{ m.slug }}/login" class="w-full bg-white hover:bg-slate-100 text-orbi-navy font-bold text-xs py-2.5 px-3.5 rounded-xl transition-all text-center inline-flex items-center justify-center gap-2 group shadow-sm">
+                        <!-- IDENTIFICAÇÃO DO MUNICÍPIO -->
+                        <div class="space-y-1">
+                            <h3 class="text-base font-bold text-slate-900 group-hover:text-orbi-blue transition-colors tracking-tight">
+                                {{ m.nome }}
+                            </h3>
+                            <p class="text-[11px] text-slate-400 font-mono truncate">
+                                orbipiaui.com.br/{{ m.slug }}
+                            </p>
+                        </div>
+
+                        <!-- BOTÃO ELEGANTE DE ENTRADA -->
+                        <a href="/auth/{{ m.slug }}/login" class="w-full bg-slate-50 hover:bg-orbi-navy hover:text-white text-slate-700 text-xs font-semibold py-2.5 px-3 rounded-xl border border-slate-200/80 transition-all text-center inline-flex items-center justify-center gap-2 group-hover:bg-orbi-navy group-hover:text-white group-hover:border-orbi-navy shadow-2xs">
                             <span>Acessar Prefeitura</span>
-                            <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-orbi-blue group-hover:translate-x-1 transition-transform"></i>
+                            <i data-lucide="arrow-right" class="w-3.5 h-3.5 text-slate-400 group-hover:text-white group-hover:translate-x-1 transition-all"></i>
                         </a>
+
                     </div>
                     {% endfor %}
                 {% endif %}
 
-                <!-- CARD DE CONVÊNIO PARA NOVOS MUNICÍPIOS -->
-                <div class="stripe-dark-card p-5 border-dashed border-sky-400/30 bg-sky-500/5 flex flex-col justify-between space-y-4 text-left">
-                    <div class="space-y-2">
-                        <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2.5 py-1 rounded-md font-mono border border-emerald-400/30">
-                            Adesão Imediata
+                <!-- CARD DELICADO PARA NOVOS MUNICÍPIOS -->
+                <div class="cidade-card-nova relative bg-gradient-to-br from-slate-50/70 to-blue-50/30 border border-dashed border-slate-300 hover:border-orbi-blue/40 rounded-2xl p-5 transition-all flex flex-col justify-between space-y-4 text-left">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="w-14 h-14 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center text-orbi-blue shrink-0 shadow-2xs">
+                            <i data-lucide="plus-circle" class="w-6 h-6 text-orbi-blue"></i>
+                        </div>
+                        <span class="text-[10px] font-semibold text-orbi-blue bg-orbi-50 border border-orbi-100 px-2 py-0.5 rounded-full font-mono uppercase">
+                            Nova Adesão
                         </span>
-                        <h3 class="text-base font-bold text-white tracking-tight">Sua cidade não está na lista?</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed font-body">
-                            Solicite o credenciamento institucional do seu município para liberação do ambiente em até 24 horas úteis.
+                    </div>
+
+                    <div class="space-y-1">
+                        <h3 class="text-sm font-bold text-slate-900 tracking-tight">
+                            Sua cidade não está na lista?
+                        </h3>
+                        <p class="text-xs text-slate-500 font-body leading-relaxed">
+                            Solicite o credenciamento institucional para ativação do domínio oficial da sua prefeitura em até 24h.
                         </p>
                     </div>
 
-                    <button onclick="abrirModalImplantacao()" class="w-full bg-orbi-blue hover:bg-orbi-blue-hover text-white font-bold text-xs py-2.5 px-3.5 rounded-xl transition-all text-center cursor-pointer shadow-stripe-glow">
-                        Solicitar Adesão Municipal
+                    <button onclick="abrirModalImplantacao()" class="w-full bg-white hover:bg-orbi-blue hover:text-white text-orbi-blue text-xs font-semibold py-2.5 px-3 rounded-xl border border-orbi-100 hover:border-orbi-blue transition-all text-center inline-flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs">
+                        <span>Solicitar Adesão Municipal</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
             </div>
 
             <!-- BARRA DE SEGURANÇA E ACESSO SUPERADMIN -->
-            <div class="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
+            <div class="pt-6 border-t border-slate-200/70 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
                 <div class="flex items-center gap-2">
-                    <i data-lucide="lock" class="w-4 h-4 text-emerald-400"></i>
-                    <span>Ambiente institucional protegido por autenticação segura e criptografia de ponta a ponta (LGPD).</span>
+                    <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+                    <span>Ambiente institucional auditável e protegido por criptografia de dados em repouso e em trânsito (LGPD).</span>
                 </div>
 
-                <a href="/auth/login-admin-global" class="text-slate-400 hover:text-sky-300 transition-colors font-medium inline-flex items-center gap-1.5 font-mono">
-                    <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                <a href="/auth/login-admin-global" class="text-slate-500 hover:text-orbi-navy transition-colors font-medium inline-flex items-center gap-1.5 font-mono">
+                    <i data-lucide="shield" class="w-3.5 h-3.5 text-slate-400"></i>
                     <span>Portal de Administração Geral (SuperAdmin) →</span>
                 </a>
             </div>
